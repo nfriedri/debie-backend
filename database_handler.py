@@ -1,7 +1,7 @@
 import psycopg2
 
 
-def get_vector_from_database(word):
+def get_vector_from_database(word, database):
     conn = None
     vector_dict = {}
     command = """
@@ -24,12 +24,19 @@ def get_vector_from_database(word):
     return vector_dict
 
 
-def get_multiple_vectors_from_db(word_list):
+def get_multiple_vectors_from_db(word_list, database):
     conn = None
     integer = 0
     vector_dict = {}
+    dbname = 'fasttext2'
+    if database == 'fasttextdb':
+        dbname = 'fasttext2'
+    if database == 'skipgramdb':
+        dbname = 'skipgram'
+    if database == 'cbowdb':
+        dbname = 'cbow'
     try:
-        conn = psycopg2.connect(dbname='fasttext2', user='postgres', host='', password='audi')
+        conn = psycopg2.connect(dbname=dbname, user='postgres', host='', password='audi')
         cur = conn.cursor()
         for word in word_list:
             try:

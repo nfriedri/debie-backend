@@ -1,6 +1,7 @@
 import random
 
 import JSONFormatter
+import api_methods
 import calculation
 import database_handler
 import vectors
@@ -88,28 +89,47 @@ def get_vectors():
 
 
 @app.route('/REST/bias_evaluation', methods=['POST'])
-def receive_bias_evaluations():
-    # vector_space = request.args.get('vecspace')
-    # eval_method = request.arg.get('method')
-    # print(vector_space)
-    # print(eval_method)
+def bias_evaluations():
+    # Get content from JSON
     content = request.get_json()
+    embedding_space = content['EmbeddingSpace']
+    methods = content['Method']
 
-    test_vectors1, test_vectors2, arg_vectors1, arg_vectors2 = JSONFormatter.get_vector_from_json_via_db(content)
+    # Retrieve Vectors from database
+    test_vectors1 = {}
+    test_vectors2 = {}
+    arg_vectors1 = {}
+    arg_vectors2 = {}
+    if embedding_space is None:
+        test_vectors1, test_vectors2, arg_vectors1, arg_vectors2 = JSONFormatter.retrieve_vectors(content, 'fasttextdb')
+    if embedding_space == 'fasttextBtn':
+        test_vectors1, test_vectors2, arg_vectors1, arg_vectors2 = JSONFormatter.retrieve_vectors(content, 'fasttextdb')
+    if embedding_space == 'skipgramBtn':
+        test_vectors1, test_vectors2, arg_vectors1, arg_vectors2 = JSONFormatter.retrieve_vectors(content, 'skipgramdb')
+    if embedding_space == 'cbowBtn':
+        test_vectors1, test_vectors2, arg_vectors1, arg_vectors2 = JSONFormatter.retrieve_vectors(content, 'cbowdb')
+
+    # Check sizes of retrieved test sets
     test_vectors1, test_vectors2 = calculation.check_sizes(test_vectors1, test_vectors2)
     arg_vectors1, arg_vectors2 = calculation.check_sizes(arg_vectors1, arg_vectors2)
-    print("Set Sizes:")
+    print("Final Set Sizes:")
     print(len(test_vectors1))
     print(len(test_vectors2))
     print(len(arg_vectors1))
     print(len(arg_vectors2))
-    ect_value1, p_value1 = ect.embedding_coherence_test(test_vectors1, test_vectors2, arg_vectors1)
-    ect_value2, p_value2 = ect.embedding_coherence_test(test_vectors1, test_vectors2, arg_vectors2)
-    #    bat_result = bat.biased_analogy_test(test_vectors1, test_vectors2, arg_vectors1, arg_vectors2)
-    bat_result = 'Currently not available'
-    weat_effect_size, weat_p_value = weat.word_embedding_association_test(test_vectors1, test_vectors2, arg_vectors1,
-                                                                          arg_vectors2)
 
-    response = jsonify(ect_value1=ect_value1, p_value1=p_value1, p_value2=p_value2, ect_value2=ect_value2,
-                       bat_value=bat_result, weat_effect_size=weat_effect_size, weat_pvalue=weat_p_value)
-    return response
+    # Call chosen methods
+    if methods is None:
+        return api_methods.return_eval_all(test_vectors1, test_vectors2, arg_vectors1, arg_vectors2)
+    if methods == 'allBtn':
+        return api_methods.return_eval_all(test_vectors1, test_vectors2, arg_vectors1, arg_vectors2)
+    if methods == 'ectBtn':
+        return api_methods.return_eval_ect(test_vectors1, test_vectors2, arg_vectors1, arg_vectors2)
+    if methods == 'batBtn':
+        return api_methods.return_eval_bat(test_vectors1, test_vectors2, arg_vectors1, arg_vectors2)
+    if methods == 'weatBtn':
+        return api_methods.return_eval_weat(test_vectors1, test_vectors2, arg_vectors1, arg_vectors2)
+    if methods == 'kmeansBtn':
+        return api_methods.return_eval_kmeans(test_vectors1, test_vectors2, arg_vectors1, arg_vectors2)
+
+    return 400
