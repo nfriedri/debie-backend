@@ -37,8 +37,8 @@ def return_eval_weat(test_vectors1, test_vectors2, arg_vectors1, arg_vectors2):
     return response
 
 
-def return_eval_kmeans(test_vectors1, test_vectors2, arg_vectors1, arg_vectors2):
-    # kmeans = k_means(test_vectors1, test_vectors2, arg_vectors1, arg_vectors2)
-    kmeans = 'Currently not available'
+def return_eval_kmeans(test_vectors1, test_vectors2):
+    kmeans = k_means.k_means_clustering(test_vectors1, test_vectors2)
+    # kmeans = 'Currently not available'
     response = jsonify(k_means=kmeans)
     return response

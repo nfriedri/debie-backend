@@ -1,14 +1,11 @@
 import numpy
+from sklearn.cluster import KMeans
 import calculation
 import random
 
 
-# from sklearn.cluster import KMeans
-
-
-def k_means_clustering(target_set1, target_set2, accuracy):
-    target1, target2 = calculation.create_duplicates_two(target_set1, target_set2)
-    # Missing: Dictionary size & content review
+def k_means_clustering(target_set1, target_set2, accuracy=50):
+    target1, target2 = calculation.create_duplicates(target_set1, target_set2)
     target1 = calculation.transform_dict_to_list(target1)
     target2 = calculation.transform_dict_to_list(target2)
     vector_list = target1 + target2

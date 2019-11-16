@@ -130,6 +130,6 @@ def bias_evaluations():
     if methods == 'weatBtn':
         return api_methods.return_eval_weat(test_vectors1, test_vectors2, arg_vectors1, arg_vectors2)
     if methods == 'kmeansBtn':
-        return api_methods.return_eval_kmeans(test_vectors1, test_vectors2, arg_vectors1, arg_vectors2)
+        return api_methods.return_eval_kmeans(test_vectors1, test_vectors2)
 
     return 400
