@@ -133,3 +133,74 @@ def bias_evaluations():
         return api_methods.return_eval_kmeans(test_vectors1, test_vectors2)
 
     return 400
+
+
+@app.route('/REST/debiasing', methods=['POST'])
+def debiasing():
+    # Get content from JSON
+    content = request.get_json()
+    embedding_space = content['EmbeddingSpace']
+    methods = content['Method']
+
+    # Retrieve Vectors from database
+    test_vectors1 = {}
+    test_vectors2 = {}
+    arg_vectors1 = {}
+    arg_vectors2 = {}
+    if embedding_space is None:
+        test_vectors1, test_vectors2, arg_vectors1, arg_vectors2 = JSONFormatter.retrieve_vectors(content, 'fasttextdb')
+    if embedding_space == 'fasttextBtn':
+        test_vectors1, test_vectors2, arg_vectors1, arg_vectors2 = JSONFormatter.retrieve_vectors(content, 'fasttextdb')
+    if embedding_space == 'skipgramBtn':
+        test_vectors1, test_vectors2, arg_vectors1, arg_vectors2 = JSONFormatter.retrieve_vectors(content, 'skipgramdb')
+    if embedding_space == 'cbowBtn':
+        test_vectors1, test_vectors2, arg_vectors1, arg_vectors2 = JSONFormatter.retrieve_vectors(content, 'cbowdb')
+
+    # Check sizes of retrieved test sets
+    test_vectors1, test_vectors2 = calculation.check_sizes(test_vectors1, test_vectors2)
+    arg_vectors1, arg_vectors2 = calculation.check_sizes(arg_vectors1, arg_vectors2)
+    print("Final Set Sizes:")
+    print(len(test_vectors1))
+    print(len(test_vectors2))
+    print(len(arg_vectors1))
+    print(len(arg_vectors2))
+
+    result1, result2 = gbdd.generalized_bias_direction_debiasing(test_vectors1, test_vectors2)
+    response = jsonify(GBDDVecs1 = result1, GBDDVecs2 = result2)
+    return response
+
+
+@app.route('/REST/debiasing_visualization', methods=['POST'])
+def debias_visualize():
+    content = request.get_json()
+    embedding_space = content['EmbeddingSpace']
+    methods = content['Method']
+
+    # Retrieve Vectors from database
+    test_vectors1 = {}
+    test_vectors2 = {}
+    arg_vectors1 = {}
+    arg_vectors2 = {}
+    if embedding_space is None:
+        test_vectors1, test_vectors2, arg_vectors1, arg_vectors2 = JSONFormatter.retrieve_vectors(content, 'fasttextdb')
+    if embedding_space == 'fasttextBtn':
+        test_vectors1, test_vectors2, arg_vectors1, arg_vectors2 = JSONFormatter.retrieve_vectors(content, 'fasttextdb')
+    if embedding_space == 'skipgramBtn':
+        test_vectors1, test_vectors2, arg_vectors1, arg_vectors2 = JSONFormatter.retrieve_vectors(content, 'skipgramdb')
+    if embedding_space == 'cbowBtn':
+        test_vectors1, test_vectors2, arg_vectors1, arg_vectors2 = JSONFormatter.retrieve_vectors(content, 'cbowdb')
+
+    # all_vectors = test_vectors1.update(test_vectors2)
+    # print(all_vectors)
+
+
+    debiased1, debiased2 = gbdd.generalized_bias_direction_debiasing(test_vectors1, test_vectors2)
+    print(debiased1)
+    biased_pca = calculation.principal_composant_analysis(test_vectors1, test_vectors2)
+    print('Debiased: ')
+
+    debiased_pca = calculation.principal_composant_analysis(debiased1, debiased2)
+
+    return jsonify(bias=biased_pca, debiased=debiased_pca)
+
+

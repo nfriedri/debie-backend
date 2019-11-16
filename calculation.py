@@ -1,6 +1,7 @@
 import numpy
 import random
 import copy
+from sklearn.decomposition import PCA
 
 
 def create_duplicates(set1, set2, set3=None, set4=None):
@@ -157,3 +158,21 @@ def euclidean_distance(vector1, vector2):
     vector_b = numpy.array(vector2)
     distance = numpy.linalg.norm(vector_a-vector_b)
     return distance
+
+
+def principal_composant_analysis(vector_dict1, vector_dict2):
+    vector_dict1_copy, vector_dict2_copy = create_duplicates(vector_dict1, vector_dict2)
+    array_words = []
+    array2d = []
+    for word in vector_dict1_copy:
+        array_words.append(word)
+        array2d.append(list(vector_dict1_copy[word]))
+    for word in vector_dict2_copy:
+        array_words.append(word)
+        array2d.append(list(vector_dict2_copy[word]))
+    pca2 = PCA(n_components=2)
+    prinicpal_components = pca2.fit_transform(numpy.array(array2d))
+    results = {}
+    for i in range(len(array_words)):
+        results[array_words[i]] = prinicpal_components[i]
+    return results

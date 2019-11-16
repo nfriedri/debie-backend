@@ -4,11 +4,13 @@ import numpy
 
 def generalized_bias_direction_debiasing(target_set1, target_set2):
     target1_copy, target2_copy = calculation.create_duplicates(target_set1, target_set2)
-    target1, target2 = calculation.transform_multiple_dicts_to_lists(target_set1, target_set2)
+    target1_copy2, target2_copy2 = calculation.create_duplicates(target_set1, target_set2)
+    target1, target2 = calculation.transform_multiple_dicts_to_lists(target1_copy2, target2_copy2)
     gbdv = calculate_bias_direction_matrix(target1, target2)
+    print('Calculated Matrix')
     new_target1 = calculate_gbdd(gbdv, target1_copy)
     new_target2 = calculate_gbdd(gbdv, target2_copy)
-
+    print('Calculated dicts')
     return new_target1, new_target2
 
 
@@ -16,6 +18,9 @@ def calculate_bias_direction_matrix(target_list1, target_list2):
     matrix = []
     for i in range(len(target_list1)):
         for j in range(len(target_list2)):
+            print(i)
+            print(j)
+            print()
             array = numpy.array(target_list1[i]) - numpy.array((target_list2[j]))
             matrix.append(array)
     u, s, vh = numpy.linalg.svd(matrix)
@@ -23,7 +28,7 @@ def calculate_bias_direction_matrix(target_list1, target_list2):
     gbdv = []
     for i in range(len(vh_transposed)):
         gbdv.append(vh_transposed[i][1])
-    print(gbdv)
+    # print(gbdv)
     return gbdv
 
 
