@@ -1,17 +1,11 @@
-import random
-
 import json
-
-import JSONFormatter
-import bias_eval_methods
-import calculation
-import database_handler
-import vectors
-from bias_evaluation import ect, bat, k_means, weat
+import logging
 from flask import Flask, request
 from flask import jsonify
 from flask_cors import CORS
-
+import JSONFormatter
+import bias_eval_methods
+import calculation
 from debiasing import gbdd, bam
 
 '''Initialize vectors into test and argument sets'''
@@ -70,24 +64,22 @@ def get_vectors():
 
 @app.route('/REST/bias_evaluation', methods=['POST'])
 def bias_evaluations():
+    logging.info("APP: Bias Evaluation is called")
     # Get content from JSON
     content = request.get_json()
     embedding_space = content['EmbeddingSpace']
     methods = content['Method']
-
+    logging.info("APP: Starting evaluation in " + str(embedding_space) + "embedding space with " + str(methods))
     # Retrieve Vectors from database
     target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors(content, embedding_space)
 
     # Check sizes of retrieved test sets
     target1, target2 = calculation.check_sizes(target1, target2)
     arg1, arg2 = calculation.check_sizes(arg1, arg2)
-    print("Final Set Sizes:")
-    print(len(target1))
-    print(len(target2))
-    print(len(arg1))
-    print(len(arg2))
+    logging.info("APP: Retrieved Vectors from database")
+    logging.info("APP: Final retrieved set sizes: T1=" + str(len(target1)) + " T2=" + str(len(target2)) + " A1=" + str(len(arg1)) + " A2=" + str(len(arg2)))
 
-    # Call chosen methods
+    logging.info("APP: Evaluation process started")
     return bias_eval_methods.return_bias_evaluation(methods, target1, target2, arg1, arg2)
 
 

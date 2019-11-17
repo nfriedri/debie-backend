@@ -1,3 +1,5 @@
+import logging
+
 import numpy
 import random
 import copy
@@ -16,29 +18,6 @@ def create_duplicates(set1, set2=None, set3=None, set4=None):
             return copy1, copy2, copy3
         return copy1, copy2
     return copy1
-
-
-''''
-def create_duplicates_two(set1, set2):
-    copy1 = copy.deepcopy(set1)
-    copy2 = copy.deepcopy(set2)
-    return copy1, copy2
-
-
-def create_duplicates_three(set1, set2, set3):
-    copy1 = copy.deepcopy(set1)
-    copy2 = copy.deepcopy(set2)
-    copy3 = copy.deepcopy(set3)
-    return copy1, copy2, copy3
-
-
-def create_duplicates_four(set1, set2, set3, set4):
-    copy1 = copy.deepcopy(set1)
-    copy2 = copy.deepcopy(set2)
-    copy3 = copy.deepcopy(set3)
-    copy4 = copy.deepcopy(set4)
-    return copy1, copy2, copy3, copy4
-'''
 
 
 # Transforms a dictionary into a list
@@ -61,7 +40,6 @@ def transform_multiple_dicts_to_lists(dict1, dict2, dict3=None, dict4=None):
     return vectors1, vectors2
 
 
-
 def check_sizes(vector_set1, vector_set2):
     if (len(vector_set1) > 0) & (len(vector_set2) > 0):
         if len(vector_set1) == len(vector_set2):
@@ -71,22 +49,20 @@ def check_sizes(vector_set1, vector_set2):
             for i in range(difference):
                 key = random.choice(list(vector_set1.keys()))
                 del vector_set1[key]
-                print("Removed keys from dictionary 2: " + str(key))
+                logging.info("CM: Removed keys from dictionary 2: " + str(key))
         elif len(vector_set2) > len(vector_set1):
             difference = len(vector_set2) - len(vector_set1)
             for i in range(difference):
                 key = random.choice(list(vector_set2.keys()))
                 del vector_set2[key]
-                print("Removed keys from dictionary 2: " + str(key))
+                logging.info("CM: Removed keys from dictionary 2: " + str(key))
     return vector_set1, vector_set2
 
 
 # Checks weather two vector sets have the same length
 def check_set_sizes(vector_set1, vector_set2):
     if len(vector_set1) > 0 & len(vector_set2) > 0:
-        print('Ungleich null')
         if len(vector_set1) != len(vector_set2):
-            print('ungleich unglecih')
             make_set_size_equal(vector_set1, vector_set2)
     return vector_set1, vector_set2
 
@@ -95,17 +71,13 @@ def check_set_sizes(vector_set1, vector_set2):
 def make_set_size_equal(vector_set1, vector_set2):
     while len(vector_set1) != len(vector_set2):
         if len(vector_set1) > len(vector_set2):
-            print("RANDOM FUNZT NET")
-            print(vector_set1.keys())
             key = random.choice(list(vector_set1.keys()))
-            print('REMOVED KEY from list 1:')
-            print(key)
             del vector_set1[key]
+            logging.info("CM: REMOVED KEY from list 1: " + str(key))
         if len(vector_set2) > len(vector_set1):
             key = random.choice(list(vector_set2.keys()))
-            print('REMOVED KEY from list 1:')
-            print(key)
             del vector_set2[key]
+            logging.info("CM: REMOVED KEY from list 2: " + str(key))
     return vector_set1, vector_set2
 
 
@@ -133,8 +105,6 @@ def create_numpy_vector(vector_set):
 # Calculates the mean vector of a target list
 def target_set_mean_vector(target_list):
     # Create empty vector with dimension 300 for simpler vector addition
-    # Alternative: Add everything into first vector...
-    # vector_array = numpy.sum(numpy.array(target_list))
     vector_array = numpy.zeros(300)
     # print("Zeros:" + str(len(vector_array)))
     for i in range(len(target_list)):

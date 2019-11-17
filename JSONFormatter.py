@@ -1,6 +1,7 @@
 import calculation
 import vectors
 import database_handler
+import logging
 
 fasttext = "C:\\Users\\Niklas\\Documents\\wiki-news-300d-1M.vec"
 
@@ -39,21 +40,20 @@ def get_multiple_vectors_from_json(content, database):
     raw_a2 = content['A2'].split(' ')
 
     test_vectors1 = database_handler.get_multiple_vectors_from_db(raw_t1, database)
-    print("VECTORS1 found")
+    logging.info("DB: First set added to memory")
     test_vectors2 = database_handler.get_multiple_vectors_from_db(raw_t2, database)
-    print("VECTORS2 found")
+    logging.info("DB: Second set added to memory")
     arg_vectors1 = database_handler.get_multiple_vectors_from_db(raw_a1, database)
-    print("VECTORS3 found")
+    logging.info("DB: Third set added to memory")
     arg_vectors2 = database_handler.get_multiple_vectors_from_db(raw_a2, database)
-    print("VECTORS4 found")
-
-    print()
-    print('Sizes: ' + str(len(test_vectors1)) + " " + str(len(test_vectors2)) + " " + str(len(arg_vectors1)) + " " + str(len(test_vectors2)))
+    logging.info("DB: Fourth set added to memory")
+    logging.info("DB: Found set sizes: " + str(len(test_vectors1)) + " " + str(len(test_vectors2)) + " " + str(len(arg_vectors1)) + " " + str(len(test_vectors2)))
 
     return test_vectors1, test_vectors2, arg_vectors1, arg_vectors2
 
 
 def retrieve_vectors(content, database):
+    logging.info("DB: Vector retrieval started")
     target1 = {}
     target2 = {}
     argument1 = {}

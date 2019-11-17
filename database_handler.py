@@ -1,4 +1,5 @@
 import psycopg2
+import logging
 
 
 def get_vector_from_database(word, database):
@@ -12,10 +13,12 @@ def get_vector_from_database(word, database):
         conn = psycopg2.connect(dbname='fasttext2', user='postgres', host='', password='audi')
         cur = conn.cursor()
         cur.execute(command)
+        logging.info("DB: Connected successfully to " + database)
         records = cur.fetchall()
         data = str(records)[3:-4]
         print(data)
         vector_dict[word] = map(float, data.split('  '))
+        logging.info("DB: Found vector for word: " + word)
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
@@ -38,6 +41,7 @@ def get_multiple_vectors_from_db(word_list, database):
     try:
         conn = psycopg2.connect(dbname=dbname, user='postgres', host='', password='audi')
         cur = conn.cursor()
+        logging.info("DB: Connected successfully to " + database)
         for word in word_list:
             try:
                 command = """
@@ -52,11 +56,12 @@ def get_multiple_vectors_from_db(word_list, database):
                 for i in range(len(tokens)):
                     vector.append(float(tokens[i]))
                 vector_dict[word] = map(float, vector)
-                print(word + ' Added to dict')
+                logging.info("DB: Found vector for " + word)
             except:
-                print('Error')
+                logging.info("DB: No vector found for " + word)
                 pass
     except (Exception, psycopg2.DatabaseError) as error:
+        logging.error("DB: Database error", error)
         print(error)
     finally:
         if conn is not None:
