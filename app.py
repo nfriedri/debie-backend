@@ -70,10 +70,8 @@ def bias_evaluations():
     embedding_space = content['EmbeddingSpace']
     methods = content['Method']
     logging.info("APP: Starting evaluation in " + str(embedding_space) + "embedding space with " + str(methods))
-    # Retrieve Vectors from database
+    # Retrieve & check vectors from database
     target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors(content, embedding_space)
-
-    # Check sizes of retrieved test sets
     target1, target2 = calculation.check_sizes(target1, target2)
     arg1, arg2 = calculation.check_sizes(arg1, arg2)
     logging.info("APP: Retrieved Vectors from database")
@@ -85,23 +83,23 @@ def bias_evaluations():
 
 @app.route('/REST/debiasing', methods=['POST'])
 def debiasing():
+    logging.info("APP: Debiasing is called")
     # Get content from JSON
     content = request.get_json()
     embedding_space = content['EmbeddingSpace']
     methods = content['Method']
+    logging.info("APP: Starting evaluation in " + str(embedding_space) + "embedding space with " + str(methods))
 
-    # Retrieve Vectors from database
+    # Retrieve & check Vectors from database
     target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors(content, embedding_space)
-
-    # Check sizes of retrieved test sets
     target1, target2 = calculation.check_sizes(target1, target2)
     arg1, arg2 = calculation.check_sizes(arg1, arg2)
-    print("Final Set Sizes:")
-    print(len(target1))
-    print(len(target2))
-    print(len(arg1))
-    print(len(arg2))
+    logging.info("APP: Retrieved Vectors from database")
+    logging.info("APP: Final retrieved set sizes: T1=" + str(len(target1)) + " T2=" + str(len(target2)) + " A1=" + str(
+        len(arg1)) + " A2=" + str(len(arg2)))
 
+    logging.info("APP: Debiasing process started")
+    # Following lines will be moved to debias_methods.py soon:
     result1, result2 = gbdd.generalized_bias_direction_debiasing(target1, target2)
     response = jsonify(GBDDVecs1=result1, GBDDVecs2=result2)
     return response
@@ -113,10 +111,8 @@ def debias_visualize():
     embedding_space = content['EmbeddingSpace']
     methods = content['Method']
 
-    # Retrieve Vectors from database
+    # Retrieve & check vectors from database
     target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors(content, embedding_space)
-
-    # Check sizes of retrieved test sets
     target1, target2 = calculation.check_sizes(target1, target2)
     arg1, arg2 = calculation.check_sizes(arg1, arg2)
 
