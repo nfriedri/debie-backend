@@ -4,16 +4,18 @@ import copy
 from sklearn.decomposition import PCA
 
 
-def create_duplicates(set1, set2, set3=None, set4=None):
+def create_duplicates(set1, set2=None, set3=None, set4=None):
     copy1 = copy.deepcopy(set1)
-    copy2 = copy.deepcopy(set2)
-    if set3 is not None:
-        copy3 = copy.deepcopy(set3)
-        if set4 is not None:
-            copy4 = copy.deepcopy(set4)
-            return copy1, copy2, copy3, copy4
-        return copy1, copy2, copy3
-    return copy1, copy2
+    if set2 is not None:
+        copy2 = copy.deepcopy(set2)
+        if set3 is not None:
+            copy3 = copy.deepcopy(set3)
+            if set4 is not None:
+                copy4 = copy.deepcopy(set4)
+                return copy1, copy2, copy3, copy4
+            return copy1, copy2, copy3
+        return copy1, copy2
+    return copy1
 
 
 ''''

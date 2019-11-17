@@ -3,6 +3,22 @@ from flask import jsonify
 from bias_evaluation import weat, ect, bat, k_means
 
 
+def return_bias_evaluation(methods, target1, target2, arg1, arg2):
+    if methods is None:
+        return return_eval_all(target1, target2, arg1, arg2)
+    if methods == 'allBtn':
+        return return_eval_all(target1, target2, arg1, arg2)
+    if methods == 'ectBtn':
+        return return_eval_ect(target1, target2, arg1, arg2)
+    if methods == 'batBtn':
+        return return_eval_bat(target1, target2, arg1, arg2)
+    if methods == 'weatBtn':
+        return return_eval_weat(target1, target2, arg1, arg2)
+    if methods == 'kmeansBtn':
+        return return_eval_kmeans(target1, target2)
+    return 400
+
+
 def return_eval_all(test_vectors1, test_vectors2, arg_vectors1, arg_vectors2):
     ect_value1, p_value1 = ect.embedding_coherence_test(test_vectors1, test_vectors2, arg_vectors1)
     ect_value2, p_value2 = ect.embedding_coherence_test(test_vectors1, test_vectors2, arg_vectors2)
