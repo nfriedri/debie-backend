@@ -21,9 +21,6 @@ def calculate_bias_direction_matrix(target_list1, target_list2):
     matrix = []
     for i in range(len(target_list1)):
         for j in range(len(target_list2)):
-            print(i)
-            print(j)
-            print()
             array = numpy.array(target_list1[i]) - numpy.array((target_list2[j]))
             matrix.append(array)
     u, s, vh = numpy.linalg.svd(matrix)

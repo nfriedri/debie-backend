@@ -38,6 +38,9 @@ def get_multiple_vectors_from_db(word_list, database):
         dbname = 'skipgram'
     if database == 'cbowdb':
         dbname = 'cbow'
+    if database == 'glovedb':
+        dbname = 'glove'
+
     try:
         conn = psycopg2.connect(dbname=dbname, user='postgres', host='', password='audi')
         cur = conn.cursor()
@@ -45,9 +48,10 @@ def get_multiple_vectors_from_db(word_list, database):
         for word in word_list:
             try:
                 command = """
-                   SELECT vector FROM fasttext WHERE word = '{}'
-                   """.format(word)
+                   SELECT vector FROM {} WHERE word = '{}'
+                   """.format(dbname, word)
                 cur.execute(command)
+                # print(command)
                 records = cur.fetchall()
                 data = records[0]
 

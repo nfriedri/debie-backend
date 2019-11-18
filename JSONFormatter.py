@@ -54,18 +54,22 @@ def get_multiple_vectors_from_json(content, database):
 
 def retrieve_vectors(content, database):
     logging.info("DB: Vector retrieval started")
+    logging.info("DB: Searching for following vectors:")
+    logging.info("DB:" + str(content))
     target1 = {}
     target2 = {}
     argument1 = {}
     argument2 = {}
     if database is None:
-        target1, target2, argument1, argument2 = retrieve_vectors(content, 'fasttextdb')
-    if database == 'fasttextBtn':
-        target1, target2, argument1, argument2 = retrieve_vectors(content, 'fasttextdb')
-    if database == 'skipgramBtn':
-        target1, target2, argument1, argument2 = retrieve_vectors(content, 'skipgramdb')
-    if database == 'cbowBtn':
-        target1, target2, argument1, argument2 = retrieve_vectors(content, 'cbowdb')
+        target1, target2, argument1, argument2 = get_multiple_vectors_from_json(content, 'fasttextdb')
+    if database == 'fasttext':
+        target1, target2, argument1, argument2 = get_multiple_vectors_from_json(content, 'fasttextdb')
+    if database == 'skipgram':
+        target1, target2, argument1, argument2 = get_multiple_vectors_from_json(content, 'skipgramdb')
+    if database == 'cbow':
+        target1, target2, argument1, argument2 = get_multiple_vectors_from_json(content, 'cbowdb')
+    if database == 'glove':
+        target1, target2, argument1, argument2 = get_multiple_vectors_from_json(content, 'glovedb')
     return target1, target2, argument1, argument2
 
 

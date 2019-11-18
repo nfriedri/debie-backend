@@ -133,6 +133,7 @@ def euclidean_distance(vector1, vector2):
 
 
 def principal_composant_analysis(vector_dict1, vector_dict2):
+    logging.info("PCA: Principal composant analysis started")
     vector_dict1_copy, vector_dict2_copy = create_duplicates(vector_dict1, vector_dict2)
     array_words = []
     array2d = []
@@ -147,4 +148,5 @@ def principal_composant_analysis(vector_dict1, vector_dict2):
     results = {}
     for i in range(len(array_words)):
         results[array_words[i]] = prinicpal_components[i]
+    logging.info("PCA: Prinicipal composant analysis completed")
     return results

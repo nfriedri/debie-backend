@@ -7,15 +7,15 @@ def return_bias_evaluation(methods, target1, target2, arg1, arg2):
     logging.info("APP-BE: Forwarding to related definitions")
     if methods is None:
         return return_eval_all(target1, target2, arg1, arg2)
-    if methods == 'allBtn':
+    if methods == 'all':
         return return_eval_all(target1, target2, arg1, arg2)
-    if methods == 'ectBtn':
+    if methods == 'ect':
         return return_eval_ect(target1, target2, arg1, arg2)
-    if methods == 'batBtn':
+    if methods == 'bat':
         return return_eval_bat(target1, target2, arg1, arg2)
-    if methods == 'weatBtn':
+    if methods == 'weat':
         return return_eval_weat(target1, target2, arg1, arg2)
-    if methods == 'kmeansBtn':
+    if methods == 'kmeans':
         return return_eval_kmeans(target1, target2)
     return 400
 
