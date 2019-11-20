@@ -119,7 +119,7 @@ def debias_visualize():
     content = request.get_json()
     embedding_space = content['EmbeddingSpace']
     methods = content['Method']
-    logging.info("APP: Starting evaluation in " + str(embedding_space) + "embedding space with " + str(methods))
+    logging.info("APP: Starting debiasing in " + str(embedding_space) + " embedding space with " + str(methods))
 
     # Retrieve & check vectors from database
     target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors(content, embedding_space)
