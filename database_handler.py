@@ -31,25 +31,13 @@ def get_multiple_vectors_from_db(word_list, database):
     conn = None
     integer = 0
     vector_dict = {}
-    dbname = "fasttext2"
-    tablename = "fasttext"
-    if database == "fasttextdb":
-        dbname = "fasttext2"
-        tablename = "fasttext"
-    if database == "skipgramdb":
-        dbname = "skipgram"
-        tablename = "skipgram"
-    if database == "cbowdb":
-        dbname = "cbow"
-        tablename = "cbow"
-    if database == "glovedb":
-        dbname = "glove"
-        tablename = "glove"
-
+    tablename = database
+    if database == 'fasttetxt':
+        tablename = 'fasttext2'
     try:
-        conn = psycopg2.connect(dbname=dbname, user='postgres', host='', password='audi')
+        conn = psycopg2.connect(dbname=database, user='postgres', host='', password='audi')
         cur = conn.cursor()
-        logging.info("DB: Connected successfully to " + dbname)
+        logging.info("DB: Connected successfully to " + database)
         for word in word_list:
             try:
                 command = """

@@ -6,34 +6,47 @@ import logging
 fasttext = "C:\\Users\\Niklas\\Documents\\wiki-news-300d-1M.vec"
 
 
-def get_vector_from_json(content):
+def get_json_vector_from_file(content):
+    logging.info("DB: Vector retrieval started")
+    logging.info("DB: Searching for following vectors:")
+    logging.info("DB:" + str(content))
     raw_t1 = content['T1'].split(' ')
     raw_t2 = content['T2'].split(' ')
     raw_a1 = content['A1'].split(' ')
     raw_a2 = content['A2'].split(' ')
-
-    print("T1: " + str(len(raw_t1)) + " T2: " + str(len(raw_t2)) + " A1: " + str(len(raw_a1)) + " A2: " + str(
+    logging.info("T1: " + str(len(raw_t1)) + " T2: " + str(len(raw_t2)) + " A1: " + str(len(raw_a1)) + " A2: " + str(
         len(raw_a2)))
 
     test_vectors1 = vectors.load_multiple_words(fasttext, raw_t1)
-    print("vectors1 found")
-    print(test_vectors1)
-
-    print(len(test_vectors1))
+    logging.info("vectors1 found")
     test_vectors2 = vectors.load_multiple_words(fasttext, raw_t2)
-    print("vectors2 found")
-    print(len(test_vectors2))
+    logging.info("vectors2 found")
     arg_vectors1 = vectors.load_multiple_words(fasttext, raw_a1)
-    print("vectors3 found")
-    print(len(arg_vectors1))
+    logging.info("vectors3 found")
     arg_vectors2 = vectors.load_multiple_words(fasttext, raw_a2)
-    print("vectors4 found")
-    print(len(arg_vectors2))
+    logging.info("vectors4 found")
+    logging.info("Retrieved set sizes: " + str(len(test_vectors1)) + " " + str(len(test_vectors2)) + " " + str(
+        len(arg_vectors1)) + " " + str(len(arg_vectors2)))
 
     return test_vectors1, test_vectors2, arg_vectors1, arg_vectors2
 
 
-def get_multiple_vectors_from_json(content, database):
+def retrieve_vector_from_db(content):
+    logging.info("DB: Retrieval of single vector started")
+    logging.info("DB: Searching for following vector:")
+    logging.info("DB:" + str(content))
+    database = content['EmbeddingSpace']
+    raw_data = content['data'].rsplit()
+    vector = database_handler.get_vector_from_database(raw_data, database)
+    logging.info("DB: Found vector to word " + raw_data)
+    return vector
+
+
+def retrieve_vectors_from_db(content):
+    logging.info("DB: Retrieval of multiple vectors started")
+    logging.info("DB: Searching for following vectors:")
+    logging.info("DB:" + str(content))
+    database = content['EmbeddingSpace']
     raw_t1 = content['T1'].split(' ')
     raw_t2 = content['T2'].split(' ')
     raw_a1 = content['A1'].split(' ')
@@ -47,30 +60,10 @@ def get_multiple_vectors_from_json(content, database):
     logging.info("DB: Third set added to memory")
     arg_vectors2 = database_handler.get_multiple_vectors_from_db(raw_a2, database)
     logging.info("DB: Fourth set added to memory")
-    logging.info("DB: Found set sizes: " + str(len(test_vectors1)) + " " + str(len(test_vectors2)) + " " + str(len(arg_vectors1)) + " " + str(len(test_vectors2)))
+    logging.info("DB: Found set sizes: " + str(len(test_vectors1)) + " " + str(len(test_vectors2)) + " " + str(
+        len(arg_vectors1)) + " " + str(len(test_vectors2)))
 
     return test_vectors1, test_vectors2, arg_vectors1, arg_vectors2
-
-
-def retrieve_vectors(content, database):
-    logging.info("DB: Vector retrieval started")
-    logging.info("DB: Searching for following vectors:")
-    logging.info("DB:" + str(content))
-    target1 = {}
-    target2 = {}
-    argument1 = {}
-    argument2 = {}
-    if database is None:
-        target1, target2, argument1, argument2 = get_multiple_vectors_from_json(content, 'fasttextdb')
-    if database == 'fasttext':
-        target1, target2, argument1, argument2 = get_multiple_vectors_from_json(content, 'fasttextdb')
-    if database == 'skipgram':
-        target1, target2, argument1, argument2 = get_multiple_vectors_from_json(content, 'skipgramdb')
-    if database == 'cbow':
-        target1, target2, argument1, argument2 = get_multiple_vectors_from_json(content, 'cbowdb')
-    if database == 'glove':
-        target1, target2, argument1, argument2 = get_multiple_vectors_from_json(content, 'glovedb')
-    return target1, target2, argument1, argument2
 
 
 def dict_to_json(vector_dict):

@@ -1,28 +1,19 @@
 import json
 import logging
-from flask import Flask, request
+import os
+
+from flask import Flask, request, flash, redirect, url_for
 from flask import jsonify
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
+from werkzeug.utils import secure_filename
+
 import JSONFormatter
 import bias_eval_methods
 import calculation
-from database_handler import get_multiple_vectors_from_db
 from debiasing import gbdd, bam
 
 '''Initialize vectors into test and argument sets'''
-fasttext = "C:\\Users\\Niklas Friedrich\\Documents\\wiki-news-300d-1M.vec"
-
 '''
-test_files = ["C:\\Users\\Niklas Friedrich\\Documents\\Initial_Test\\initial_t1.vec",
-              "C:\\Users\\Niklas Friedrich\\Documents\\Initial_Test\\initial_t2.vec",
-              "C:\\Users\\Niklas Friedrich\\Documents\\Initial_Test\\initial_a1.vec",
-              "C:\\Users\\Niklas Friedrich\\Documents\\Initial_Test\\initial_a2.vec"
-              ]
-
-init_t1 = vectors.load_vectors(test_files[0])
-init_t2 = vectors.load_vectors(test_files[1])
-init_a1 = vectors.load_vectors(test_files[2])
-init_a2 = vectors.load_vectors(test_files[3])
 
 t1= ["glovers", "gladiolus", "nance", "crowfoot"]
 t2= ["caterpillars", "gnats", "termites", "avenger", "ants", "bumblebee"]
@@ -37,32 +28,39 @@ word_list3 = ["aster", "clover", "hyacinth", "marigold", "poppy", "azalea", "cro
               "carnation", "Gladiola", "magnolia", "petunia"]
 '''
 ''' RestAPI '''
+# FLASK, CORS & Logging configuration
+
+UPLOAD_FOLDER = 'C:\\Users\\Niklas\\Documents\\GitHub\\debie_backend\\uploads\\files'
+ALLOWED_EXTENSIONS = {'txt', 'vec'}
 
 app = Flask(__name__)
 CORS(app)
+app.secret_key = "secret key"
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['CORS_HEADERS'] = 'Content-Type'
 
-logging.basicConfig(filename="logfiles.log", level=logging.INFO)
-print("logging configured")
+
+# logging.basicConfig(filename="logfiles.log", level=logging.INFO)
+# print("logging configured")
 
 
-@app.route('/REST/POST_word', methods=["POST"])
-def get_vector():
+@app.route('/REST/retrieve_single_vector', methods=['POST'])
+def retrieve_single_vector():
+    logging.info("APP: Retrieve single vector is called")
     content = request.get_json()
-    data = content['data']
-    vector = JSONFormatter.get_vector_from_json(data)
-    vector_list = list(vector[data])
-    return jsonify(word=data, vector=vector_list)
-
-
-@app.route('/REST/POST_words', methods=["POST"])
-def get_vectors():
-    # Receive words from input field:
-    content = request.get_json()
-    data = content['data']
-    # Split words from input field
-    list_words = data.split(' ')
-    vector_dict = JSONFormatter.get_multiple_vectors_from_json(list_words, 'fasttextdb')
+    vector_dict = JSONFormatter.retrieve_vector_from_db(content)
     response = jsonify(word=[word for word in vector_dict], vector=[list(vector_dict[vec]) for vec in vector_dict])
+    logging.info("APP: Retrieved vector")
+    return response
+
+
+@app.route('/REST/retrieve_multiple_vectors', methods=['POST'])
+def retrieve_multiple_vectors():
+    logging.info("APP: Retrieve multiple vectors is called")
+    content = request.get_json()
+    vector_dict = JSONFormatter.retrieve_vectors_from_db(content)
+    response = jsonify(word=[word for word in vector_dict], vector=[list(vector_dict[vec]) for vec in vector_dict])
+    logging.info("APP: Retrieved vectors")
     return response
 
 
@@ -71,11 +69,10 @@ def bias_evaluations():
     logging.info("APP: Bias Evaluation is called")
     # Get content from JSON
     content = request.get_json()
-    embedding_space = content['EmbeddingSpace']
     methods = content['Method']
-    logging.info("APP: Starting evaluation in " + str(embedding_space) + "embedding space with " + str(methods))
+    logging.info("APP: Starting evaluation process")
     # Retrieve & check vectors from database
-    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors(content, embedding_space)
+    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db(content)
     target1, target2 = calculation.check_sizes(target1, target2)
     arg1, arg2 = calculation.check_sizes(arg1, arg2)
     logging.info("APP: Retrieved Vectors from database")
@@ -96,7 +93,7 @@ def debiasing():
     logging.info("APP: Starting evaluation in " + str(embedding_space) + "embedding space with " + str(methods))
 
     # Retrieve & check Vectors from database
-    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors(content, embedding_space)
+    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db(content)
     target1, target2 = calculation.check_sizes(target1, target2)
     arg1, arg2 = calculation.check_sizes(arg1, arg2)
     logging.info("APP: Retrieved Vectors from database")
@@ -113,7 +110,7 @@ def debiasing():
     return response
 
 
-@app.route('/REST/debiasing_visualization', methods=['POST'])
+@app.route('/REST/debiasing_with_pca', methods=['POST'])
 def debias_visualize():
     logging.info("APP: Debiasing is called")
     content = request.get_json()
@@ -122,7 +119,7 @@ def debias_visualize():
     logging.info("APP: Starting debiasing in " + str(embedding_space) + " embedding space with " + str(methods))
 
     # Retrieve & check vectors from database
-    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors(content, embedding_space)
+    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db(content)
     target1, target2 = calculation.check_sizes(target1, target2)
     arg1, arg2 = calculation.check_sizes(arg1, arg2)
     logging.info("APP: Retrieved Vectors from database")
@@ -131,20 +128,55 @@ def debias_visualize():
 
     logging.info("APP: Debiasing process started")
     debiased1, debiased2 = gbdd.generalized_bias_direction_debiasing(target1, target2)
+    debiased1_copy, debiased2_copy = calculation.create_duplicates(debiased1, debiased2)
+    debiased = debiased1_copy.update(debiased2_copy)
+    target1_copy, target2_copy = calculation.create_duplicates(target1, target2)
+    target = target1_copy.update(target2_copy)
 
     biased_pca = calculation.principal_composant_analysis(target1, target2)
     debiased_pca = calculation.principal_composant_analysis(debiased1, debiased2)
 
     response = json.dumps(
-        {"EmbeddingSpace": embedding_space, "Method": methods, "BiasedVectors": JSONFormatter.dict_to_json(biased_pca),
-         "DebiasedVectors": JSONFormatter.dict_to_json(debiased_pca)})
+        {"EmbeddingSpace": embedding_space, "Method": methods,
+         "BiasedVectorsPCA": JSONFormatter.dict_to_json(biased_pca),
+         "DebiasedVectorsPCA": JSONFormatter.dict_to_json(debiased_pca),
+         "BiasedVecs:": JSONFormatter.dict_to_json(debiased),
+         "DebiasedVecs": JSONFormatter.dict_to_json(target)})
     logging.info("APP: Debiasing process with PCA finished")
     logging.info("APP: " + str(response))
-    print(response)
+    # print(response)
     return response
+
+
+@app.route('/REST/own-embedding-space', methods=['POST', 'PUT'])
+@cross_origin()
+def upload_embedding_space():
+    logging.info("APP: Receiving file form upload")
+    if 'file' not in request.files:
+        resp = jsonify({'message': 'No file part in the request'})
+        resp.status_code = 400
+        return resp
+    file = request.files['file']
+    if file.filename == '':
+        resp = jsonify({'message': 'No file selected for uploading'})
+        resp.status_code = 400
+        return resp
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        resp = jsonify({'message': 'File successfully uploaded'})
+        resp.status_code = 201
+        return resp
+    else:
+        resp = jsonify({'message': 'Allowed file types are txt, pdf, png, jpg, jpeg, gif'})
+        resp.status_code = 400
+        return resp
+
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 if __name__ == '__main__':
     app.run()
-
-
