@@ -51,17 +51,29 @@ def retrieve_vectors_from_db(content):
     raw_t2 = content['T2'].split(' ')
     raw_a1 = content['A1'].split(' ')
     raw_a2 = content['A2'].split(' ')
-
-    test_vectors1 = database_handler.get_multiple_vectors_from_db(raw_t1, database)
-    logging.info("DB: First set added to memory")
-    test_vectors2 = database_handler.get_multiple_vectors_from_db(raw_t2, database)
-    logging.info("DB: Second set added to memory")
-    arg_vectors1 = database_handler.get_multiple_vectors_from_db(raw_a1, database)
-    logging.info("DB: Third set added to memory")
-    arg_vectors2 = database_handler.get_multiple_vectors_from_db(raw_a2, database)
-    logging.info("DB: Fourth set added to memory")
-    logging.info("DB: Found set sizes: " + str(len(test_vectors1)) + " " + str(len(test_vectors2)) + " " + str(
-        len(arg_vectors1)) + " " + str(len(test_vectors2)))
+    if database == "uploadSpace":
+        # TODO Somehow retrieve filename from last upload
+        file = "uploads\\files\\" + database
+        print(file)
+        test_vectors1 = vectors.load_multiple_words(file, raw_t1)
+        logging.info("DB: First set added to memory")
+        test_vectors2 = database_handler.get_multiple_vectors_from_db(file, raw_t2)
+        logging.info("DB: Second set added to memory")
+        arg_vectors1 = database_handler.get_multiple_vectors_from_db(file, raw_a1)
+        logging.info("DB: Third set added to memory")
+        arg_vectors2 = database_handler.get_multiple_vectors_from_db(file, raw_a2)
+        print("BIG BIG PROBLEM")
+    else:
+        test_vectors1 = database_handler.get_multiple_vectors_from_db(raw_t1, database)
+        logging.info("DB: First set added to memory")
+        test_vectors2 = database_handler.get_multiple_vectors_from_db(raw_t2, database)
+        logging.info("DB: Second set added to memory")
+        arg_vectors1 = database_handler.get_multiple_vectors_from_db(raw_a1, database)
+        logging.info("DB: Third set added to memory")
+        arg_vectors2 = database_handler.get_multiple_vectors_from_db(raw_a2, database)
+        logging.info("DB: Fourth set added to memory")
+        logging.info("DB: Found set sizes: " + str(len(test_vectors1)) + " " + str(len(test_vectors2)) + " " + str(
+            len(arg_vectors1)) + " " + str(len(test_vectors2)))
 
     return test_vectors1, test_vectors2, arg_vectors1, arg_vectors2
 
