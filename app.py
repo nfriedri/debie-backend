@@ -30,14 +30,13 @@ word_list3 = ["aster", "clover", "hyacinth", "marigold", "poppy", "azalea", "cro
 ''' RestAPI '''
 # FLASK, CORS & Logging configuration
 
-UPLOAD_FOLDER = 'C:\\Users\\Niklas\\Documents\\GitHub\\debie_backend\\uploads\\files'
+UPLOAD_FOLDER = 'C:\\Users\\Niklas Friedrich\\Documents\\GitHub\\debie_backend\\uploads\\files'
 ALLOWED_EXTENSIONS = {'txt', 'vec'}
 
 app = Flask(__name__)
 CORS(app)
 app.secret_key = "secret key"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['CORS_HEADERS'] = 'Content-Type'
 
 
 # logging.basicConfig(filename="logfiles.log", level=logging.INFO)
@@ -148,15 +147,17 @@ def debias_visualize():
     return response
 
 
-@app.route('/REST/own-embedding-space', methods=['POST', 'PUT'])
-@cross_origin()
+@app.route('/REST/own-embedding-space', methods=['POST'])
 def upload_embedding_space():
     logging.info("APP: Receiving file form upload")
-    if 'file' not in request.files:
+    print('Receiving file form upload')
+
+    if 'uploadFile' not in request.files:
         resp = jsonify({'message': 'No file part in the request'})
         resp.status_code = 400
         return resp
-    file = request.files['file']
+    file = request.files['uploadFile']
+    print(file.read())
     if file.filename == '':
         resp = jsonify({'message': 'No file selected for uploading'})
         resp.status_code = 400
@@ -166,10 +167,12 @@ def upload_embedding_space():
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         resp = jsonify({'message': 'File successfully uploaded'})
         resp.status_code = 201
+        print('Case 3')
         return resp
     else:
         resp = jsonify({'message': 'Allowed file types are txt, pdf, png, jpg, jpeg, gif'})
         resp.status_code = 400
+        print('Case 4')
         return resp
 
 
