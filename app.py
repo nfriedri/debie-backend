@@ -10,6 +10,7 @@ from werkzeug.utils import secure_filename
 import JSONFormatter
 import bias_eval_methods
 import calculation
+import database_handler
 from debiasing import gbdd, bam
 
 '''Initialize vectors into test and argument sets'''
@@ -42,7 +43,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # logging.basicConfig(filename="logfiles.log", level=logging.INFO)
 # print("logging configured")
 
-
+# Example: http://127.0.0.1:5000/REST/retrieve_single_vector2?embedding_space=fasttext&word=car
 @app.route('/REST/retrieve_single_vector', methods=['POST'])
 def retrieve_single_vector():
     logging.info("APP: Retrieve single vector is called")
@@ -53,11 +54,25 @@ def retrieve_single_vector():
     return response
 
 
+@app.route('/REST/retrieve_single_vector2/', methods=['GET'])
+def retrieve_single_vector2():
+    logging.info("APP: Retrieve single vector is called")
+    bar = request.args.to_dict()
+    space = bar['space']
+    search = bar['word']
+    vector_dict = database_handler.get_vector_from_database(search, space)
+    response = jsonify(word=[word for word in vector_dict], vector=[list(vector_dict[vec]) for vec in vector_dict])
+    logging.info("APP: Retrieved vector")
+    return response
+
+
 @app.route('/REST/retrieve_multiple_vectors', methods=['POST'])
 def retrieve_multiple_vectors():
     logging.info("APP: Retrieve multiple vectors is called")
+    bar = request.args.to_dict()
+    space = bar['space']
     content = request.get_json()
-    vector_dict = JSONFormatter.retrieve_vectors_from_db(content)
+    vector_dict = database_handler.get_multiple_vectors_from_db()
     response = jsonify(word=[word for word in vector_dict], vector=[list(vector_dict[vec]) for vec in vector_dict])
     logging.info("APP: Retrieved vectors")
     return response
