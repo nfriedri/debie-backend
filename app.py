@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import sys
 
 from flask import Flask, request, flash, redirect, url_for
 from flask import jsonify
@@ -43,19 +44,9 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # logging.basicConfig(filename="logfiles.log", level=logging.INFO)
 # print("logging configured")
 
-# Example: http://127.0.0.1:5000/REST/retrieve_single_vector2?embedding_space=fasttext&word=car
-@app.route('/REST/retrieve_single_vector', methods=['POST'])
+# Example: http://127.0.0.1:5000/REST/retrieve_single_vector?embedding_space=fasttext&word=car
+@app.route('/REST/retrieve_single_vector/', methods=['GET'])
 def retrieve_single_vector():
-    logging.info("APP: Retrieve single vector is called")
-    content = request.get_json()
-    vector_dict = JSONFormatter.retrieve_vector_from_db(content)
-    response = jsonify(word=[word for word in vector_dict], vector=[list(vector_dict[vec]) for vec in vector_dict])
-    logging.info("APP: Retrieved vector")
-    return response
-
-
-@app.route('/REST/retrieve_single_vector2/', methods=['GET'])
-def retrieve_single_vector2():
     logging.info("APP: Retrieve single vector is called")
     bar = request.args.to_dict()
     space = bar['space']
@@ -85,16 +76,24 @@ def bias_evaluations():
     content = request.get_json()
     methods = content['Method']
     logging.info("APP: Starting evaluation process")
+    target1, target2, arg1, arg2 = {},{},{},{}
     # Retrieve & check vectors from database
     target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db(content)
-    target1, target2 = calculation.check_sizes(target1, target2)
-    arg1, arg2 = calculation.check_sizes(arg1, arg2)
-    logging.info("APP: Retrieved Vectors from database")
-    logging.info("APP: Final retrieved set sizes: T1=" + str(len(target1)) + " T2=" + str(len(target2)) + " A1=" + str(
-        len(arg1)) + " A2=" + str(len(arg2)))
+    if len(target1) or len(target2) == 0:
+        return jsonify(message="Error inserted words can not be found. Please try with other words or a different embedding space.")
+    try:
+        target1, target2 = calculation.check_sizes(target1, target2)
+        arg1, arg2 = calculation.check_sizes(arg1, arg2)
+        logging.info("APP: Retrieved Vectors from database")
+        logging.info("APP: Final retrieved set sizes: T1=" + str(len(target1)) + " T2=" + str(len(target2)) + " A1=" + str(
+            len(arg1)) + " A2=" + str(len(arg2)))
 
-    logging.info("APP: Evaluation process started")
-    return bias_eval_methods.return_bias_evaluation(methods, target1, target2, arg1, arg2)
+        logging.info("APP: Evaluation process started")
+        result = bias_eval_methods.return_bias_evaluation(methods, target1, target2, arg1, arg2)
+        return result
+    except:
+        return jsonify(
+            message="Error: Calculation failed please try again.")
 
 
 @app.route('/REST/debiasing', methods=['POST'])
