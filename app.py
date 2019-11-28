@@ -12,13 +12,13 @@ import JSONFormatter
 import bias_eval_methods
 import calculation
 import database_handler
-from debiasing import gbdd, bam
+from debiasing import gbdd, bam, bam2
 
 '''Initialize vectors into test and argument sets'''
-'''
+
 
 t1= ["glovers", "gladiolus", "nance", "crowfoot"]
-t2= ["caterpillars", "gnats", "termites", "avenger", "ants", "bumblebee"]
+t2= ["caterpillars", "gnats", "termites"]
 a1= ["donation", "liberty", "tranquility", "fortunate", "mild"]
 a2= ["misuse", "collision", "stench", "destitution", "demise"]
 
@@ -28,7 +28,17 @@ word_list2 = ["football", "basketball", "adidas", "nike", "puma"]
 word_list3 = ["aster", "clover", "hyacinth", "marigold", "poppy", "azalea", "crocus", "iris", "orchid", "rose",
               "daffodil", "lilac", "pansy", "tulip", "buttercup", "daisy", "lily", "peony", "violet",
               "carnation", "Gladiola", "magnolia", "petunia"]
-'''
+
+dict1 = database_handler.get_multiple_vectors_from_db(t1, 'fasttext')
+dict2 = database_handler.get_multiple_vectors_from_db(t2, 'fasttext')
+print(len(dict1))
+print(len(dict2))
+print('START')
+print(bam2.bias_alignment_model2(dict1, dict2))
+
+
+
+
 ''' RestAPI '''
 # FLASK, CORS & Logging configuration
 
@@ -76,7 +86,34 @@ def bias_evaluations():
     content = request.get_json()
     methods = content['Method']
     logging.info("APP: Starting evaluation process")
-    target1, target2, arg1, arg2 = {},{},{},{}
+    target1, target2, arg1, arg2 = {}, {}, {}, {}
+    # Retrieve & check vectors from database
+    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db(content)
+    # if len(target1) or len(target2) == 0:
+    #     print("Wrong Loop")
+    #     return jsonify(message="Error inserted words can not be found. Please try with other words or a different embedding space.")
+    target1, target2 = calculation.check_sizes(target1, target2)
+    arg1, arg2 = calculation.check_sizes(arg1, arg2)
+    logging.info("APP: Retrieved Vectors from database")
+    logging.info("APP: Final retrieved set sizes: T1=" + str(len(target1)) + " T2=" + str(len(target2)) + " A1=" + str(
+    len(arg1)) + " A2=" + str(len(arg2)))
+    logging.info("APP: Evaluation process started")
+    result = bias_eval_methods.return_bias_evaluation(methods, target1, target2, arg1, arg2)
+    return result
+
+
+@app.route('/REST/bias_evaluation2', methods=['POST'])
+def bias_evaluations2():
+    logging.info("APP: Bias Evaluation2 is called")
+    # Get content from JSON
+    bar = request.args.to_dict()
+    space = bar['space']
+    search = bar['word']
+    content = request.get_json()
+    logging.info("APP: Starting evaluation process")
+    target1, target2, arg1, arg2 = {}, {}, {}, {}
+
+    # TODO: Rebuild retrieve vecs from db
     # Retrieve & check vectors from database
     target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db(content)
     if len(target1) or len(target2) == 0:
@@ -94,7 +131,6 @@ def bias_evaluations():
     except:
         return jsonify(
             message="Error: Calculation failed please try again.")
-
 
 @app.route('/REST/debiasing', methods=['POST'])
 def debiasing():
@@ -195,5 +231,5 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-if __name__ == '__main__':
-    app.run()
+# if __name__ == '__main__':
+#     app.run()

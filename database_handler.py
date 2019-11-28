@@ -32,8 +32,7 @@ def get_multiple_vectors_from_db(word_list, database):
     integer = 0
     vector_dict = {}
     tablename = database
-    if database == 'fasttetxt':
-        tablename = 'fasttext2'
+
     try:
         conn = psycopg2.connect(dbname=database, user='postgres', host='', password='audi')
         cur = conn.cursor()

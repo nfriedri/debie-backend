@@ -17,8 +17,13 @@ def bias_alignment_model(target_set1, target_set2):
     return result_dict
 
 
-def stack_vectors(vector_list):
+def stack_vectors(target_list1, target_list2):
     stacked_vecs = []
+    matrix = []
+    for i in range(len(target_list1)):
+        for j in range(len(target_list2)):
+            array = numpy.array(target_list1[i]) - numpy.array((target_list2[j]))
+            matrix.append(array)
     for i in range(1, len(vector_list)-1):
         vector = numpy.concatenate((numpy.array(vector_list[i-1]), numpy.array(vector_list[i+1])), axis=None)
         stacked_vecs.append(vector)
