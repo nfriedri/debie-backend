@@ -73,7 +73,8 @@ def retrieve_multiple_vectors():
     bar = request.args.to_dict()
     space = bar['space']
     content = request.get_json()
-    vector_dict = database_handler.get_multiple_vectors_from_db()
+    word_list = content['data'].split(' ')
+    vector_dict = database_handler.get_multiple_vectors_from_db(word_list, space)
     response = jsonify(word=[word for word in vector_dict], vector=[list(vector_dict[vec]) for vec in vector_dict])
     logging.info("APP: Retrieved vectors")
     return response
@@ -101,8 +102,111 @@ def bias_evaluations():
     return result
 
 
-@app.route('/REST/debiasing', methods=['POST'])
-def debiasing():
+@app.route('/REST/bias_evaluation/all', methods=['POST'])
+def bias_evaluations_all():
+    logging.info("APP: Bias Evaluation ALL Methods is called")
+    content = request.get_json()
+    logging.info("APP: Starting evaluation process")
+    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db(content)
+    target1, target2 = calculation.check_sizes(target1, target2)
+    arg1, arg2 = calculation.check_sizes(arg1, arg2)
+    if len(target1) == 0 or len(target2) == 0 or len(arg1) == 0 or len(arg2) == 0:
+        logging.info("APP: Stopped, no values found in database")
+        return jsonify(message="ERROR: No values found in database."), 400
+    logging.info("APP: Final retrieved set sizes: T1=" + str(len(target1)) + " T2=" + str(len(target2)) + " A1=" + str(
+        len(arg1)) + " A2=" + str(len(arg2)))
+    logging.info("APP: Evaluation process started")
+    try:
+        result = bias_eval_methods.return_eval_all(target1, target2, arg1, arg2)
+    except:
+        return jsonify(message="Internal Server Error"), 500
+    return result, 200
+
+
+@app.route('/REST/bias_evaluation/ect', methods=['POST'])
+def bias_evaluations_ect():
+    logging.info("APP: Bias Evaluation ECT Method is called")
+    content = request.get_json()
+    logging.info("APP: Starting evaluation process")
+    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db(content)
+    target1, target2 = calculation.check_sizes(target1, target2)
+    arg1, arg2 = calculation.check_sizes(arg1, arg2)
+    if len(target1) == 0 or len(target2) == 0 or len(arg1) == 0 or len(arg2) == 0:
+        logging.info("APP: Stopped, no values found in database")
+        return jsonify(message="ERROR: No values found in database."), 400
+    logging.info("APP: Final retrieved set sizes: T1=" + str(len(target1)) + " T2=" + str(len(target2)) + " A1=" + str(
+        len(arg1)) + " A2=" + str(len(arg2)))
+    logging.info("APP: Evaluation process started")
+    try:
+        result = bias_eval_methods.return_eval_ect(target1, target2, arg1, arg2)
+    except:
+        return jsonify(message="Internal Server Error"), 500
+    return result, 200
+
+
+@app.route('/REST/bias_evaluation/bat', methods=['POST'])
+def bias_evaluations_bat():
+    logging.info("APP: Bias Evaluation BAT Method is called")
+    content = request.get_json()
+    logging.info("APP: Starting evaluation process")
+    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db(content)
+    target1, target2 = calculation.check_sizes(target1, target2)
+    arg1, arg2 = calculation.check_sizes(arg1, arg2)
+    if len(target1) == 0 or len(target2) == 0 or len(arg1) == 0 or len(arg2) == 0:
+        logging.info("APP: Stopped, no values found in database")
+        return jsonify(message="ERROR: No values found in database."), 400
+    logging.info("APP: Final retrieved set sizes: T1=" + str(len(target1)) + " T2=" + str(len(target2)) + " A1=" + str(
+        len(arg1)) + " A2=" + str(len(arg2)))
+    logging.info("APP: Evaluation process started")
+    try:
+        result = bias_eval_methods.return_eval_bat(target1, target2, arg1, arg2)
+    except:
+        return jsonify(message="Internal Server Error"), 500
+    return result, 200
+
+
+@app.route('/REST/bias_evaluation/weat', methods=['POST'])
+def bias_evaluations_weat():
+    logging.info("APP: Bias Evaluation WEAT Method is called")
+    content = request.get_json()
+    logging.info("APP: Starting evaluation process")
+    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db(content)
+    target1, target2 = calculation.check_sizes(target1, target2)
+    arg1, arg2 = calculation.check_sizes(arg1, arg2)
+    if len(target1) == 0 or len(target2) == 0 or len(arg1) == 0 or len(arg2) == 0:
+        logging.info("APP: Stopped, no values found in database")
+        return jsonify(message="ERROR: No values found in database."), 400
+    logging.info("APP: Final retrieved set sizes: T1=" + str(len(target1)) + " T2=" + str(len(target2)) + " A1=" + str(
+        len(arg1)) + " A2=" + str(len(arg2)))
+    logging.info("APP: Evaluation process started")
+    try:
+        result = bias_eval_methods.return_eval_weat(target1, target2, arg1, arg2)
+    except:
+        return jsonify(message="Internal Server Error"), 500
+    return result, 200
+
+
+@app.route('/REST/bias_evaluation/kmeans', methods=['POST'])
+def bias_evaluations_kmeans():
+    logging.info("APP: Bias Evaluation KMEANS Method is called")
+    content = request.get_json()
+    logging.info("APP: Starting evaluation process")
+    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db(content)
+    target1, target2 = calculation.check_sizes(target1, target2)
+    if len(target1) == 0 or len(target2) == 0:
+        logging.info("APP: Stopped, no values found in database")
+        return jsonify(message="ERROR: No values found in database."), 400
+    logging.info("APP: Final retrieved set sizes: T1=" + str(len(target1)) + " T2=" + str(len(target2)))
+    logging.info("APP: Evaluation process started")
+    try:
+        result = bias_eval_methods.return_eval_kmeans(target1, target2)
+    except:
+        return jsonify(message="Internal Server Error"), 500
+    return result, 200
+
+
+@app.route('/REST/debiasing/full/gbdd', methods=['POST'])
+def debiasing_full_gbdd():
     logging.info("APP: Debiasing is called")
     # Get content from JSON
     content = request.get_json()
@@ -128,8 +232,8 @@ def debiasing():
     return response
 
 
-@app.route('/REST/debiasing_with_pca', methods=['POST'])
-def debias_visualize():
+@app.route('/REST/debiasing/pca/gbdd', methods=['POST'])
+def debiasing_pca_gbdd():
     logging.info("APP: Debiasing is called")
     content = request.get_json()
     embedding_space = content['EmbeddingSpace']
@@ -166,7 +270,17 @@ def debias_visualize():
     return response
 
 
-@app.route('/REST/own-embedding-space', methods=['POST'])
+@app.route('/REST/debiasing/full/bam', methods=['POST'])
+def debiasing_full_bam():
+    return 200
+
+
+@app.route('/REST/debiasing/pca/bam', methods=['POST'])
+def debiasing_pca_bam():
+    return 200
+
+
+@app.route('/REST/uploads/embedding-spaces', methods=['PUT'])
 def upload_embedding_space():
     logging.info("APP: Receiving file form upload")
     print('Receiving file form upload')
@@ -193,6 +307,16 @@ def upload_embedding_space():
         resp.status_code = 400
         print('Case 4')
         return resp
+
+
+@app.route('REST/uploads/json/format1', methods=['PUT'])
+def upload_json_format1():
+    return 200
+
+
+@app.route('REST/uploads/json/format2', methods=['PUT'])
+def upload_json_format2():
+    return 200
 
 
 def allowed_file(filename):
