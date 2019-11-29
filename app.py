@@ -15,7 +15,7 @@ import database_handler
 from debiasing import gbdd, bam, bam2
 
 '''Initialize vectors into test and argument sets'''
-
+'''
 
 t1= ["glovers", "gladiolus", "nance", "crowfoot"]
 t2= ["caterpillars", "gnats", "termites"]
@@ -36,7 +36,7 @@ print(len(dict2))
 print('START')
 print(bam2.bias_alignment_model2(dict1, dict2))
 
-
+'''
 
 
 ''' RestAPI '''
@@ -51,11 +51,11 @@ app.secret_key = "secret key"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
-# logging.basicConfig(filename="logfiles.log", level=logging.INFO)
-# print("logging configured")
+logging.basicConfig(filename="logfiles.log", level=logging.INFO)
+print("logging configured")
 
 # Example: http://127.0.0.1:5000/REST/retrieve_single_vector?embedding_space=fasttext&word=car
-@app.route('/REST/retrieve_single_vector/', methods=['GET'])
+@app.route('/REST/retrieve_single_vector', methods=['GET'])
 def retrieve_single_vector():
     logging.info("APP: Retrieve single vector is called")
     bar = request.args.to_dict()
@@ -82,55 +82,24 @@ def retrieve_multiple_vectors():
 @app.route('/REST/bias_evaluation', methods=['POST'])
 def bias_evaluations():
     logging.info("APP: Bias Evaluation is called")
-    # Get content from JSON
     content = request.get_json()
     methods = content['Method']
     logging.info("APP: Starting evaluation process")
-    target1, target2, arg1, arg2 = {}, {}, {}, {}
-    # Retrieve & check vectors from database
     target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db(content)
-    # if len(target1) or len(target2) == 0:
-    #     print("Wrong Loop")
-    #     return jsonify(message="Error inserted words can not be found. Please try with other words or a different embedding space.")
     target1, target2 = calculation.check_sizes(target1, target2)
     arg1, arg2 = calculation.check_sizes(arg1, arg2)
-    logging.info("APP: Retrieved Vectors from database")
+    if len(target1) == 0 or len(target2) == 0 or len(arg1) == 0 or len(arg2) == 0:
+        logging.info("APP: Stopped, no values found in database")
+        return jsonify(message="ERROR: No values found in database."), 400
     logging.info("APP: Final retrieved set sizes: T1=" + str(len(target1)) + " T2=" + str(len(target2)) + " A1=" + str(
     len(arg1)) + " A2=" + str(len(arg2)))
     logging.info("APP: Evaluation process started")
-    result = bias_eval_methods.return_bias_evaluation(methods, target1, target2, arg1, arg2)
+    try:
+        result = bias_eval_methods.return_bias_evaluation(methods, target1, target2, arg1, arg2)
+    except:
+        return "500 ERROR vector dimensions are unequal"
     return result
 
-
-@app.route('/REST/bias_evaluation2', methods=['POST'])
-def bias_evaluations2():
-    logging.info("APP: Bias Evaluation2 is called")
-    # Get content from JSON
-    bar = request.args.to_dict()
-    space = bar['space']
-    search = bar['word']
-    content = request.get_json()
-    logging.info("APP: Starting evaluation process")
-    target1, target2, arg1, arg2 = {}, {}, {}, {}
-
-    # TODO: Rebuild retrieve vecs from db
-    # Retrieve & check vectors from database
-    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db(content)
-    if len(target1) or len(target2) == 0:
-        return jsonify(message="Error inserted words can not be found. Please try with other words or a different embedding space.")
-    try:
-        target1, target2 = calculation.check_sizes(target1, target2)
-        arg1, arg2 = calculation.check_sizes(arg1, arg2)
-        logging.info("APP: Retrieved Vectors from database")
-        logging.info("APP: Final retrieved set sizes: T1=" + str(len(target1)) + " T2=" + str(len(target2)) + " A1=" + str(
-            len(arg1)) + " A2=" + str(len(arg2)))
-
-        logging.info("APP: Evaluation process started")
-        result = bias_eval_methods.return_bias_evaluation(methods, target1, target2, arg1, arg2)
-        return result
-    except:
-        return jsonify(
-            message="Error: Calculation failed please try again.")
 
 @app.route('/REST/debiasing', methods=['POST'])
 def debiasing():
@@ -231,5 +200,5 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-# if __name__ == '__main__':
-#     app.run()
+if __name__ == '__main__':
+    app.run()
