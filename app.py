@@ -54,20 +54,29 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 logging.basicConfig(filename="logfiles.log", level=logging.INFO)
 print("logging configured")
 
+
+@app.route('/hello')
+def hello():
+    return 'Hello, World'
+
+
 # Example: http://127.0.0.1:5000/REST/retrieve_single_vector?embedding_space=fasttext&word=car
-@app.route('/REST/retrieve_single_vector', methods=['GET'])
+@app.route('/REST/vectors/single', methods=['GET'])
 def retrieve_single_vector():
+    print("In def")
     logging.info("APP: Retrieve single vector is called")
     bar = request.args.to_dict()
     space = bar['space']
     search = bar['word']
+    print(space)
+    print(search)
     vector_dict = database_handler.get_vector_from_database(search, space)
     response = jsonify(word=[word for word in vector_dict], vector=[list(vector_dict[vec]) for vec in vector_dict])
     logging.info("APP: Retrieved vector")
     return response
 
 
-@app.route('/REST/retrieve_multiple_vectors', methods=['POST'])
+@app.route('/REST/vectors/multiple', methods=['POST'])
 def retrieve_multiple_vectors():
     logging.info("APP: Retrieve multiple vectors is called")
     bar = request.args.to_dict()
@@ -78,6 +87,16 @@ def retrieve_multiple_vectors():
     response = jsonify(word=[word for word in vector_dict], vector=[list(vector_dict[vec]) for vec in vector_dict])
     logging.info("APP: Retrieved vectors")
     return response
+
+
+@app.route('/REST/augmentations/single')
+def retrieve_single_augmentation():
+    return 200, 'OK'
+
+
+@app.route('/REST/augmentations/first10k')
+def retrieve_multiple_augmentations_10k():
+    return 200, 'OK'
 
 
 @app.route('/REST/bias_evaluation', methods=['POST'])
@@ -309,12 +328,12 @@ def upload_embedding_space():
         return resp
 
 
-@app.route('REST/uploads/json/format1', methods=['PUT'])
+@app.route('/REST/uploads/json/format1', methods=['PUT'])
 def upload_json_format1():
     return 200
 
 
-@app.route('REST/uploads/json/format2', methods=['PUT'])
+@app.route('/REST/uploads/json/format2', methods=['PUT'])
 def upload_json_format2():
     return 200
 
@@ -324,5 +343,5 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-if __name__ == '__main__':
-    app.run()
+#if __name__ == '__main__':
+#    app.run()
