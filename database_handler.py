@@ -8,15 +8,15 @@ def get_vector_from_database(word, database):
     command = """
     SELECT vector FROM fasttext WHERE word = '{}'
     """.format(word)
-    print(command)
+    # print(command)
     try:
-        conn = psycopg2.connect(dbname='fasttext2', user='postgres', host='', password='audi')
+        conn = psycopg2.connect(dbname=database, user='postgres', host='', password='audi')
         cur = conn.cursor()
         cur.execute(command)
         logging.info("DB: Connected successfully to " + database)
         records = cur.fetchall()
         data = str(records)[3:-4]
-        print(data)
+        # print(data)
         vector_dict[word] = map(float, data.split('  '))
         logging.info("DB: Found vector for word: " + word)
     except (Exception, psycopg2.DatabaseError) as error:

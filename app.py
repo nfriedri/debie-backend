@@ -63,13 +63,10 @@ def hello():
 # Example: http://127.0.0.1:5000/REST/retrieve_single_vector?embedding_space=fasttext&word=car
 @app.route('/REST/vectors/single', methods=['GET'])
 def retrieve_single_vector():
-    print("In def")
     logging.info("APP: Retrieve single vector is called")
     bar = request.args.to_dict()
     space = bar['space']
     search = bar['word']
-    print(space)
-    print(search)
     vector_dict = database_handler.get_vector_from_database(search, space)
     response = jsonify(word=[word for word in vector_dict], vector=[list(vector_dict[vec]) for vec in vector_dict])
     logging.info("APP: Retrieved vector")
@@ -121,7 +118,7 @@ def bias_evaluations():
     return result
 
 
-@app.route('/REST/bias_evaluation/all', methods=['POST'])
+@app.route('/REST/bias-evaluation/all', methods=['POST'])
 def bias_evaluations_all():
     logging.info("APP: Bias Evaluation ALL Methods is called")
     content = request.get_json()
@@ -142,7 +139,7 @@ def bias_evaluations_all():
     return result, 200
 
 
-@app.route('/REST/bias_evaluation/ect', methods=['POST'])
+@app.route('/REST/bias-evaluation/ect', methods=['POST'])
 def bias_evaluations_ect():
     logging.info("APP: Bias Evaluation ECT Method is called")
     content = request.get_json()
@@ -163,7 +160,7 @@ def bias_evaluations_ect():
     return result, 200
 
 
-@app.route('/REST/bias_evaluation/bat', methods=['POST'])
+@app.route('/REST/bias-evaluation/bat', methods=['POST'])
 def bias_evaluations_bat():
     logging.info("APP: Bias Evaluation BAT Method is called")
     content = request.get_json()
@@ -184,7 +181,7 @@ def bias_evaluations_bat():
     return result, 200
 
 
-@app.route('/REST/bias_evaluation/weat', methods=['POST'])
+@app.route('/REST/bias-evaluation/weat', methods=['POST'])
 def bias_evaluations_weat():
     logging.info("APP: Bias Evaluation WEAT Method is called")
     content = request.get_json()
@@ -205,7 +202,7 @@ def bias_evaluations_weat():
     return result, 200
 
 
-@app.route('/REST/bias_evaluation/kmeans', methods=['POST'])
+@app.route('/REST/bias-evaluation/kmeans', methods=['POST'])
 def bias_evaluations_kmeans():
     logging.info("APP: Bias Evaluation KMEANS Method is called")
     content = request.get_json()
@@ -343,5 +340,5 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-#if __name__ == '__main__':
-#    app.run()
+if __name__ == '__main__':
+    app.run()
