@@ -42,15 +42,16 @@ def retrieve_vector_from_db(content):
     return vector
 
 
-def retrieve_vectors_from_db(content):
+def retrieve_vectors_from_db(content, database=None):
     logging.info("DB: Retrieval of multiple vectors started")
     logging.info("DB: Searching for following vectors:")
     logging.info("DB:" + str(content))
-    database = content['EmbeddingSpace']
     raw_t1 = content['T1'].split(' ')
     raw_t2 = content['T2'].split(' ')
     raw_a1 = content['A1'].split(' ')
     raw_a2 = content['A2'].split(' ')
+    if database is None:
+        database = 'fasttext'
     if database == "uploadSpace":
         # TODO Somehow retrieve filename from last upload
         file = "uploads\\files\\" + database

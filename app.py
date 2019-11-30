@@ -55,11 +55,6 @@ logging.basicConfig(filename="logfiles.log", level=logging.INFO)
 print("logging configured")
 
 
-@app.route('/hello')
-def hello():
-    return 'Hello, World'
-
-
 # Example: http://127.0.0.1:5000/REST/retrieve_single_vector?embedding_space=fasttext&word=car
 @app.route('/REST/vectors/single', methods=['GET'])
 def retrieve_single_vector():
@@ -96,7 +91,7 @@ def retrieve_multiple_augmentations_10k():
     return 200, 'OK'
 
 
-@app.route('/REST/bias_evaluation', methods=['POST'])
+@app.route('/REST/bias-evaluation', methods=['POST'])
 def bias_evaluations():
     logging.info("APP: Bias Evaluation is called")
     content = request.get_json()
@@ -122,8 +117,9 @@ def bias_evaluations():
 def bias_evaluations_all():
     logging.info("APP: Bias Evaluation ALL Methods is called")
     content = request.get_json()
+    database = request.args.to_dict()['space']
     logging.info("APP: Starting evaluation process")
-    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db(content)
+    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db(content, database)
     target1, target2 = calculation.check_sizes(target1, target2)
     arg1, arg2 = calculation.check_sizes(arg1, arg2)
     if len(target1) == 0 or len(target2) == 0 or len(arg1) == 0 or len(arg2) == 0:
