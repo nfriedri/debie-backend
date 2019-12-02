@@ -23,7 +23,7 @@ a1= ["donation", "liberty", "tranquility", "fortunate", "mild"]
 a2= ["misuse", "collision", "stench", "destitution", "demise"]
 
 
-word_list1 = ["car", "plane", "bmw", "mercedes", "audi"]
+
 word_list2 = ["football", "basketball", "adidas", "nike", "puma"]
 word_list3 = ["aster", "clover", "hyacinth", "marigold", "poppy", "azalea", "crocus", "iris", "orchid", "rose",
               "daffodil", "lilac", "pansy", "tulip", "buttercup", "daisy", "lily", "peony", "violet",
@@ -35,7 +35,6 @@ print(len(dict1))
 print(len(dict2))
 print('START')
 print(bam2.bias_alignment_model2(dict1, dict2))
-
 '''
 
 
@@ -62,10 +61,13 @@ def retrieve_single_vector():
     bar = request.args.to_dict()
     space = bar['space']
     search = bar['word']
-    vector_dict = database_handler.get_vector_from_database(search, space)
-    response = jsonify(word=[word for word in vector_dict], vector=[list(vector_dict[vec]) for vec in vector_dict])
-    logging.info("APP: Retrieved vector")
-    return response
+    try:
+        vector_dict = database_handler.get_vector_from_database(search, space)
+        response = jsonify(word=[word for word in vector_dict], vector=[list(vector_dict[vec]) for vec in vector_dict])
+        logging.info("APP: Retrieved vector")
+    except:
+        return jsonify(message="NOT FOUND"), 404
+    return response, 200
 
 
 @app.route('/REST/vectors/multiple', methods=['POST'])
@@ -75,42 +77,45 @@ def retrieve_multiple_vectors():
     space = bar['space']
     content = request.get_json()
     word_list = content['data'].split(' ')
-    vector_dict = database_handler.get_multiple_vectors_from_db(word_list, space)
-    response = jsonify(word=[word for word in vector_dict], vector=[list(vector_dict[vec]) for vec in vector_dict])
-    logging.info("APP: Retrieved vectors")
-    return response
+    try:
+        vector_dict = database_handler.get_multiple_vectors_from_db(word_list, space)
+        response = jsonify(word=[word for word in vector_dict], vector=[list(vector_dict[vec]) for vec in vector_dict])
+        logging.info("APP: Retrieved vectors")
+    except:
+        return jsonify(message="NOT FOUND"), 404
+    return response, 200
 
 
 @app.route('/REST/augmentations/single')
 def retrieve_single_augmentation():
-    return 200, 'OK'
+    logging.info("APP: Retrieve single augmentation is called")
+    bar = request.args.to_dict()
+    space = bar['space']
+    search = bar['word']
+    try:
+        vector_dict = database_handler.get_augmentation_from_db(search, space)
+        response = jsonify(word=[word for word in vector_dict], vector=[list(vector_dict[vec]) for vec in vector_dict])
+        logging.info("APP: Retrieved vector")
+    except:
+        return jsonify(message="NOT FOUND"), 404
+    return response, 200
 
 
 @app.route('/REST/augmentations/first10k')
 def retrieve_multiple_augmentations_10k():
-    return 200, 'OK'
-
-
-@app.route('/REST/bias-evaluation', methods=['POST'])
-def bias_evaluations():
-    logging.info("APP: Bias Evaluation is called")
+    logging.info("APP: Retrieve single augmentation is called")
+    bar = request.args.to_dict()
+    space = bar['space']
+    search = bar['word']
     content = request.get_json()
-    methods = content['Method']
-    logging.info("APP: Starting evaluation process")
-    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db(content)
-    target1, target2 = calculation.check_sizes(target1, target2)
-    arg1, arg2 = calculation.check_sizes(arg1, arg2)
-    if len(target1) == 0 or len(target2) == 0 or len(arg1) == 0 or len(arg2) == 0:
-        logging.info("APP: Stopped, no values found in database")
-        return jsonify(message="ERROR: No values found in database."), 400
-    logging.info("APP: Final retrieved set sizes: T1=" + str(len(target1)) + " T2=" + str(len(target2)) + " A1=" + str(
-    len(arg1)) + " A2=" + str(len(arg2)))
-    logging.info("APP: Evaluation process started")
+    word_list = content['data'].split(' ')
     try:
-        result = bias_eval_methods.return_bias_evaluation(methods, target1, target2, arg1, arg2)
+        vector_dict = database_handler.get_multiple_augmentation_from_db(word_list, space)
+        response = jsonify(word=[word for word in vector_dict], vector=[list(vector_dict[vec]) for vec in vector_dict])
+        logging.info("APP: Retrieved vector")
     except:
-        return "500 ERROR vector dimensions are unequal"
-    return result
+        return jsonify(message="NOT FOUND"), 404
+    return response, 200
 
 
 @app.route('/REST/bias-evaluation/all', methods=['POST'])
@@ -119,7 +124,7 @@ def bias_evaluations_all():
     content = request.get_json()
     database = request.args.to_dict()['space']
     logging.info("APP: Starting evaluation process")
-    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db(content, database)
+    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db_evaluation(content, database)
     target1, target2 = calculation.check_sizes(target1, target2)
     arg1, arg2 = calculation.check_sizes(arg1, arg2)
     if len(target1) == 0 or len(target2) == 0 or len(arg1) == 0 or len(arg2) == 0:
@@ -139,8 +144,9 @@ def bias_evaluations_all():
 def bias_evaluations_ect():
     logging.info("APP: Bias Evaluation ECT Method is called")
     content = request.get_json()
+    database = request.args.to_dict()['space']
     logging.info("APP: Starting evaluation process")
-    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db(content)
+    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db_evaluation(content, database)
     target1, target2 = calculation.check_sizes(target1, target2)
     arg1, arg2 = calculation.check_sizes(arg1, arg2)
     if len(target1) == 0 or len(target2) == 0 or len(arg1) == 0 or len(arg2) == 0:
@@ -160,8 +166,9 @@ def bias_evaluations_ect():
 def bias_evaluations_bat():
     logging.info("APP: Bias Evaluation BAT Method is called")
     content = request.get_json()
+    database = request.args.to_dict()['space']
     logging.info("APP: Starting evaluation process")
-    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db(content)
+    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db_evaluation(content, database)
     target1, target2 = calculation.check_sizes(target1, target2)
     arg1, arg2 = calculation.check_sizes(arg1, arg2)
     if len(target1) == 0 or len(target2) == 0 or len(arg1) == 0 or len(arg2) == 0:
@@ -181,8 +188,9 @@ def bias_evaluations_bat():
 def bias_evaluations_weat():
     logging.info("APP: Bias Evaluation WEAT Method is called")
     content = request.get_json()
+    database = request.args.to_dict()['space']
     logging.info("APP: Starting evaluation process")
-    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db(content)
+    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db_evaluation(content, database)
     target1, target2 = calculation.check_sizes(target1, target2)
     arg1, arg2 = calculation.check_sizes(arg1, arg2)
     if len(target1) == 0 or len(target2) == 0 or len(arg1) == 0 or len(arg2) == 0:
@@ -202,8 +210,9 @@ def bias_evaluations_weat():
 def bias_evaluations_kmeans():
     logging.info("APP: Bias Evaluation KMEANS Method is called")
     content = request.get_json()
+    database = request.args.to_dict()['space']
     logging.info("APP: Starting evaluation process")
-    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db(content)
+    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db_evaluation(content, database)
     target1, target2 = calculation.check_sizes(target1, target2)
     if len(target1) == 0 or len(target2) == 0:
         logging.info("APP: Stopped, no values found in database")
@@ -222,21 +231,19 @@ def debiasing_full_gbdd():
     logging.info("APP: Debiasing is called")
     # Get content from JSON
     content = request.get_json()
-    embedding_space = content['EmbeddingSpace']
-    methods = content['Method']
-    logging.info("APP: Starting evaluation in " + str(embedding_space) + "embedding space with " + str(methods))
-
+    database = request.args.to_dict()['space']
+    augment_flag = request.args_to_dict()['augments']
+    logging.info("APP: Starting GBDD debiasing in " + database)
     # Retrieve & check Vectors from database
-    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db(content)
+    target1, target2, aug1, aug2 = JSONFormatter.retrieve_vectors_from_db_debias(content, database)
     target1, target2 = calculation.check_sizes(target1, target2)
-    arg1, arg2 = calculation.check_sizes(arg1, arg2)
+    aug1, aug2 = calculation.check_sizes(aug1, aug2)
     logging.info("APP: Retrieved Vectors from database")
     logging.info("APP: Final retrieved set sizes: T1=" + str(len(target1)) + " T2=" + str(len(target2)) + " A1=" + str(
-        len(arg1)) + " A2=" + str(len(arg2)))
-
+        len(aug1)) + " A2=" + str(len(aug2)))
     logging.info("APP: Debiasing process started")
     # Following lines will be moved to debias_methods.py soon:
-    result1, result2 = gbdd.generalized_bias_direction_debiasing(target1, target2)
+    result1, result2 = gbdd.generalized_bias_direction_debiasing(target1, target2, aug1, aug2)
     response = json.dumps(
         {"biased": JSONFormatter.dict_to_json(target1), "debiased": JSONFormatter.dict_to_json(result1)})
     # response = jsonify(GBDDVecs1=result1, GBDDVecs2=result2)
@@ -248,8 +255,7 @@ def debiasing_full_gbdd():
 def debiasing_pca_gbdd():
     logging.info("APP: Debiasing is called")
     content = request.get_json()
-    embedding_space = content['EmbeddingSpace']
-    methods = content['Method']
+
     logging.info("APP: Starting debiasing in " + str(embedding_space) + " embedding space with " + str(methods))
 
     # Retrieve & check vectors from database
@@ -336,5 +342,5 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-if __name__ == '__main__':
-    app.run()
+# if __name__ == '__main__':
+#    app.run()

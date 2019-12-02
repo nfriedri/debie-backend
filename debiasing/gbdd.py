@@ -3,25 +3,25 @@ import numpy
 import logging
 
 
-def generalized_bias_direction_debiasing(target_set1, target_set2):
+def generalized_bias_direction_debiasing(target_set1, target_set2, augments1, augments2):
     logging.info("GBDD: Debiasing started")
-    target1_copy, target2_copy = calculation.create_duplicates(target_set1, target_set2)
-    target1_copy2, target2_copy2 = calculation.create_duplicates(target_set1, target_set2)
-    target1, target2 = calculation.transform_multiple_dicts_to_lists(target1_copy2, target2_copy2)
+    target1_copy, target2_copy, augments1_copy, augments2_copy = calculation.create_duplicates(target_set1, target_set2,
+                                                                                               augments1, augments2)
+    aug1, aug2 = calculation.transform_multiple_dicts_to_lists(augments1, augments2)
     logging.info("GBDD: Vector dictionaries and lists prepared successfully")
-    gbdv = calculate_bias_direction_matrix(target1, target2)
+    gbdv = calculate_bias_direction_matrix(aug1, aug2)
     new_target1 = calculate_gbdd(gbdv, target1_copy)
     new_target2 = calculate_gbdd(gbdv, target2_copy)
     logging.info("GBDD: Debiasing finished successfully")
     return new_target1, new_target2
 
 
-def calculate_bias_direction_matrix(target_list1, target_list2):
+def calculate_bias_direction_matrix(aug_list1, aug_list2):
     logging.info("GBDD: Calculating bias direction matrix")
     matrix = []
-    for i in range(len(target_list1)):
-        for j in range(len(target_list2)):
-            array = numpy.array(target_list1[i]) - numpy.array((target_list2[j]))
+    for i in range(len(aug_list1)):
+        for j in range(len(aug_list2)):
+            array = numpy.array(aug_list1[i]) - numpy.array((aug_list2[j]))
             matrix.append(array)
     u, s, vh = numpy.linalg.svd(matrix)
     vh_transposed = numpy.transpose(vh)
