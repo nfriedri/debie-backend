@@ -17,8 +17,8 @@ def biased_analogy_test(test_set1, test_set2, argument_set1, argument_set2):
 
     # Rank vectors after euclidean distance to query vectors
     rank_result = vector_ranking(query_vectors1, query_vectors2, numpy_arg1, numpy_arg2)
-    logging.log("BAT: Finished calculation")
-    logging.log("BAT: Results: " + str(rank_result))
+    logging.info("BAT: Finished calculation")
+    logging.info("BAT: Results: " + str(rank_result))
     return rank_result
 
 
@@ -45,7 +45,7 @@ def query_calculation(numpy_test1, numpy_test2, numpy_arg1, numpy_arg2):
 
 # Rank vectors after euclidean distance to query vectors
 def vector_ranking(query_vectors1, query_vectors2, arg_vectors1, arg_vectors2):
-    logging.log("BAT: Started vector ranking")
+    logging.info("BAT: Started vector ranking")
     biased = 0
     others = 0
     print(len(query_vectors1) * len(arg_vectors2))
@@ -63,8 +63,8 @@ def vector_ranking(query_vectors1, query_vectors2, arg_vectors1, arg_vectors2):
             if calculation.euclidean_distance(query_vectors2[i], arg_vectors1[j]) > calculation.euclidean_distance(
                     query_vectors2[i], arg_vectors2[j]):
                 biased += 1
-                print('BIASED')
+                # print('BIASED')
             else:
                 others += 1
-    logging.log("BAT: Finished vector ranking")
+    logging.info("BAT: Finished vector ranking")
     return biased / others

@@ -12,17 +12,20 @@ import JSONFormatter
 import bias_eval_methods
 import calculation
 import database_handler
+from bias_evaluation import bat
 from debiasing import gbdd, bam, bam2
 
 '''Initialize vectors into test and argument sets'''
 '''
 
-t1= ["glovers", "gladiolus", "nance", "crowfoot"]
-t2= ["caterpillars", "gnats", "termites"]
-a1= ["donation", "liberty", "tranquility", "fortunate", "mild"]
-a2= ["misuse", "collision", "stench", "destitution", "demise"]
-
-
+t1 = ["aster", "gladiolus", "nance", "crowfoot"]
+t2 = ["caterpillars", "gnats", "termites", "butterflies"]
+a1 = ["donation", "liberty", "tranquility", "fortunate", "mild"]
+a2 = ["misuse", "collision", "stench", "destitution", "demise"]
+t1 = database_handler.get_multiple_vectors_from_db(t1, 'fasttext')
+t2 = database_handler.get_multiple_vectors_from_db(t2, 'fasttext')
+a1 = database_handler.get_multiple_vectors_from_db(a1, 'fasttext')
+a2 = database_handler.get_multiple_vectors_from_db(a2, 'fasttext')
 
 word_list2 = ["football", "basketball", "adidas", "nike", "puma"]
 word_list3 = ["aster", "clover", "hyacinth", "marigold", "poppy", "azalea", "crocus", "iris", "orchid", "rose",
