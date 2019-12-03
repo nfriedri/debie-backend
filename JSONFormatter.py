@@ -122,6 +122,32 @@ def retrieve_vectors_from_db_debias(content, database, augment_flag=True):
     return test_vectors1, test_vectors2, aug_target1, aug_target2
 
 
+def retrieve_vectors_from_json(content):
+    logging.info("DB: Loading Vectors from JSON Input.")
+    target_dict1 = {}
+    target_dict2 = {}
+    attribute_dict1 = {}
+    attribute_dict2 = {}
+    for pair in content['T1']:
+        word = pair['word']
+        vec = pair['vec']
+        target_dict1[word] = vec.split(' ')
+    for pair in content['T2']:
+        word = pair['word']
+        vec = pair['vec']
+        target_dict2[word] = vec.split(' ')
+    for pair in content['A1']:
+        word = pair['word']
+        vec = pair['vec']
+        attribute_dict1[word] = vec.split(' ')
+    for pair in content['A2']:
+        word = pair['word']
+        vec = pair['vec']
+        attribute_dict2[word] = vec.split(' ')
+    logging.info("DB: Loaded JSON Input successfully.")
+    return target_dict1, target_dict2, attribute_dict1, attribute_dict2
+
+
 def dict_to_json(vector_dict):
     vector_dict_copy = calculation.create_duplicates(vector_dict)
     string_dict = {}

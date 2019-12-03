@@ -53,8 +53,20 @@ app.secret_key = "secret key"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
-logging.basicConfig(filename="logfiles.log", level=logging.INFO)
-print("logging configured")
+# logging.basicConfig(filename="logfiles.log", level=logging.INFO)
+# print("logging configured")
+
+
+@app.route('/REST/uploads/validJSON', methods=['POST'])
+def valid_JSON():
+    print('Valid JSON called')
+    content = request.get_json()
+    t1, t2, a1, a2 = JSONFormatter.retrieve_vectors_from_json(content)
+    print(t1)
+    print(t2)
+    print(a1)
+    print(a2)
+    return 'VALID', 200
 
 
 # Example: http://127.0.0.1:5000/REST/retrieve_single_vector?embedding_space=fasttext&word=car
@@ -89,7 +101,7 @@ def retrieve_multiple_vectors():
     return response, 200
 
 
-@app.route('/REST/augmentations/single')
+@app.route('/REST/augmentations/single', methods=['GET'])
 def retrieve_single_augmentation():
     logging.info("APP: Retrieve single augmentation is called")
     bar = request.args.to_dict()
@@ -104,12 +116,11 @@ def retrieve_single_augmentation():
     return response, 200
 
 
-@app.route('/REST/augmentations/first10k')
+@app.route('/REST/augmentations/first10k', methods=['POST'])
 def retrieve_multiple_augmentations_10k():
     logging.info("APP: Retrieve single augmentation is called")
     bar = request.args.to_dict()
     space = bar['space']
-    search = bar['word']
     content = request.get_json()
     word_list = content['data'].split(' ')
     try:
@@ -126,8 +137,12 @@ def bias_evaluations_all():
     logging.info("APP: Bias Evaluation ALL Methods is called")
     content = request.get_json()
     database = request.args.to_dict()['space']
+    vector_flag = request.args.to_dict()['vectors']
     logging.info("APP: Starting evaluation process")
-    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db_evaluation(content, database)
+    if vector_flag == 'false':
+        target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db_evaluation(content, database)
+    else:
+        target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_json(content)
     target1, target2 = calculation.check_sizes(target1, target2)
     arg1, arg2 = calculation.check_sizes(arg1, arg2)
     if len(target1) == 0 or len(target2) == 0 or len(arg1) == 0 or len(arg2) == 0:
@@ -139,6 +154,7 @@ def bias_evaluations_all():
     try:
         result = bias_eval_methods.return_eval_all(target1, target2, arg1, arg2)
     except:
+        pass
         return jsonify(message="Internal Server Error"), 500
     return result, 200
 
@@ -149,7 +165,11 @@ def bias_evaluations_ect():
     content = request.get_json()
     database = request.args.to_dict()['space']
     logging.info("APP: Starting evaluation process")
-    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db_evaluation(content, database)
+    vector_flag = request.args.to_dict()['vectors']
+    if vector_flag == 'false':
+        target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db_evaluation(content, database)
+    else:
+        target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_json(content)
     target1, target2 = calculation.check_sizes(target1, target2)
     arg1, arg2 = calculation.check_sizes(arg1, arg2)
     if len(target1) == 0 or len(target2) == 0 or len(arg1) == 0 or len(arg2) == 0:
@@ -171,7 +191,11 @@ def bias_evaluations_bat():
     content = request.get_json()
     database = request.args.to_dict()['space']
     logging.info("APP: Starting evaluation process")
-    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db_evaluation(content, database)
+    vector_flag = request.args.to_dict()['vectors']
+    if vector_flag == 'false':
+        target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db_evaluation(content, database)
+    else:
+        target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_json(content)
     target1, target2 = calculation.check_sizes(target1, target2)
     arg1, arg2 = calculation.check_sizes(arg1, arg2)
     if len(target1) == 0 or len(target2) == 0 or len(arg1) == 0 or len(arg2) == 0:
@@ -193,7 +217,11 @@ def bias_evaluations_weat():
     content = request.get_json()
     database = request.args.to_dict()['space']
     logging.info("APP: Starting evaluation process")
-    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db_evaluation(content, database)
+    vector_flag = request.args.to_dict()['vectors']
+    if vector_flag == 'false':
+        target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db_evaluation(content, database)
+    else:
+        target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_json(content)
     target1, target2 = calculation.check_sizes(target1, target2)
     arg1, arg2 = calculation.check_sizes(arg1, arg2)
     if len(target1) == 0 or len(target2) == 0 or len(arg1) == 0 or len(arg2) == 0:
@@ -215,7 +243,11 @@ def bias_evaluations_kmeans():
     content = request.get_json()
     database = request.args.to_dict()['space']
     logging.info("APP: Starting evaluation process")
-    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db_evaluation(content, database)
+    vector_flag = request.args.to_dict()['vectors']
+    if vector_flag == 'false':
+        target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db_evaluation(content, database)
+    else:
+        target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_json(content)
     target1, target2 = calculation.check_sizes(target1, target2)
     if len(target1) == 0 or len(target2) == 0:
         logging.info("APP: Stopped, no values found in database")
@@ -345,5 +377,5 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-# if __name__ == '__main__':
-#    app.run()
+if __name__ == '__main__':
+    app.run()

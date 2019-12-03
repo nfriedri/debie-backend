@@ -69,6 +69,7 @@ def check_set_sizes(vector_set1, vector_set2):
 
 # Removes random elements from the longer list until their equal
 def make_set_size_equal(vector_set1, vector_set2):
+    logging.info('CM: Making set sizes equal:')
     while len(vector_set1) != len(vector_set2):
         if len(vector_set1) > len(vector_set2):
             key = random.choice(list(vector_set1.keys()))

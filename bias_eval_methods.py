@@ -25,24 +25,21 @@ def return_eval_all(test_vectors1, test_vectors2, arg_vectors1, arg_vectors2):
     try:
         ect_value1, p_value1 = ect.embedding_coherence_test(test_vectors1, test_vectors2, arg_vectors1)
         ect_value2, p_value2 = ect.embedding_coherence_test(test_vectors1, test_vectors2, arg_vectors2)
-        bat_result = bat.biased_analogy_test(test_vectors1, test_vectors2, arg_vectors1, arg_vectors2)
-        # bat_result = 'Currently not available'
+        # bat_result = bat.biased_analogy_test(test_vectors1, test_vectors2, arg_vectors1, arg_vectors2)
+        bat_result = 'Currently not available'
         weat_effect_size, weat_p_value = weat.word_embedding_association_test(test_vectors1, test_vectors2, arg_vectors1,
                                                                               arg_vectors2)
         kmeans = k_means.k_means_clustering(test_vectors1, test_vectors2)
         logging.info("APP-BE: Evaluations finished successfully")
-    except RuntimeWarning as rw:
-        print(rw)
-
-    if ect_value1 and ect_value2 and weat_effect_size and kmeans is None:
-        response = jsonify(message="400 Error: Calculation failed please try again.")
-        return response
-    else:
         response = jsonify(ect_value1=ect_value1, p_value1=p_value1, p_value2=p_value2, ect_value2=ect_value2,
-                       bat_value=bat_result, weat_effect_size=weat_effect_size, weat_pvalue=weat_p_value,
+                       bat_result=bat_result, weat_effect_size=weat_effect_size, weat_pvalue=weat_p_value,
                        k_means=kmeans)
         logging.info("APP-BE: Results: " + str(response))
         return response
+    except RuntimeWarning as rw:
+        print(rw)
+
+    return jsonify(message="Internal Calculation Error")
 
 
 def return_eval_ect(test_vectors1, test_vectors2, arg_vectors1, arg_vectors2):
