@@ -37,8 +37,11 @@ def query_calculation(numpy_test1, numpy_test2, numpy_arg1, numpy_arg2):
                     query_vec1.append(query1)
                     query_vec2.append(query2)
                     integer += 1
-                    if i == 1000:
-                        print(integer)
+                    if integer % 100 == 0:
+                        # print(integer)
+                        print("Query_vec     " + str(len(query_vec1)))
+
+
     logging.info("BAT: Finished query calculation successfully")
     return query_vec1, query_vec2
 
@@ -55,7 +58,7 @@ def vector_ranking(query_vectors1, query_vectors2, arg_vectors1, arg_vectors2):
                     query_vectors1[i], arg_vectors1[j]):
                 biased += 1
                 # if biased % 1000 == 0:
-                   # print(biased)
+                # print(biased)
             else:
                 others += 1
     for i in range(len(query_vectors2)):

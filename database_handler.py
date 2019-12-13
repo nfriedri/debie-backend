@@ -1,9 +1,12 @@
 import psycopg2
 import logging
 import augmentation
+import datetime
 
 
 def get_vector_from_database(word, database):
+    # t1 = datetime.datetime.now()
+    # print(t1)
     conn = None
     vector_dict = {}
     command = """
@@ -25,12 +28,15 @@ def get_vector_from_database(word, database):
     finally:
         if conn is not None:
             conn.close()
+    # t2 = datetime.datetime.now()
+    # print(t2)
+    # print(t2-t1)
     return vector_dict
 
 
 def get_multiple_vectors_from_db(word_list, database):
     conn = None
-    integer = 0
+    # integer = 0
     vector_dict = {}
     tablename = database
 
@@ -39,10 +45,11 @@ def get_multiple_vectors_from_db(word_list, database):
         cur = conn.cursor()
         logging.info("DB: Connected successfully to " + database)
         for word in word_list:
+            command = """
+                               SELECT vector FROM {} WHERE word = '{}'
+                               """.format(tablename, word)
             try:
-                command = """
-                   SELECT vector FROM {} WHERE word = '{}'
-                   """.format(tablename, word)
+
                 cur.execute(command)
                 # print(command)
                 records = cur.fetchall()
@@ -56,6 +63,7 @@ def get_multiple_vectors_from_db(word_list, database):
                 logging.info("DB: Found vector for " + word)
             except:
                 logging.info("DB: No vector found for " + word)
+                print(command)
                 pass
     except (Exception, psycopg2.DatabaseError) as error:
         logging.error("DB: Database error", error)

@@ -3,10 +3,10 @@ import calculation
 import logging
 
 
-def embedding_coherence_test(test_set1, test_set2, arg_set):
+def embedding_coherence_test(test_set1, test_set2, attribute_set):
     logging.info("ECT: Calculation started")
     # Create duplicates
-    test1, test2, argument = calculation.create_duplicates(test_set1, test_set2, arg_set)
+    test1, test2, argument = calculation.create_duplicates(test_set1, test_set2, attribute_set)
     # Transform vector sets in lists
     test_list1 = calculation.transform_dict_to_list(test1)
     test_list2 = calculation.transform_dict_to_list(test2)

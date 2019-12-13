@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import sys
+import traceback
 
 from flask import Flask, request, flash, redirect, url_for
 from flask import jsonify
@@ -14,31 +15,48 @@ import calculation
 import database_handler
 from bias_evaluation import bat
 from debiasing import gbdd, bam, bam2
+from bias_evaluation import bat2, weat, ect, k_means
 
 '''Initialize vectors into test and argument sets'''
-'''
+# '''
 
-t1 = ["aster", "gladiolus", "nance", "crowfoot"]
-t2 = ["caterpillars", "gnats", "termites", "butterflies"]
-a1 = ["donation", "liberty", "tranquility", "fortunate", "mild"]
-a2 = ["misuse", "collision", "stench", "destitution", "demise"]
+# t1 = ["aster", "gladiolus", "nance", "crowfoot"]
+# t2 = ["caterpillars", "gnats", "termites", "butterflies"]
+# a1 = ["donation", "liberty", "tranquility", "fortunate"]
+# a2 = ["misuse", "collision", "stench", "destitution", "demise"]
+
+t1 = ["science", "technology", "physics", "chemistry", "einstein", "nasa", "experiment", "astronomy"]
+t2 = ["poetry", "art", "shakespeare", "dance", "literature", "novel", "symphony", "drama"]
+a1 = ["brother", "father", "uncle", "grandfather", "son", "he", "his", "him"]
+a2 = ["sister", "mother", "aunt", "grandmother", "daughter", "she", "hers", "her"]
+attributes = ["brother", "father", "uncle", "grandfather", "son", "he", "his", "him", "sister", "mother", "aunt", "grandmother", "daughter", "she", "hers", "her"]
+
 t1 = database_handler.get_multiple_vectors_from_db(t1, 'fasttext')
 t2 = database_handler.get_multiple_vectors_from_db(t2, 'fasttext')
 a1 = database_handler.get_multiple_vectors_from_db(a1, 'fasttext')
 a2 = database_handler.get_multiple_vectors_from_db(a2, 'fasttext')
+attributes = database_handler.get_multiple_vectors_from_db(attributes, "fasttext")
 
 word_list2 = ["football", "basketball", "adidas", "nike", "puma"]
 word_list3 = ["aster", "clover", "hyacinth", "marigold", "poppy", "azalea", "crocus", "iris", "orchid", "rose",
               "daffodil", "lilac", "pansy", "tulip", "buttercup", "daisy", "lily", "peony", "violet",
               "carnation", "Gladiola", "magnolia", "petunia"]
 
-dict1 = database_handler.get_multiple_vectors_from_db(t1, 'fasttext')
-dict2 = database_handler.get_multiple_vectors_from_db(t2, 'fasttext')
-print(len(dict1))
-print(len(dict2))
-print('START')
-print(bam2.bias_alignment_model2(dict1, dict2))
-'''
+
+# print(kmeans2.k_means_clustering(t1, t2))
+# print(k_means.k_means_clustering(t1, t2))
+# print(ect2.embedding_coherence_test(t1, t2, attributes))
+# print(bat2.bias_analogy_test(t1, t2, a1, a2))
+# print(bias_eval_methods.return_eval_ect(t1, t2, a1, a2))
+# print(ect.embedding_coherence_test(t1, t2, attributes))
+#print(weat.word_embedding_association_test(t1, t2, a1, a2))
+# '''
+
+
+
+
+
+
 
 
 ''' RestAPI '''
@@ -153,7 +171,8 @@ def bias_evaluations_all():
     logging.info("APP: Evaluation process started")
     try:
         result = bias_eval_methods.return_eval_all(target1, target2, arg1, arg2)
-    except:
+    except Exception as e:
+        print(e)
         pass
         return jsonify(message="Internal Server Error"), 500
     return result, 200
@@ -206,7 +225,9 @@ def bias_evaluations_bat():
     logging.info("APP: Evaluation process started")
     try:
         result = bias_eval_methods.return_eval_bat(target1, target2, arg1, arg2)
-    except:
+    except Exception as e:
+        print(e)
+        traceback.print_exc()
         return jsonify(message="Internal Server Error"), 500
     return result, 200
 
@@ -266,8 +287,9 @@ def debiasing_full_gbdd():
     logging.info("APP: Debiasing is called")
     # Get content from JSON
     content = request.get_json()
-    database = request.args.to_dict()['space']
-    augment_flag = request.args_to_dict()['augments']
+    arguments = request.args.to_dict()
+    database = arguments['space']
+    augment_flag = arguments['augments']
     logging.info("APP: Starting GBDD debiasing in " + database)
     # Retrieve & check Vectors from database
     target1, target2, aug1, aug2 = JSONFormatter.retrieve_vectors_from_db_debias(content, database)
@@ -281,7 +303,6 @@ def debiasing_full_gbdd():
     result1, result2 = gbdd.generalized_bias_direction_debiasing(target1, target2, aug1, aug2)
     response = json.dumps(
         {"biased": JSONFormatter.dict_to_json(target1), "debiased": JSONFormatter.dict_to_json(result1)})
-    # response = jsonify(GBDDVecs1=result1, GBDDVecs2=result2)
     logging.info("APP: Debiasing process finished")
     return response
 
@@ -290,11 +311,11 @@ def debiasing_full_gbdd():
 def debiasing_pca_gbdd():
     logging.info("APP: Debiasing is called")
     content = request.get_json()
-
-    logging.info("APP: Starting debiasing in " + str(embedding_space) + " embedding space with " + str(methods))
+    database = request.args.to_dict()['space']
+    logging.info("APP: Starting debiasing in " + str(database) + " embedding space with gbdd")
 
     # Retrieve & check vectors from database
-    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db(content)
+    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db_debias(content, database)
     target1, target2 = calculation.check_sizes(target1, target2)
     arg1, arg2 = calculation.check_sizes(arg1, arg2)
     logging.info("APP: Retrieved Vectors from database")
@@ -312,7 +333,7 @@ def debiasing_pca_gbdd():
     debiased_pca = calculation.principal_composant_analysis(debiased1, debiased2)
 
     response = json.dumps(
-        {"EmbeddingSpace": embedding_space, "Method": methods,
+        {"EmbeddingSpace": database, "Method": "GBDD",
          "BiasedVectorsPCA": JSONFormatter.dict_to_json(biased_pca),
          "DebiasedVectorsPCA": JSONFormatter.dict_to_json(debiased_pca),
          "BiasedVecs:": JSONFormatter.dict_to_json(debiased),

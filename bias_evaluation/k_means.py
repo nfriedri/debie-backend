@@ -14,7 +14,7 @@ def k_means_clustering(target_set1, target_set2, accuracy=50):
     logging.info("KMeans: Vector dictionaries and lists prepared successfully")
 
     gold_standard1 = [1] * len(target1) + [0] * len(target2)
-    gold_standard2 = [2] * len(target1) + [0] * len(target2)
+    gold_standard2 = [0] * len(target1) + [1] * len(target2)
     cluster = list(zip(vector_list, gold_standard1, gold_standard2))
     scores = []
     logging.info("KMeans: Cluster & Gold Standards created")

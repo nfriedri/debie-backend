@@ -25,7 +25,7 @@ def transform_dict_to_list(dict1):
     vector_list = []
     for word in dict1:
         vector_list.append(list(dict1[word]))
-    return vector_list
+    return numpy.array(vector_list)
 
 
 def transform_multiple_dicts_to_lists(dict1, dict2, dict3=None, dict4=None):
@@ -98,7 +98,7 @@ def create_numpy_vector(vector_set):
     array = []
     for word in vector_set:
         vector = list(vector_set[word])
-        array.append(vector)
+        array.append(numpy.array(vector))
     numpy_array = numpy.array(array)
     return numpy_array
 

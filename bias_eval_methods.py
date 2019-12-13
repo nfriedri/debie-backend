@@ -1,5 +1,9 @@
+import numpy
 from flask import jsonify
-from bias_evaluation import weat, ect, bat, k_means
+import traceback
+
+import calculation
+from bias_evaluation import weat, ect, bat, k_means, bat2
 import logging
 
 
@@ -25,15 +29,16 @@ def return_eval_all(test_vectors1, test_vectors2, arg_vectors1, arg_vectors2):
     try:
         ect_value1, p_value1 = ect.embedding_coherence_test(test_vectors1, test_vectors2, arg_vectors1)
         ect_value2, p_value2 = ect.embedding_coherence_test(test_vectors1, test_vectors2, arg_vectors2)
-        # bat_result = bat.biased_analogy_test(test_vectors1, test_vectors2, arg_vectors1, arg_vectors2)
-        bat_result = 'Currently not available'
-        weat_effect_size, weat_p_value = weat.word_embedding_association_test(test_vectors1, test_vectors2, arg_vectors1,
+        bat_result = bat2.bias_analogy_test(test_vectors1, test_vectors2, arg_vectors1, arg_vectors2)
+        # bat_result = 'Currently not available'
+        weat_effect_size, weat_p_value = weat.word_embedding_association_test(test_vectors1, test_vectors2,
+                                                                              arg_vectors1,
                                                                               arg_vectors2)
         kmeans = k_means.k_means_clustering(test_vectors1, test_vectors2)
         logging.info("APP-BE: Evaluations finished successfully")
         response = jsonify(ect_value1=ect_value1, p_value1=p_value1, p_value2=p_value2, ect_value2=ect_value2,
-                       bat_result=bat_result, weat_effect_size=weat_effect_size, weat_pvalue=weat_p_value,
-                       k_means=kmeans)
+                           bat_result=bat_result, weat_effect_size=weat_effect_size, weat_pvalue=weat_p_value,
+                           k_means=kmeans)
         logging.info("APP-BE: Results: " + str(response))
         return response
     except RuntimeWarning as rw:
@@ -47,17 +52,18 @@ def return_eval_ect(test_vectors1, test_vectors2, arg_vectors1, arg_vectors2):
     ect_value1, p_value1 = ect.embedding_coherence_test(test_vectors1, test_vectors2, arg_vectors1)
     ect_value2, p_value2 = ect.embedding_coherence_test(test_vectors1, test_vectors2, arg_vectors2)
     logging.info("APP-BE: ECT finished successfully")
-    response = jsonify(ect_value1=ect_value1, p_value1=p_value1, p_value2=p_value2, ect_value2=ect_value2)
+    response = jsonify(ect_value1=ect_value1, p_value1=p_value1, p_value2=p_value2,
+                       ect_value2=ect_value2)
     logging.info("APP-BE: Results: " + str(response))
     return response
 
 
 def return_eval_bat(test_vectors1, test_vectors2, arg_vectors1, arg_vectors2):
     logging.info("APP-BE: Starting BAT evaluation")
-    bat_result = bat.biased_analogy_test(test_vectors1, test_vectors2, arg_vectors1, arg_vectors2)
+    bat_result = bat2.bias_analogy_test(test_vectors1, test_vectors2, arg_vectors1, arg_vectors2)
     # bat_result = 'Currently not available'
     logging.info("APP-BE: BAT finished successfully")
-    response = jsonify(bat_value=bat_result)
+    response = jsonify(bat_result=bat_result)
     logging.info("APP-BE: Results: " + str(response))
     return response
 
