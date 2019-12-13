@@ -125,6 +125,16 @@ def cosine_similarity(vector1, vector2):
     return cos
 
 
+# Concatenates two dictionaries to one big
+def concatenate_dicts(dict1, dict2):
+    result = {}
+    for word in dict1:
+        result[word] = dict1[word]
+    for word in dict2:
+        result[word] = dict2[word]
+    return result
+
+
 # Calculates the euclidean distance between two vectors
 def euclidean_distance(vector1, vector2):
     vector_a = numpy.array(vector1)

@@ -289,7 +289,7 @@ def debiasing_full_gbdd():
     augment_flag = arguments['augments']
     logging.info("APP: Starting GBDD debiasing in " + database)
     # Retrieve & check Vectors from database
-    target1, target2, aug1, aug2 = JSONFormatter.retrieve_vectors_from_db_debias(content, database)
+    target1, target2, aug1, aug2 = JSONFormatter.retrieve_vectors_from_db_debias(content, database, augment_flag)
     target1, target2 = calculation.check_sizes(target1, target2)
     aug1, aug2 = calculation.check_sizes(aug1, aug2)
     logging.info("APP: Retrieved Vectors from database")
@@ -308,11 +308,13 @@ def debiasing_full_gbdd():
 def debiasing_pca_gbdd():
     logging.info("APP: Debiasing is called")
     content = request.get_json()
-    database = request.args.to_dict()['space']
+    arguments = request.args.to_dict()
+    database = arguments['space']
+    augment_flag = arguments['augments']
     logging.info("APP: Starting debiasing in " + str(database) + " embedding space with gbdd")
 
     # Retrieve & check vectors from database
-    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db_debias(content, database)
+    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db_debias(content, database, augment_flag)
     target1, target2 = calculation.check_sizes(target1, target2)
     arg1, arg2 = calculation.check_sizes(arg1, arg2)
     logging.info("APP: Retrieved Vectors from database")
@@ -320,12 +322,13 @@ def debiasing_pca_gbdd():
         len(arg1)) + " A2=" + str(len(arg2)))
 
     logging.info("APP: Debiasing process started")
-    debiased1, debiased2 = gbdd.generalized_bias_direction_debiasing(target1, target2)
+    debiased1, debiased2 = gbdd.generalized_bias_direction_debiasing(target1, target2, arg1, arg2)
     debiased1_copy, debiased2_copy = calculation.create_duplicates(debiased1, debiased2)
-    debiased = debiased1_copy.update(debiased2_copy)
+    debiased = calculation.concatenate_dicts(debiased1_copy, debiased2_copy)
+    print(debiased)
     target1_copy, target2_copy = calculation.create_duplicates(target1, target2)
-    target = target1_copy.update(target2_copy)
-
+    target = calculation.concatenate_dicts(target1_copy, target2_copy)
+    print(target)
     biased_pca = calculation.principal_composant_analysis(target1, target2)
     debiased_pca = calculation.principal_composant_analysis(debiased1, debiased2)
 
