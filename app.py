@@ -29,7 +29,8 @@ t1 = ["science", "technology", "physics", "chemistry", "einstein", "nasa", "expe
 t2 = ["poetry", "art", "shakespeare", "dance", "literature", "novel", "symphony", "drama"]
 a1 = ["brother", "father", "uncle", "grandfather", "son", "he", "his", "him"]
 a2 = ["sister", "mother", "aunt", "grandmother", "daughter", "she", "hers", "her"]
-attributes = ["brother", "father", "uncle", "grandfather", "son", "he", "his", "him", "sister", "mother", "aunt", "grandmother", "daughter", "she", "hers", "her"]
+attributes = ["brother", "father", "uncle", "grandfather", "son", "he", "his", "him", "sister", "mother", "aunt",
+              "grandmother", "daughter", "she", "hers", "her"]
 
 t1 = database_handler.get_multiple_vectors_from_db(t1, 'fasttext')
 t2 = database_handler.get_multiple_vectors_from_db(t2, 'fasttext')
@@ -42,21 +43,14 @@ word_list3 = ["aster", "clover", "hyacinth", "marigold", "poppy", "azalea", "cro
               "daffodil", "lilac", "pansy", "tulip", "buttercup", "daisy", "lily", "peony", "violet",
               "carnation", "Gladiola", "magnolia", "petunia"]
 
-
 # print(kmeans2.k_means_clustering(t1, t2))
 # print(k_means.k_means_clustering(t1, t2))
 # print(ect2.embedding_coherence_test(t1, t2, attributes))
 # print(bat2.bias_analogy_test(t1, t2, a1, a2))
 # print(bias_eval_methods.return_eval_ect(t1, t2, a1, a2))
 # print(ect.embedding_coherence_test(t1, t2, attributes))
-#print(weat.word_embedding_association_test(t1, t2, a1, a2))
+# print(weat.word_embedding_association_test(t1, t2, a1, a2))
 # '''
-
-
-
-
-
-
 
 
 ''' RestAPI '''
@@ -70,9 +64,8 @@ CORS(app)
 app.secret_key = "secret key"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-
-# logging.basicConfig(filename="logfiles.log", level=logging.INFO)
-# print("logging configured")
+logging.basicConfig(filename="logfiles.log", level=logging.INFO)
+print("logging configured")
 
 
 @app.route('/REST/uploads/validJSON', methods=['POST'])
@@ -126,8 +119,8 @@ def retrieve_single_augmentation():
     space = bar['space']
     search = bar['word']
     try:
-        vector_dict = database_handler.get_augmentation_from_db(search, space)
-        response = jsonify(word=[word for word in vector_dict], vector=[list(vector_dict[vec]) for vec in vector_dict])
+        augmentations = database_handler.get_augmentation_from_db(search, space)
+        response = jsonify(word=search, augments=[augmentations[i] for i in range(len(augmentations))])
         logging.info("APP: Retrieved vector")
     except:
         return jsonify(message="NOT FOUND"), 404
@@ -142,8 +135,12 @@ def retrieve_multiple_augmentations_10k():
     content = request.get_json()
     word_list = content['data'].split(' ')
     try:
-        vector_dict = database_handler.get_multiple_augmentation_from_db(word_list, space)
-        response = jsonify(word=[word for word in vector_dict], vector=[list(vector_dict[vec]) for vec in vector_dict])
+        augmentations = database_handler.get_multiple_augmentation_from_db(word_list, space)
+        print(word for word in augmentations)
+        print(augmentations[word] for word in augmentations)
+        response = jsonify(words=[word for word in word_list],
+                           augments=[list(augmentations[word]) for word in augmentations])
+        # response = json.dumps(augmentations)
         logging.info("APP: Retrieved vector")
     except:
         return jsonify(message="NOT FOUND"), 404

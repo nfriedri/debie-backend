@@ -81,11 +81,13 @@ def get_augmentation_from_db(word, database):
         conn = psycopg2.connect(dbname=database, user='postgres', host='', password='audi')
         cur = conn.cursor()
         logging.info("DB: Connected successfully to " + database)
+        print("DB: Connected successfully to " + database)
         command = """SELECT augment1, augment2, augment3, augment4 FROM augmentation WHERE word = '{}'""".format(word)
         cur.execute(command)
         records = cur.fetchall()
         augmentation = records[0]
         logging.info("DB: Found augmentation for " + word + ": " + str(augmentation))
+        print("DB: Found augmentation for " + word + ": " + str(augmentation))
     except psycopg2.DatabaseError as error:
         logging.error("DB: Database error", error)
         print(error)
