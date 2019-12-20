@@ -7,7 +7,7 @@ def generalized_bias_direction_debiasing(target_set1, target_set2, augments1, au
     logging.info("GBDD: Debiasing started")
     target1_copy, target2_copy, augments1_copy, augments2_copy = calculation.create_duplicates(target_set1, target_set2,
                                                                                                augments1, augments2)
-    aug1, aug2 = calculation.transform_multiple_dicts_to_lists(augments1, augments2)
+    aug1, aug2 = calculation.transform_multiple_dicts_to_lists(augments1_copy, augments2_copy)
     logging.info("GBDD: Vector dictionaries and lists prepared successfully")
     gbdv = calculate_bias_direction_matrix(aug1, aug2)
     new_target1 = calculate_gbdd(gbdv, target1_copy)
