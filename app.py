@@ -327,10 +327,8 @@ def debiasing_pca_gbdd():
     debiased1, debiased2 = gbdd.generalized_bias_direction_debiasing(target1, target2, arg1, arg2)
     debiased1_copy, debiased2_copy = calculation.create_duplicates(debiased1, debiased2)
     debiased = calculation.concatenate_dicts(debiased1_copy, debiased2_copy)
-    print(debiased)
     target1_copy, target2_copy = calculation.create_duplicates(target1, target2)
     target = calculation.concatenate_dicts(target1_copy, target2_copy)
-    print(target)
     biased_pca = calculation.principal_composant_analysis(target1, target2)
     debiased_pca = calculation.principal_composant_analysis(debiased1, debiased2)
 
@@ -398,10 +396,8 @@ def debiasing_pca_bam():
     debiased1, debiased2 = bam2.bias_alignment_model(target1, target2, arg1, arg2)
     debiased1_copy, debiased2_copy = calculation.create_duplicates(debiased1, debiased2)
     debiased = calculation.concatenate_dicts(debiased1_copy, debiased2_copy)
-    print(debiased)
     target1_copy, target2_copy = calculation.create_duplicates(target1, target2)
     target = calculation.concatenate_dicts(target1_copy, target2_copy)
-    print(target)
     biased_pca = calculation.principal_composant_analysis(target1, target2)
     debiased_pca = calculation.principal_composant_analysis(debiased1, debiased2)
 
@@ -449,7 +445,6 @@ def debiasing_full_gbdd_bam():
 
 @app.route('/REST/debiasing/pca/gbddxbam', methods=['POST'])
 def debiasing_pca_gbdd_bam():
-    print('here')
     logging.info("APP: Debiasing is called")
     content = request.get_json()
     arguments = request.args.to_dict()
@@ -470,16 +465,12 @@ def debiasing_pca_gbdd_bam():
 
     logging.info("APP: Debiasing process started")
     debiased1, debiased2 = gbdd.generalized_bias_direction_debiasing(target1, target2, arg1, arg2)
-    print(debiased1.keys())
-    print(debiased2.keys())
     debiased1, debiased2 = bam2.bias_alignment_model(debiased1, debiased2, arg1, arg2)
     debiased1, debiased2 = gbdd.generalized_bias_direction_debiasing(debiased1, debiased2, arg1, arg2)
     debiased1_copy, debiased2_copy = calculation.create_duplicates(debiased1, debiased2)
     debiased = calculation.concatenate_dicts(debiased1_copy, debiased2_copy)
-    print(debiased)
     target1_copy, target2_copy = calculation.create_duplicates(target1, target2)
     target = calculation.concatenate_dicts(target1_copy, target2_copy)
-    print(target)
     biased_pca = calculation.principal_composant_analysis(target1, target2)
     debiased_pca = calculation.principal_composant_analysis(debiased1, debiased2)
 
@@ -550,10 +541,8 @@ def debiasing_pca_bam_gbdd():
     debiased1, debiased2 = gbdd.generalized_bias_direction_debiasing(debiased1, debiased2, arg1, arg2)
     debiased1_copy, debiased2_copy = calculation.create_duplicates(debiased1, debiased2)
     debiased = calculation.concatenate_dicts(debiased1_copy, debiased2_copy)
-    print(debiased)
     target1_copy, target2_copy = calculation.create_duplicates(target1, target2)
     target = calculation.concatenate_dicts(target1_copy, target2_copy)
-    print(target)
     biased_pca = calculation.principal_composant_analysis(target1, target2)
     debiased_pca = calculation.principal_composant_analysis(debiased1, debiased2)
 
