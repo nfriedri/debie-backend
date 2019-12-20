@@ -1,7 +1,10 @@
+import numpy
 import psycopg2
 import logging
 import augmentation
 import datetime
+
+import calculation
 
 
 def get_vector_from_database(word, database):
@@ -124,3 +127,43 @@ def get_multiple_augmentation_from_db(word_list, database):
         if conn is not None:
             conn.close()
     return augmentations
+
+
+def word_for_nearest_vector(request_vector, database):
+    print(datetime.datetime.now())
+    conn = None
+    running = 0
+    target_word = ''
+    maximum_vector = []
+    maximum_cosine = 0.0
+    try:
+        conn = psycopg2.connect(dbname=database, user='postgres', host='', password='audi')
+        cur = conn.cursor()
+        command = """SELECT vector FROM {} FETCH FIRST 10000 ONLY""".format(database)
+        cur.execute(command)
+        records = cur.fetchall()
+        data = records[0]
+        # cosine = []
+        running += 1
+        for string in data:
+            running += 1
+            tokens = str(string)[2:-3].split('  ')
+            vector = []
+            for i in range(len(tokens)):
+                vector.append(float(tokens[i]))
+            vector = numpy.array(vector)
+            current_cosine = calculation.cosine_similarity(request_vector, vector)
+            if current_cosine > maximum_cosine:
+                maximum_vector = vector
+                maximum_cosine = current_cosine
+        command2 = """SELECT word FROM {} WHERE vector='{}'""".format(database, str(maximum_vector))
+        cur.execute(command2)
+        records2 = cur.fetchall()
+        target_word = records2[0]
+    except psycopg2.DatabaseError as error:
+        logging.error("DB: Database error", error)
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
+    return target_word

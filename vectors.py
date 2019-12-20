@@ -13,7 +13,7 @@ def load_vectors(fname):
 
 def load_word(fname, word):
     fin = io.open(fname, 'r', encoding='utf-8', newline='\n', errors='ignore')
-    n, d = map(int, fin.readline().split())
+    # n, d = map(int, fin.readline().split())
     data = {}
     for line in fin:
         tokens = line.rstrip().split(' ')
@@ -24,7 +24,7 @@ def load_word(fname, word):
 
 def load_word_list(fname, word_list):
     fin = io.open(fname, 'r', encoding='utf-8', newline='\n', errors='ignore')
-    n, d = map(int, fin.readline().split())
+    # n, d = map(int, fin.readline().split())
     data = {}
     for line in fin:
         for word in word_list:

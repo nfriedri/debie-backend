@@ -4,8 +4,6 @@ import database_handler
 import augmentation
 import logging
 
-fasttext = "C:\\Users\\Niklas\\Documents\\wiki-news-300d-1M.vec"
-
 
 def get_json_vector_from_file(content):
     logging.info("DB: Vector retrieval started")
@@ -43,7 +41,7 @@ def retrieve_vector_from_db(content):
     return vector
 
 
-def retrieve_vectors_from_db_evaluation(content, database=None):
+def retrieve_vectors_evaluation(content, database):
     logging.info("DB: Retrieval of multiple vectors started")
     logging.info("DB: Searching for following vectors:")
     logging.info("DB:" + str(content))
@@ -53,19 +51,7 @@ def retrieve_vectors_from_db_evaluation(content, database=None):
     raw_a2 = content['A2'].split(' ')
     if database is None:
         database = 'fasttext'
-    if database == "uploadSpace":
-        # TODO Somehow retrieve filename from last upload
-        file = "uploads\\files\\" + database
-        print(file)
-        test_vectors1 = vectors.load_multiple_words(file, raw_t1)
-        logging.info("DB: First set added to memory")
-        test_vectors2 = database_handler.get_multiple_vectors_from_db(file, raw_t2)
-        logging.info("DB: Second set added to memory")
-        arg_vectors1 = database_handler.get_multiple_vectors_from_db(file, raw_a1)
-        logging.info("DB: Third set added to memory")
-        arg_vectors2 = database_handler.get_multiple_vectors_from_db(file, raw_a2)
-        print("BIG BIG PROBLEM")
-    else:
+    if database == "fasttext" or database == "skipgram" or database == "cbow" or database == "glove":
         test_vectors1 = database_handler.get_multiple_vectors_from_db(raw_t1, database)
         logging.info("DB: First set added to memory")
         test_vectors2 = database_handler.get_multiple_vectors_from_db(raw_t2, database)
@@ -76,11 +62,20 @@ def retrieve_vectors_from_db_evaluation(content, database=None):
         logging.info("DB: Fourth set added to memory")
         logging.info("DB: Found set sizes: " + str(len(test_vectors1)) + " " + str(len(test_vectors2)) + " " + str(
             len(arg_vectors1)) + " " + str(len(test_vectors2)))
+    else:
+        file = "uploads\\files\\" + database
+        test_vectors1 = vectors.load_multiple_words(file, raw_t1)
+        logging.info("DB: First set added to memory")
+        test_vectors2 = vectors.load_multiple_words(file, raw_t2)
+        logging.info("DB: Second set added to memory")
+        arg_vectors1 = vectors.load_multiple_words(file, raw_a1)
+        logging.info("DB: Third set added to memory")
+        arg_vectors2 = vectors.load_multiple_words(file, raw_a2)
 
     return test_vectors1, test_vectors2, arg_vectors1, arg_vectors2
 
 
-def retrieve_vectors_from_db_debias(content, database, augment_flag=True):
+def retrieve_vectors_debiasing(content, database, augment_flag=True):
     logging.info("DB: Retrieval of multiple vectors started")
     logging.info("DB: Searching for following vectors:")
     logging.info("DB:" + str(content))

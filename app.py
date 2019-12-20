@@ -147,11 +147,14 @@ def retrieve_multiple_augmentations_10k():
 def bias_evaluations_all():
     logging.info("APP: Bias Evaluation ALL Methods is called")
     content = request.get_json()
-    database = request.args.to_dict()['space']
-    vector_flag = request.args.to_dict()['vectors']
+    records = request.args.to_dict()
+    database = records['space']
+    vector_flag = 'false'
+    if 'vectors' in records.keys():
+        vector_flag = request.args.to_dict()['vectors']
     logging.info("APP: Starting evaluation process")
     if vector_flag == 'false':
-        target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db_evaluation(content, database)
+        target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_evaluation(content, database)
     else:
         target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_json(content)
     target1, target2 = calculation.check_sizes(target1, target2)
@@ -560,7 +563,7 @@ def debiasing_pca_bam_gbdd():
 
 @app.route('/REST/uploads/embedding-spaces', methods=['POST'])
 def upload_embedding_space():
-    logging.info("APP: Receiving file form upload")
+    logging.info("APP: Receiving file from upload")
     print('Receiving file form upload')
 
     if 'uploadFile' not in request.files:
@@ -568,7 +571,7 @@ def upload_embedding_space():
         resp.status_code = 400
         return resp
     file = request.files['uploadFile']
-    print(file.read())
+    # print(file.read())
     if file.filename == '':
         resp = jsonify({'message': 'No file selected for uploading'})
         resp.status_code = 400
