@@ -77,14 +77,14 @@ def get_multiple_vectors_from_db(word_list, database):
     return vector_dict
 
 
-def get_augmentation_from_db(word, database):
+def get_augmentation_from_db(word):
     conn = None
     augmentation = []
     try:
-        conn = psycopg2.connect(dbname=database, user='postgres', host='', password='audi')
+        conn = psycopg2.connect(dbname='augmentation', user='postgres', host='', password='audi')
         cur = conn.cursor()
-        logging.info("DB: Connected successfully to " + database)
-        print("DB: Connected successfully to " + database)
+        logging.info("DB: Connected successfully to augmentation")
+        print("DB: Connected successfully to augmentation")
         command = """SELECT augment1, augment2, augment3, augment4 FROM augmentation WHERE word = '{}'""".format(word)
         cur.execute(command)
         records = cur.fetchall()
@@ -100,13 +100,13 @@ def get_augmentation_from_db(word, database):
     return augmentation
 
 
-def get_multiple_augmentation_from_db(word_list, database):
+def get_multiple_augmentation_from_db(word_list):
     conn = None
     augmentations = {}
     try:
-        conn = psycopg2.connect(dbname=database, user='postgres', host='', password='audi')
+        conn = psycopg2.connect(dbname='augmentation', user='postgres', host='', password='audi')
         cur = conn.cursor()
-        logging.info("DB: Connected successfully to " + database)
+        logging.info("DB: Connected successfully to augmentation")
         for word in word_list:
             try:
                 command = """SELECT augment1, augment2, augment3, augment4 FROM augmentation WHERE word = '{}'""".format(word)
@@ -117,7 +117,7 @@ def get_multiple_augmentation_from_db(word_list, database):
                 logging.info("DB: Found augmentation for " + word + ": " + str(data))
             except:
                 logging.info("DB: No vector found for " + word)
-                augmentation.load_augment(word, database)
+                data = augmentation.load_augment(word)
                 augmentations[word] = data
                 pass
     except psycopg2.DatabaseError as error:

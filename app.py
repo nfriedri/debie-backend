@@ -112,10 +112,9 @@ def retrieve_multiple_vectors():
 def retrieve_single_augmentation():
     logging.info("APP: Retrieve single augmentation is called")
     bar = request.args.to_dict()
-    space = bar['space']
     search = bar['word']
     try:
-        augmentations = database_handler.get_augmentation_from_db(search, space)
+        augmentations = database_handler.get_augmentation_from_db(search)
         response = jsonify(word=search, augments=[augmentations[i] for i in range(len(augmentations))])
         logging.info("APP: Retrieved vector")
     except:
@@ -131,7 +130,7 @@ def retrieve_multiple_augmentations_10k():
     content = request.get_json()
     word_list = content['data'].split(' ')
     try:
-        augmentations = database_handler.get_multiple_augmentation_from_db(word_list, space)
+        augmentations = database_handler.get_multiple_augmentation_from_db(word_list)
         print(word for word in augmentations)
         print(augmentations[word] for word in augmentations)
         response = jsonify(words=[word for word in word_list],
@@ -182,7 +181,7 @@ def bias_evaluations_ect():
     logging.info("APP: Starting evaluation process")
     vector_flag = request.args.to_dict()['vectors']
     if vector_flag == 'false':
-        target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db_evaluation(content, database)
+        target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_evaluation(content, database)
     else:
         target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_json(content)
     target1, target2 = calculation.check_sizes(target1, target2)
@@ -208,7 +207,7 @@ def bias_evaluations_bat():
     logging.info("APP: Starting evaluation process")
     vector_flag = request.args.to_dict()['vectors']
     if vector_flag == 'false':
-        target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db_evaluation(content, database)
+        target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_evaluation(content, database)
     else:
         target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_json(content)
     target1, target2 = calculation.check_sizes(target1, target2)
@@ -236,7 +235,7 @@ def bias_evaluations_weat():
     logging.info("APP: Starting evaluation process")
     vector_flag = request.args.to_dict()['vectors']
     if vector_flag == 'false':
-        target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db_evaluation(content, database)
+        target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_evaluation(content, database)
     else:
         target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_json(content)
     target1, target2 = calculation.check_sizes(target1, target2)
@@ -262,7 +261,7 @@ def bias_evaluations_kmeans():
     logging.info("APP: Starting evaluation process")
     vector_flag = request.args.to_dict()['vectors']
     if vector_flag == 'false':
-        target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db_evaluation(content, database)
+        target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_evaluation(content, database)
     else:
         target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_json(content)
     target1, target2 = calculation.check_sizes(target1, target2)
@@ -288,7 +287,7 @@ def debiasing_full_gbdd():
     augment_flag = arguments['augments']
     logging.info("APP: Starting GBDD debiasing in " + database)
     # Retrieve & check Vectors from database
-    target1, target2, aug1, aug2 = JSONFormatter.retrieve_vectors_from_db_debias(content, database, augment_flag)
+    target1, target2, aug1, aug2 = JSONFormatter.retrieve_vectors_debiasing(content, database, augment_flag)
     target1, target2 = calculation.check_sizes(target1, target2)
     aug1, aug2 = calculation.check_sizes(aug1, aug2)
     if len(target1) == 0 or len(target2) == 0 or len(aug1) == 0 or len(aug2) == 0:
@@ -316,7 +315,7 @@ def debiasing_pca_gbdd():
     logging.info("APP: Starting debiasing in " + str(database) + " embedding space with gbdd")
 
     # Retrieve & check vectors from database
-    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db_debias(content, database, augment_flag)
+    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_debiasing(content, database, augment_flag)
     target1, target2 = calculation.check_sizes(target1, target2)
     arg1, arg2 = calculation.check_sizes(arg1, arg2)
     logging.info("APP: Retrieved Vectors from database")
@@ -357,13 +356,13 @@ def debiasing_full_bam():
     augment_flag = arguments['augments']
     logging.info("APP: Starting GBDD debiasing in " + database)
     # Retrieve & check Vectors from database
-    target1, target2, aug1, aug2 = JSONFormatter.retrieve_vectors_from_db_debias(content, database, augment_flag)
+    target1, target2, aug1, aug2 = JSONFormatter.retrieve_vectors_debiasing(content, database, augment_flag)
     target1, target2 = calculation.check_sizes(target1, target2)
     aug1, aug2 = calculation.check_sizes(aug1, aug2)
     logging.info("APP: Retrieved Vectors from database")
     logging.info("APP: Final retrieved set sizes: T1=" + str(len(target1)) + " T2=" + str(len(target2)) + " A1=" + str(
         len(aug1)) + " A2=" + str(len(aug2)))
-    if len(target1) == 0 or len(target2) == 0 or len(arg1) == 0 or len(arg2) == 0:
+    if len(target1) == 0 or len(target2) == 0 or len(aug1) == 0 or len(aug2) == 0:
         logging.info("APP: Stopped, no values found in database")
         return jsonify(message="ERROR: No values found in database."), 404
     logging.info("APP: Debiasing process started")
@@ -385,7 +384,7 @@ def debiasing_pca_bam():
     logging.info("APP: Starting debiasing in " + str(database) + " embedding space with gbdd")
 
     # Retrieve & check vectors from database
-    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db_debias(content, database, augment_flag)
+    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_debiasing(content, database, augment_flag)
     target1, target2 = calculation.check_sizes(target1, target2)
     arg1, arg2 = calculation.check_sizes(arg1, arg2)
     logging.info("APP: Retrieved Vectors from database")
@@ -426,13 +425,13 @@ def debiasing_full_gbdd_bam():
     augment_flag = arguments['augments']
     logging.info("APP: Starting GBDD debiasing in " + database)
     # Retrieve & check Vectors from database
-    target1, target2, aug1, aug2 = JSONFormatter.retrieve_vectors_from_db_debias(content, database, augment_flag)
+    target1, target2, aug1, aug2 = JSONFormatter.retrieve_vectors_debiasing(content, database, augment_flag)
     target1, target2 = calculation.check_sizes(target1, target2)
     aug1, aug2 = calculation.check_sizes(aug1, aug2)
     logging.info("APP: Retrieved Vectors from database")
     logging.info("APP: Final retrieved set sizes: T1=" + str(len(target1)) + " T2=" + str(len(target2)) + " A1=" + str(
         len(aug1)) + " A2=" + str(len(aug2)))
-    if len(target1) == 0 or len(target2) == 0 or len(arg1) == 0 or len(arg2) == 0:
+    if len(target1) == 0 or len(target2) == 0 or len(aug1) == 0 or len(aug2) == 0:
         logging.info("APP: Stopped, no values found in database")
         return jsonify(message="ERROR: No values found in database."), 404
 
@@ -456,7 +455,7 @@ def debiasing_pca_gbdd_bam():
     logging.info("APP: Starting debiasing in " + str(database) + " embedding space with gbdd")
 
     # Retrieve & check vectors from database
-    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db_debias(content, database, augment_flag)
+    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_debiasing(content, database, augment_flag)
     target1, target2 = calculation.check_sizes(target1, target2)
     arg1, arg2 = calculation.check_sizes(arg1, arg2)
     logging.info("APP: Retrieved Vectors from database")
@@ -499,13 +498,13 @@ def debiasing_full_bam_gbdd():
     augment_flag = arguments['augments']
     logging.info("APP: Starting GBDD debiasing in " + database)
     # Retrieve & check Vectors from database
-    target1, target2, aug1, aug2 = JSONFormatter.retrieve_vectors_from_db_debias(content, database, augment_flag)
+    target1, target2, aug1, aug2 = JSONFormatter.retrieve_vectors_debiasing(content, database, augment_flag)
     target1, target2 = calculation.check_sizes(target1, target2)
     aug1, aug2 = calculation.check_sizes(aug1, aug2)
     logging.info("APP: Retrieved Vectors from database")
     logging.info("APP: Final retrieved set sizes: T1=" + str(len(target1)) + " T2=" + str(len(target2)) + " A1=" + str(
         len(aug1)) + " A2=" + str(len(aug2)))
-    if len(target1) == 0 or len(target2) == 0 or len(arg1) == 0 or len(arg2) == 0:
+    if len(target1) == 0 or len(target2) == 0 or len(aug1) == 0 or len(aug2) == 0:
         logging.info("APP: Stopped, no values found in database")
         return jsonify(message="ERROR: No values found in database."), 404
 
@@ -529,7 +528,7 @@ def debiasing_pca_bam_gbdd():
     logging.info("APP: Starting debiasing in " + str(database) + " embedding space with gbdd")
 
     # Retrieve & check vectors from database
-    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_db_debias(content, database, augment_flag)
+    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_debiasing(content, database, augment_flag)
     target1, target2 = calculation.check_sizes(target1, target2)
     arg1, arg2 = calculation.check_sizes(arg1, arg2)
     logging.info("APP: Retrieved Vectors from database")
