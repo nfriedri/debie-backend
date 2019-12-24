@@ -143,7 +143,7 @@ def euclidean_distance(vector1, vector2):
     return distance
 
 
-def principal_composant_analysis(vector_dict1, vector_dict2):
+def principal_componant_analysis(vector_dict1, vector_dict2):
     logging.info("PCA: Principal composant analysis started")
     vector_dict1_copy, vector_dict2_copy = create_duplicates(vector_dict1, vector_dict2)
     array_words = []

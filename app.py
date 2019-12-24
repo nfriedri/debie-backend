@@ -1,47 +1,17 @@
-import json
 import logging
 import os
-import sys
 import traceback
 
-from flask import Flask, request, flash, redirect, url_for
+from flask import Flask, request
 from flask import jsonify
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 from werkzeug.utils import secure_filename
 
 import JSONFormatter
 import bias_eval_methods
 import calculation
 import database_handler
-from bias_evaluation import bat
-from debiasing import gbdd, bam, bam2
-from bias_evaluation import bat2, weat, ect, k_means
-
-'''Initialize vectors into test and argument sets'''
-# '''
-
-# t1 = ["aster", "gladiolus", "nance", "crowfoot"]
-# t2 = ["caterpillars", "gnats", "termites", "butterflies"]
-# a1 = ["donation", "liberty", "tranquility", "fortunate"]
-# a2 = ["misuse", "collision", "stench", "destitution", "demise"]
-
-# t1 = ["science", "technology", "physics", "chemistry", "einstein", "nasa", "experiment", "astronomy"]
-# t2 = ["poetry", "art", "shakespeare", "dance", "literature", "novel", "symphony", "drama"]
-# a1 = ["brother", "father", "uncle", "grandfather", "son", "he", "his", "him"]
-# a2 = ["sister", "mother", "aunt", "grandmother", "daughter", "she", "hers", "her"]
-# attributes = ["brother", "father", "uncle", "grandfather", "son", "he", "his", "him", "sister", "mother", "aunt",
-#              "grandmother", "daughter", "she", "hers", "her"]
-
-# t1 = database_handler.get_multiple_vectors_from_db(t1, 'fasttext')
-# t2 = database_handler.get_multiple_vectors_from_db(t2, 'fasttext')
-# a1 = database_handler.get_multiple_vectors_from_db(a1, 'fasttext')
-# a2 = database_handler.get_multiple_vectors_from_db(a2, 'fasttext')
-# attributes = database_handler.get_multiple_vectors_from_db(attributes, "fasttext")
-
-# word_list2 = ["football", "basketball", "adidas", "nike", "puma"]
-# word_list3 = ["aster", "clover", "hyacinth", "marigold", "poppy", "azalea", "crocus", "iris", "orchid", "rose",
-#              "daffodil", "lilac", "pansy", "tulip", "buttercup", "daisy", "lily", "peony", "violet",
-#              "carnation", "Gladiola", "magnolia", "petunia"]
+import debias_methods
 
 
 ''' RestAPI '''
@@ -280,28 +250,10 @@ def bias_evaluations_kmeans():
 @app.route('/REST/debiasing/full/gbdd', methods=['POST'])
 def debiasing_full_gbdd():
     logging.info("APP: Debiasing is called")
-    # Get content from JSON
     content = request.get_json()
     arguments = request.args.to_dict()
-    database = arguments['space']
-    augment_flag = arguments['augments']
-    logging.info("APP: Starting GBDD debiasing in " + database)
-    # Retrieve & check Vectors from database
-    target1, target2, aug1, aug2 = JSONFormatter.retrieve_vectors_debiasing(content, database, augment_flag)
-    target1, target2 = calculation.check_sizes(target1, target2)
-    aug1, aug2 = calculation.check_sizes(aug1, aug2)
-    if len(target1) == 0 or len(target2) == 0 or len(aug1) == 0 or len(aug2) == 0:
-        logging.info("APP: Stopped, no values found in database")
-        return jsonify(message="ERROR: No values found in database."), 404
-    logging.info("APP: Retrieved Vectors from database")
-    logging.info("APP: Final retrieved set sizes: T1=" + str(len(target1)) + " T2=" + str(len(target2)) + " A1=" + str(
-        len(aug1)) + " A2=" + str(len(aug2)))
-    logging.info("APP: Debiasing process started")
-    # Following lines will be moved to debias_methods.py soon:
-    result1, result2 = gbdd.generalized_bias_direction_debiasing(target1, target2, aug1, aug2)
-    response = json.dumps(
-        {"biased": JSONFormatter.dict_to_json(target1), "debiased": JSONFormatter.dict_to_json(result1)})
-    logging.info("APP: Debiasing process finished")
+    methods = 'gbdd'
+    response = debias_methods.return_full_debiasing(methods, arguments, content)
     return response
 
 
@@ -310,39 +262,8 @@ def debiasing_pca_gbdd():
     logging.info("APP: Debiasing is called")
     content = request.get_json()
     arguments = request.args.to_dict()
-    database = arguments['space']
-    augment_flag = arguments['augments']
-    logging.info("APP: Starting debiasing in " + str(database) + " embedding space with gbdd")
-
-    # Retrieve & check vectors from database
-    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_debiasing(content, database, augment_flag)
-    target1, target2 = calculation.check_sizes(target1, target2)
-    arg1, arg2 = calculation.check_sizes(arg1, arg2)
-    logging.info("APP: Retrieved Vectors from database")
-    logging.info("APP: Final retrieved set sizes: T1=" + str(len(target1)) + " T2=" + str(len(target2)) + " A1=" + str(
-        len(arg1)) + " A2=" + str(len(arg2)))
-    if len(target1) == 0 or len(target2) == 0 or len(arg1) == 0 or len(arg2) == 0:
-        logging.info("APP: Stopped, no values found in database")
-        return jsonify(message="ERROR: No values found in database."), 404
-
-    logging.info("APP: Debiasing process started")
-    debiased1, debiased2 = gbdd.generalized_bias_direction_debiasing(target1, target2, arg1, arg2)
-    debiased1_copy, debiased2_copy = calculation.create_duplicates(debiased1, debiased2)
-    debiased = calculation.concatenate_dicts(debiased1_copy, debiased2_copy)
-    target1_copy, target2_copy = calculation.create_duplicates(target1, target2)
-    target = calculation.concatenate_dicts(target1_copy, target2_copy)
-    biased_pca = calculation.principal_composant_analysis(target1, target2)
-    debiased_pca = calculation.principal_composant_analysis(debiased1, debiased2)
-
-    response = json.dumps(
-        {"EmbeddingSpace": database, "Method": "GBDD",
-         "BiasedVectorsPCA": JSONFormatter.dict_to_json(biased_pca),
-         "DebiasedVectorsPCA": JSONFormatter.dict_to_json(debiased_pca),
-         "BiasedVecs:": JSONFormatter.dict_to_json(debiased),
-         "DebiasedVecs": JSONFormatter.dict_to_json(target)})
-    logging.info("APP: Debiasing process with PCA finished")
-    logging.info("APP: " + str(response))
-    # print(response)
+    methods = 'gbdd'
+    response = debias_methods.return_pca_debiasing(methods, arguments, content)
     return response
 
 
@@ -352,25 +273,8 @@ def debiasing_full_bam():
     # Get content from JSON
     content = request.get_json()
     arguments = request.args.to_dict()
-    database = arguments['space']
-    augment_flag = arguments['augments']
-    logging.info("APP: Starting GBDD debiasing in " + database)
-    # Retrieve & check Vectors from database
-    target1, target2, aug1, aug2 = JSONFormatter.retrieve_vectors_debiasing(content, database, augment_flag)
-    target1, target2 = calculation.check_sizes(target1, target2)
-    aug1, aug2 = calculation.check_sizes(aug1, aug2)
-    logging.info("APP: Retrieved Vectors from database")
-    logging.info("APP: Final retrieved set sizes: T1=" + str(len(target1)) + " T2=" + str(len(target2)) + " A1=" + str(
-        len(aug1)) + " A2=" + str(len(aug2)))
-    if len(target1) == 0 or len(target2) == 0 or len(aug1) == 0 or len(aug2) == 0:
-        logging.info("APP: Stopped, no values found in database")
-        return jsonify(message="ERROR: No values found in database."), 404
-    logging.info("APP: Debiasing process started")
-    # Following lines will be moved to debias_methods.py soon:
-    result1, result2 = bam2.bias_alignment_model(target1, target2, aug1, aug2)
-    response = json.dumps(
-        {"biased": JSONFormatter.dict_to_json(target1), "debiased": JSONFormatter.dict_to_json(result1)})
-    logging.info("APP: Debiasing process finished")
+    methods = 'bam'
+    response = debias_methods.return_full_debiasing(methods, arguments, content)
     return response
 
 
@@ -379,39 +283,8 @@ def debiasing_pca_bam():
     logging.info("APP: Debiasing is called")
     content = request.get_json()
     arguments = request.args.to_dict()
-    database = arguments['space']
-    augment_flag = arguments['augments']
-    logging.info("APP: Starting debiasing in " + str(database) + " embedding space with gbdd")
-
-    # Retrieve & check vectors from database
-    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_debiasing(content, database, augment_flag)
-    target1, target2 = calculation.check_sizes(target1, target2)
-    arg1, arg2 = calculation.check_sizes(arg1, arg2)
-    logging.info("APP: Retrieved Vectors from database")
-    logging.info("APP: Final retrieved set sizes: T1=" + str(len(target1)) + " T2=" + str(len(target2)) + " A1=" + str(
-        len(arg1)) + " A2=" + str(len(arg2)))
-    if len(target1) == 0 or len(target2) == 0 or len(arg1) == 0 or len(arg2) == 0:
-        logging.info("APP: Stopped, no values found in database")
-        return jsonify(message="ERROR: No values found in database."), 404
-
-    logging.info("APP: Debiasing process started")
-    debiased1, debiased2 = bam2.bias_alignment_model(target1, target2, arg1, arg2)
-    debiased1_copy, debiased2_copy = calculation.create_duplicates(debiased1, debiased2)
-    debiased = calculation.concatenate_dicts(debiased1_copy, debiased2_copy)
-    target1_copy, target2_copy = calculation.create_duplicates(target1, target2)
-    target = calculation.concatenate_dicts(target1_copy, target2_copy)
-    biased_pca = calculation.principal_composant_analysis(target1, target2)
-    debiased_pca = calculation.principal_composant_analysis(debiased1, debiased2)
-
-    response = json.dumps(
-        {"EmbeddingSpace": database, "Method": "GBDD",
-         "BiasedVectorsPCA": JSONFormatter.dict_to_json(biased_pca),
-         "DebiasedVectorsPCA": JSONFormatter.dict_to_json(debiased_pca),
-         "BiasedVecs:": JSONFormatter.dict_to_json(debiased),
-         "DebiasedVecs": JSONFormatter.dict_to_json(target)})
-    logging.info("APP: Debiasing process with PCA finished")
-    logging.info("APP: " + str(response))
-    # print(response)
+    methods = 'bam'
+    response = debias_methods.return_pca_debiasing(methods, arguments, content)
     return response
 
 
@@ -421,27 +294,8 @@ def debiasing_full_gbdd_bam():
     # Get content from JSON
     content = request.get_json()
     arguments = request.args.to_dict()
-    database = arguments['space']
-    augment_flag = arguments['augments']
-    logging.info("APP: Starting GBDD debiasing in " + database)
-    # Retrieve & check Vectors from database
-    target1, target2, aug1, aug2 = JSONFormatter.retrieve_vectors_debiasing(content, database, augment_flag)
-    target1, target2 = calculation.check_sizes(target1, target2)
-    aug1, aug2 = calculation.check_sizes(aug1, aug2)
-    logging.info("APP: Retrieved Vectors from database")
-    logging.info("APP: Final retrieved set sizes: T1=" + str(len(target1)) + " T2=" + str(len(target2)) + " A1=" + str(
-        len(aug1)) + " A2=" + str(len(aug2)))
-    if len(target1) == 0 or len(target2) == 0 or len(aug1) == 0 or len(aug2) == 0:
-        logging.info("APP: Stopped, no values found in database")
-        return jsonify(message="ERROR: No values found in database."), 404
-
-    logging.info("APP: Debiasing process started")
-    # Following lines will be moved to debias_methods.py soon:
-    result1, result2 = gbdd.generalized_bias_direction_debiasing(target1, target2, aug1, aug2)
-    result1, result2 = bam2.bias_alignment_model(result1, result2, aug1, aug2)
-    response = json.dumps(
-        {"biased": JSONFormatter.dict_to_json(target1), "debiased": JSONFormatter.dict_to_json(result1)})
-    logging.info("APP: Debiasing process finished")
+    methods = 'gbddxbam'
+    response = debias_methods.return_full_debiasing(methods, arguments, content)
     return response
 
 
@@ -450,72 +304,19 @@ def debiasing_pca_gbdd_bam():
     logging.info("APP: Debiasing is called")
     content = request.get_json()
     arguments = request.args.to_dict()
-    database = arguments['space']
-    augment_flag = arguments['augments']
-    logging.info("APP: Starting debiasing in " + str(database) + " embedding space with gbdd")
-
-    # Retrieve & check vectors from database
-    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_debiasing(content, database, augment_flag)
-    target1, target2 = calculation.check_sizes(target1, target2)
-    arg1, arg2 = calculation.check_sizes(arg1, arg2)
-    logging.info("APP: Retrieved Vectors from database")
-    logging.info("APP: Final retrieved set sizes: T1=" + str(len(target1)) + " T2=" + str(len(target2)) + " A1=" + str(
-        len(arg1)) + " A2=" + str(len(arg2)))
-    if len(target1) == 0 or len(target2) == 0 or len(arg1) == 0 or len(arg2) == 0:
-        logging.info("APP: Stopped, no values found in database")
-        return jsonify(message="ERROR: No values found in database."), 404
-
-    logging.info("APP: Debiasing process started")
-    debiased1, debiased2 = gbdd.generalized_bias_direction_debiasing(target1, target2, arg1, arg2)
-    debiased1, debiased2 = bam2.bias_alignment_model(debiased1, debiased2, arg1, arg2)
-    debiased1, debiased2 = gbdd.generalized_bias_direction_debiasing(debiased1, debiased2, arg1, arg2)
-    debiased1_copy, debiased2_copy = calculation.create_duplicates(debiased1, debiased2)
-    debiased = calculation.concatenate_dicts(debiased1_copy, debiased2_copy)
-    target1_copy, target2_copy = calculation.create_duplicates(target1, target2)
-    target = calculation.concatenate_dicts(target1_copy, target2_copy)
-    biased_pca = calculation.principal_composant_analysis(target1, target2)
-    debiased_pca = calculation.principal_composant_analysis(debiased1, debiased2)
-
-    response = json.dumps(
-        {"EmbeddingSpace": database, "Method": "GBDD",
-         "BiasedVectorsPCA": JSONFormatter.dict_to_json(biased_pca),
-         "DebiasedVectorsPCA": JSONFormatter.dict_to_json(debiased_pca),
-         "BiasedVecs:": JSONFormatter.dict_to_json(debiased),
-         "DebiasedVecs": JSONFormatter.dict_to_json(target)})
-    logging.info("APP: Debiasing process with PCA finished")
-    logging.info("APP: " + str(response))
-    # print(response)
-    return response, 200
+    methods = 'gbddxbam'
+    response = debias_methods.return_pca_debiasing(methods, arguments, content)
+    return response
 
 
 @app.route('/REST/debiasing/full/bamxgbdd', methods=['POST'])
 def debiasing_full_bam_gbdd():
     logging.info("APP: Debiasing is called")
-    # Get content from JSON
     content = request.get_json()
     arguments = request.args.to_dict()
-    database = arguments['space']
-    augment_flag = arguments['augments']
-    logging.info("APP: Starting GBDD debiasing in " + database)
-    # Retrieve & check Vectors from database
-    target1, target2, aug1, aug2 = JSONFormatter.retrieve_vectors_debiasing(content, database, augment_flag)
-    target1, target2 = calculation.check_sizes(target1, target2)
-    aug1, aug2 = calculation.check_sizes(aug1, aug2)
-    logging.info("APP: Retrieved Vectors from database")
-    logging.info("APP: Final retrieved set sizes: T1=" + str(len(target1)) + " T2=" + str(len(target2)) + " A1=" + str(
-        len(aug1)) + " A2=" + str(len(aug2)))
-    if len(target1) == 0 or len(target2) == 0 or len(aug1) == 0 or len(aug2) == 0:
-        logging.info("APP: Stopped, no values found in database")
-        return jsonify(message="ERROR: No values found in database."), 404
-
-    logging.info("APP: Debiasing process started")
-    # Following lines will be moved to debias_methods.py soon:
-    result1, result2 = bam2.bias_alignment_model(target1, target2, aug1, aug2)
-    result1, result2 = gbdd.generalized_bias_direction_debiasing(result1, result2, aug1, aug2)
-    response = json.dumps(
-        {"biased": JSONFormatter.dict_to_json(target1), "debiased": JSONFormatter.dict_to_json(result1)})
-    logging.info("APP: Debiasing process finished")
-    return response, 200
+    methods = 'bamxgbdd'
+    response = debias_methods.return_full_debiasing(methods, arguments, content)
+    return response
 
 
 @app.route('/REST/debiasing/pca/bamxgbdd', methods=['POST'])
@@ -523,41 +324,9 @@ def debiasing_pca_bam_gbdd():
     logging.info("APP: Debiasing is called")
     content = request.get_json()
     arguments = request.args.to_dict()
-    database = arguments['space']
-    augment_flag = arguments['augments']
-    logging.info("APP: Starting debiasing in " + str(database) + " embedding space with gbdd")
-
-    # Retrieve & check vectors from database
-    target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_debiasing(content, database, augment_flag)
-    target1, target2 = calculation.check_sizes(target1, target2)
-    arg1, arg2 = calculation.check_sizes(arg1, arg2)
-    logging.info("APP: Retrieved Vectors from database")
-    logging.info("APP: Final retrieved set sizes: T1=" + str(len(target1)) + " T2=" + str(len(target2)) + " A1=" + str(
-        len(arg1)) + " A2=" + str(len(arg2)))
-    if len(target1) == 0 or len(target2) == 0 or len(arg1) == 0 or len(arg2) == 0:
-        logging.info("APP: Stopped, no values found in database")
-        return jsonify(message="ERROR: No values found in database."), 404
-
-    logging.info("APP: Debiasing process started")
-    debiased1, debiased2 = bam2.bias_alignment_model(target1, target2, arg1, arg2)
-    debiased1, debiased2 = gbdd.generalized_bias_direction_debiasing(debiased1, debiased2, arg1, arg2)
-    debiased1_copy, debiased2_copy = calculation.create_duplicates(debiased1, debiased2)
-    debiased = calculation.concatenate_dicts(debiased1_copy, debiased2_copy)
-    target1_copy, target2_copy = calculation.create_duplicates(target1, target2)
-    target = calculation.concatenate_dicts(target1_copy, target2_copy)
-    biased_pca = calculation.principal_composant_analysis(target1, target2)
-    debiased_pca = calculation.principal_composant_analysis(debiased1, debiased2)
-
-    response = json.dumps(
-        {"EmbeddingSpace": database, "Method": "GBDD",
-         "BiasedVectorsPCA": JSONFormatter.dict_to_json(biased_pca),
-         "DebiasedVectorsPCA": JSONFormatter.dict_to_json(debiased_pca),
-         "BiasedVecs:": JSONFormatter.dict_to_json(debiased),
-         "DebiasedVecs": JSONFormatter.dict_to_json(target)})
-    logging.info("APP: Debiasing process with PCA finished")
-    logging.info("APP: " + str(response))
-    # print(response)
-    return response, 200
+    methods = 'bamxgbdd'
+    response = debias_methods.return_pca_debiasing(methods, arguments, content)
+    return response
 
 
 @app.route('/REST/uploads/embedding-spaces', methods=['POST'])

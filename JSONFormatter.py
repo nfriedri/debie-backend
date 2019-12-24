@@ -4,6 +4,7 @@ import database_handler
 import augmentation
 import logging
 
+fasttext = ''
 
 def get_json_vector_from_file(content):
     logging.info("DB: Vector retrieval started")
