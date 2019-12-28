@@ -82,40 +82,46 @@ def retrieve_vectors_debiasing(content, database, augment_flag=True):
     logging.info("DB:" + str(content))
     raw_t1 = content['T1'].split(' ')
     raw_t2 = content['T2'].split(' ')
+    raw_a1 = content['A1'].split(' ')
+    raw_a2 = content['A2'].split(' ')
+
     if database is None:
         database = 'fasttext'
-    if database == "uploadSpace":
-        # TODO Somehow retrieve filename from last upload
-        file = "uploads\\files\\" + database
-        print(file)
-        test_vectors1 = vectors.load_multiple_words(file, raw_t1)
-        logging.info("DB: First set added to memory")
-        test_vectors2 = vectors.load_multiple_words(file, raw_t2)
-        logging.info("DB: Second set added to memory")
-        if augment_flag:
-            raw_aug1 = content['A1'].split(' ')
-            raw_aug2 = content['A2'].split(' ')
-            aug_target1 = vectors.load_multiple_words(file, raw_aug1)
-            aug_target2 = vectors.load_multiple_words(file, raw_aug2)
-        else:
-            aug_target1 = augmentation.load_multiple_augments(raw_t1, file)
-            aug_target2 = augmentation.load_multiple_augments(raw_t2, file)
-    else:
-        test_vectors1 = database_handler.get_multiple_vectors_from_db(raw_t1, database)
-        logging.info("DB: First set added to memory")
-        test_vectors2 = database_handler.get_multiple_vectors_from_db(raw_t2, database)
-        logging.info("DB: Second set added to memory")
-        logging.info("DB: Found set sizes: " + str(len(test_vectors1)) + " " + str(len(test_vectors2)))
-        if augment_flag:
-            raw_aug1 = content['A1'].split(' ')
-            raw_aug2 = content['A2'].split(' ')
-            aug_target1 = database_handler.get_multiple_vectors_from_db(raw_aug1, database)
-            aug_target2 = database_handler.get_multiple_vectors_from_db(raw_aug2, database)
-        else:
-            aug_target1 = augmentation.load_multiple_augments(raw_t1, database)
-            aug_target2 = augmentation.load_multiple_augments(raw_t2, database)
 
-    return test_vectors1, test_vectors2, aug_target1, aug_target2
+    if database == "uploadSpace":
+        file = "uploads\\files\\" + database
+        target_vectors1 = vectors.load_multiple_words(file, raw_t1)
+        logging.info("DB: First set added to memory")
+        target_vectors2 = vectors.load_multiple_words(file, raw_t2)
+        logging.info("DB: Second set added to memory")
+        attributes1 = vectors.load_multiple_words(file, raw_a1)
+        logging.info("DB: Third set added to memory")
+        attributes2 = vectors.load_multiple_words(file, raw_a2)
+        logging.info("DB: Fourth set added to memory")
+        word_list1 = list(target_vectors1.keys()) + list(attributes1.keys())
+        word_list2 = list(target_vectors2.keys()) + list(attributes2.keys())
+        augments_list1 = database_handler.get_multiple_augmentation_from_db(word_list1, database)
+        augments_list2 = database_handler.get_multiple_augmentation_from_db(word_list2, database)
+        augments_vecs1 = vectors.load_multiple_words(file, augments_list1)
+        augments_vecs2 = vectors.load_multiple_words(file, augments_list2)
+    else:
+        target_vectors1 = database_handler.get_multiple_vectors_from_db(raw_t1, database)
+        logging.info("DB: First set added to memory")
+        target_vectors2 = database_handler.get_multiple_vectors_from_db(raw_t2, database)
+        logging.info("DB: Second set added to memory")
+        attributes1 = database_handler.get_multiple_vectors_from_db(raw_a1, database)
+        logging.info("DB: Third set added to memory")
+        attributes2 = database_handler.get_multiple_vectors_from_db(raw_a2, database)
+        logging.info("DB: Fourth set added to memory")
+        logging.info("DB: Found set sizes: " + str(len(target_vectors1)) + " " + str(len(target_vectors2)))
+        word_list1 = list(target_vectors1.keys()) + list(attributes1.keys())
+        word_list2 = list(target_vectors2.keys()) + list(attributes2.keys())
+        augments_list1 = database_handler.get_multiple_augmentation_from_db(word_list1, database)
+        augments_list2 = database_handler.get_multiple_augmentation_from_db(word_list2, database)
+        augments_vecs1 = database_handler.get_multiple_vectors_from_db(augments_list1, database)
+        augments_vecs2 = database_handler.get_multiple_vectors_from_db(augments_list2, database)
+
+    return target_vectors1, target_vectors2, attributes1, attributes2, augments_vecs1, augments_vecs2
 
 
 def retrieve_vectors_from_json(content):

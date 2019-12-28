@@ -66,7 +66,7 @@ def get_multiple_vectors_from_db(word_list, database):
                 logging.info("DB: Found vector for " + word)
             except:
                 logging.info("DB: No vector found for " + word)
-                print(command)
+                # print(command)
                 pass
     except (Exception, psycopg2.DatabaseError) as error:
         logging.error("DB: Database error", error)
@@ -100,7 +100,7 @@ def get_augmentation_from_db(word):
     return augmentation
 
 
-def get_multiple_augmentation_from_db(word_list):
+def get_multiple_augmentation_from_db(word_list, database):
     conn = None
     augmentations = {}
     try:
@@ -117,8 +117,9 @@ def get_multiple_augmentation_from_db(word_list):
                 logging.info("DB: Found augmentation for " + word + ": " + str(data))
             except:
                 logging.info("DB: No vector found for " + word)
-                data = augmentation.load_augment(word)
-                augmentations[word] = data
+                # data = augmentation.load_augment(word, da)
+                data = get_vector_from_database(word, database)
+                # augmentations[word] = data
                 pass
     except psycopg2.DatabaseError as error:
         logging.error("DB: Database error", error)

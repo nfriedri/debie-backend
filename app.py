@@ -1,3 +1,4 @@
+import io
 import logging
 import os
 import traceback
@@ -12,6 +13,7 @@ import bias_eval_methods
 import calculation
 import database_handler
 import debias_methods
+import vectors
 
 
 ''' RestAPI '''
@@ -19,6 +21,7 @@ import debias_methods
 
 UPLOAD_FOLDER = 'C:\\Users\\Niklas Friedrich\\Documents\\GitHub\\debie_backend\\uploads\\files'
 ALLOWED_EXTENSIONS = {'txt', 'vec'}
+MAX_CONTENT_LENGTH = 250 * 1024 * 1024
 
 app = Flask(__name__)
 CORS(app)

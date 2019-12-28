@@ -126,12 +126,18 @@ def cosine_similarity(vector1, vector2):
 
 
 # Concatenates two dictionaries to one big
-def concatenate_dicts(dict1, dict2):
+def concatenate_dicts(dict1, dict2, dict3=None, dict4=None):
     result = {}
     for word in dict1:
         result[word] = dict1[word]
     for word in dict2:
         result[word] = dict2[word]
+    if dict3 is not None:
+        for word in dict3:
+            result[word] = dict3[word]
+    if dict4 is not None:
+        for word in dict4:
+            result[word] = dict4[word]
     return result
 
 
@@ -143,7 +149,7 @@ def euclidean_distance(vector1, vector2):
     return distance
 
 
-def principal_componant_analysis(vector_dict1, vector_dict2):
+def principal_componant_analysis(vector_dict1, vector_dict2, vector_dict3=None, vector_dict4=None):
     logging.info("PCA: Principal composant analysis started")
     vector_dict1_copy, vector_dict2_copy = create_duplicates(vector_dict1, vector_dict2)
     array_words = []
@@ -154,6 +160,16 @@ def principal_componant_analysis(vector_dict1, vector_dict2):
     for word in vector_dict2_copy:
         array_words.append(word)
         array2d.append(list(vector_dict2_copy[word]))
+    if vector_dict3 is not None:
+        vector_dict3_copy = create_duplicates(vector_dict3)
+        for word in vector_dict3_copy:
+            array_words.append(word)
+            array2d.append(list(vector_dict3_copy[word]))
+    if vector_dict4 is not None:
+        vector_dict4_copy = create_duplicates(vector_dict4)
+        for word in vector_dict4_copy:
+            array_words.append(word)
+            array2d.append(list(vector_dict4_copy[word]))
     pca2 = PCA(n_components=2)
     prinicpal_components = pca2.fit_transform(numpy.array(array2d))
     results = {}
