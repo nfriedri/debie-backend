@@ -15,6 +15,10 @@ import database_handler
 import debias_methods
 import vectors
 
+word_list = ["man", "woman", "programmer", "homemaker"]
+words = database_handler.get_multiple_vectors_from_db(word_list, 'fasttext')
+print(words)
+print(calculation.principal_componant_analysis(words))
 
 ''' RestAPI '''
 # FLASK, CORS & Logging configuration
@@ -150,9 +154,11 @@ def bias_evaluations_all():
 def bias_evaluations_ect():
     logging.info("APP: Bias Evaluation ECT Method is called")
     content = request.get_json()
-    database = request.args.to_dict()['space']
-    logging.info("APP: Starting evaluation process")
-    vector_flag = request.args.to_dict()['vectors']
+    records = request.args.to_dict()
+    database = records['space']
+    vector_flag = 'false'
+    if 'vectors' in records.keys():
+        vector_flag = request.args.to_dict()['vectors']
     if vector_flag == 'false':
         target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_evaluation(content, database)
     else:
@@ -176,9 +182,11 @@ def bias_evaluations_ect():
 def bias_evaluations_bat():
     logging.info("APP: Bias Evaluation BAT Method is called")
     content = request.get_json()
-    database = request.args.to_dict()['space']
-    logging.info("APP: Starting evaluation process")
-    vector_flag = request.args.to_dict()['vectors']
+    records = request.args.to_dict()
+    database = records['space']
+    vector_flag = 'false'
+    if 'vectors' in records.keys():
+        vector_flag = request.args.to_dict()['vectors']
     if vector_flag == 'false':
         target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_evaluation(content, database)
     else:
@@ -204,9 +212,12 @@ def bias_evaluations_bat():
 def bias_evaluations_weat():
     logging.info("APP: Bias Evaluation WEAT Method is called")
     content = request.get_json()
-    database = request.args.to_dict()['space']
-    logging.info("APP: Starting evaluation process")
-    vector_flag = request.args.to_dict()['vectors']
+    content = request.get_json()
+    records = request.args.to_dict()
+    database = records['space']
+    vector_flag = 'false'
+    if 'vectors' in records.keys():
+        vector_flag = request.args.to_dict()['vectors']
     if vector_flag == 'false':
         target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_evaluation(content, database)
     else:
@@ -230,9 +241,11 @@ def bias_evaluations_weat():
 def bias_evaluations_kmeans():
     logging.info("APP: Bias Evaluation KMEANS Method is called")
     content = request.get_json()
-    database = request.args.to_dict()['space']
-    logging.info("APP: Starting evaluation process")
-    vector_flag = request.args.to_dict()['vectors']
+    records = request.args.to_dict()
+    database = records['space']
+    vector_flag = 'false'
+    if 'vectors' in records.keys():
+        vector_flag = request.args.to_dict()['vectors']
     if vector_flag == 'false':
         target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_evaluation(content, database)
     else:
@@ -377,6 +390,6 @@ def allowed_file(filename):
 
 
 if __name__ == '__main__':
-    app.run()
+     app.run()
 
 
