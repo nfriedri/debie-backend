@@ -13,12 +13,7 @@ import bias_eval_methods
 import calculation
 import database_handler
 import debias_methods
-import vectors
 
-word_list = ["man", "woman", "programmer", "homemaker"]
-words = database_handler.get_multiple_vectors_from_db(word_list, 'fasttext')
-print(words)
-print(calculation.principal_componant_analysis(words))
 
 ''' RestAPI '''
 # FLASK, CORS & Logging configuration
@@ -390,6 +385,6 @@ def allowed_file(filename):
 
 
 if __name__ == '__main__':
-     app.run()
+    app.run()
 
 
