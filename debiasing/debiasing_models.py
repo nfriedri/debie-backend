@@ -5,14 +5,20 @@ from flask import jsonify
 
 import JSONFormatter
 import calculation
-from debiasing import bam2, gbdd
+from debiasing import bam, gbdd
 
 
 def return_full_debiasing(methods, arguments, content):
     logging.info("APP-DE: Forwarding to related definitions")
-    database = arguments['space']
-    augment_flag = arguments['augments']
-    target1, target2, attr1, attr2, augments1, augments2 = JSONFormatter.retrieve_vectors_debiasing(content, database, augment_flag)
+    database = 'fasttext'
+    augment_flag = 'false'
+    if 'space' in arguments.keys():
+        database = arguments['space']
+    if 'augments' in arguments.keys():
+        augment_flag = arguments['augments']
+
+    target1, target2, attr1, attr2, augments1, augments2, augments3, augments4 = JSONFormatter.retrieve_vectors_debiasing(
+        content, database, augment_flag)
     target1, target2 = calculation.check_sizes(target1, target2)
     attr1, attr2 = calculation.check_sizes(attr1, attr2)
     logging.info("APP: Final retrieved set sizes: T1=" + str(len(target1)) + " T2=" + str(len(target2)) + " A1=" + str(
@@ -24,17 +30,24 @@ def return_full_debiasing(methods, arguments, content):
     res1, res2, res3, res4 = {}, {}, {}, {}
     try:
         if methods is None:
-            res1, res2, res3, res4 = gbdd.generalized_bias_direction_debiasing(target1, target2, attr1, attr2, augments1, augments2)
+            res1, res2, res3, res4 = gbdd.generalized_bias_direction_debiasing(target1, target2, attr1, attr2,
+                                                                            augments1, augments2, augments3, augments4)
         if methods == 'gbdd':
-            res1, res2, res3, res4 = gbdd.generalized_bias_direction_debiasing(target1, target2, attr1, attr2, augments1, augments2)
+            res1, res2, res3, res4 = gbdd.generalized_bias_direction_debiasing(target1, target2, attr1, attr2,
+                                                                            augments1, augments2, augments3, augments4)
         if methods == 'bam':
-            res1, res2, res3, res4= bam2.bias_alignment_model(target1, target2, attr1, attr2, augments1, augments2)
+            res1, res2, res3, res4 = bam.bias_alignment_model(target1, target2, attr1, attr2, augments1, augments2,
+                                                              augments3, augments4)
         if methods == 'gbddxbam':
-            res1, res2, res3, res4 = gbdd.generalized_bias_direction_debiasing(target1, target2, attr1, attr2, augments1, augments2)
-            res1, res2, res3, res4 = bam2.bias_alignment_model(res1, res2, res3, res4, augments1, augments2)
+            res1, res2, res3, res4 = gbdd.generalized_bias_direction_debiasing(target1, target2, attr1, attr2,
+                                                                            augments1, augments2, augments3, augments4)
+            res1, res2, res3, res4 = bam.bias_alignment_model(res1, res2, res3, res4, augments1, augments2, augments3,
+                                                              augments4)
         if methods == 'bamxgbdd':
-            res1, res2, res3, res4 = bam2.bias_alignment_model(target1, target2, attr1, attr2, augments1, augments2)
-            res1, res2, res3, res4 = gbdd.generalized_bias_direction_debiasing(res1, res2, res3, res4, augments1, augments2)
+            res1, res2, res3, res4 = bam.bias_alignment_model(target1, target2, attr1, attr2, augments1, augments2,
+                                                              augments3, augments4)
+            res1, res2, res3, res4 = gbdd.generalized_bias_direction_debiasing(res1, res2, res3, res4, augments1,
+                                                                               augments2, augments3, augments4)
         biased_terms = calculation.concatenate_dicts(target1, target2, attr1, attr2)
         debiased_terms = calculation.concatenate_dicts(res1, res2, res3, res4)
         response = json.dumps(
@@ -51,8 +64,9 @@ def return_pca_debiasing(methods, arguments, content):
     logging.info("APP-DE: Forwarding to related definitions")
     database = arguments['space']
     augment_flag = arguments['augments']
-    target1, target2, attr1, attr2, augments1, augments2 = JSONFormatter.retrieve_vectors_debiasing(content, database,
-                                                                                                    augment_flag)
+    target1, target2, attr1, attr2, augments1, augments2, augments3, augments4 = JSONFormatter.retrieve_vectors_debiasing(
+        content, database,
+        augment_flag)
     target1, target2 = calculation.check_sizes(target1, target2)
     attr1, attr2 = calculation.check_sizes(attr1, attr2)
     logging.info("APP: Final retrieved set sizes: T1=" + str(len(target1)) + " T2=" + str(len(target2)) + " A1=" + str(
@@ -65,20 +79,25 @@ def return_pca_debiasing(methods, arguments, content):
     try:
         if methods is None:
             res1, res2, res3, res4 = gbdd.generalized_bias_direction_debiasing(target1, target2, attr1, attr2,
-                                                                               augments1, augments2)
+                                                                               augments1, augments2, augments3,
+                                                                               augments4)
         if methods == 'gbdd':
             res1, res2, res3, res4 = gbdd.generalized_bias_direction_debiasing(target1, target2, attr1, attr2,
-                                                                               augments1, augments2)
+                                                                               augments1, augments2, augments3,
+                                                                               augments4)
         if methods == 'bam':
-            res1, res2, res3, res4 = bam2.bias_alignment_model(target1, target2, attr1, attr2, augments1, augments2)
+            res1, res2, res3, res4 = bam.bias_alignment_model(target1, target2, attr1, attr2, augments1, augments2,
+                                                              augments3, augments4)
         if methods == 'gbddxbam':
             res1, res2, res3, res4 = gbdd.generalized_bias_direction_debiasing(target1, target2, attr1, attr2,
-                                                                               augments1, augments2)
-            res1, res2, res3, res4 = bam2.bias_alignment_model(res1, res2, res3, res4, augments1, augments2)
+                                                                               augments1, augments2, augments3,
+                                                                               augments4)
+            res1, res2, res3, res4 = bam.bias_alignment_model(res1, res2, res3, res4, augments1, augments2, augments3,
+                                                              augments4)
         if methods == 'bamxgbdd':
-            res1, res2, res3, res4 = bam2.bias_alignment_model(target1, target2, attr1, attr2, augments1, augments2)
+            res1, res2, res3, res4 = bam.bias_alignment_model(target1, target2, attr1, attr2, augments1, augments2)
             res1, res2, res3, res4 = gbdd.generalized_bias_direction_debiasing(res1, res2, res3, res4, augments1,
-                                                                               augments2)
+                                                                               augments2, augments3, augments4)
         target1_copy, target2_copy = calculation.create_duplicates(target1, target2)
         attr1_copy, attr2_copy = calculation.create_duplicates(attr1, attr2)
         res1_copy, res2_copy, res3_copy, res4_copy = calculation.create_duplicates(res1, res2, res3, res4)
@@ -96,4 +115,3 @@ def return_pca_debiasing(methods, arguments, content):
         return jsonify(message="DEBIASING ERROR"), 500
     logging.info("APP: Debiasing process finished")
     return response, 200
-

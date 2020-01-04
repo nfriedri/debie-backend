@@ -3,11 +3,15 @@ import numpy
 import logging
 
 
-def generalized_bias_direction_debiasing(target_set1, target_set2, attributes1, attributes2, augments1, augments2):
+def generalized_bias_direction_debiasing(target_set1, target_set2, attributes1, attributes2, augments1, augments2,
+                                         augments3, augments4):
     logging.info("GBDD: Debiasing started")
     target1_copy, target2_copy = calculation.create_duplicates(target_set1, target_set2)
     attributes1_copy, attributes2_copy = calculation.create_duplicates(attributes1, attributes2)
     augments1_copy, augments2_copy = calculation.create_duplicates(augments1, augments2)
+    augments3_copy, augments4_copy = calculation.create_duplicates(augments3, augments4)
+    augments1_copy = calculation.concatenate_dicts(augments1_copy, augments3_copy)
+    augments2_copy = calculation.concatenate_dicts(augments2_copy, augments4_copy)
 
     aug1, aug2 = calculation.transform_multiple_dicts_to_lists(augments1_copy, augments2_copy)
     logging.info("GBDD: Vector dictionaries and lists prepared successfully")

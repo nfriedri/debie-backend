@@ -2,42 +2,65 @@ import numpy
 import calculation
 
 
-def bias_alignment_model(target_set1, target_set2):
+def bias_alignment_model(target_set1, target_set2, attributes1, attributes2, augments1, augments2, augments3, augments4):
     target1_copy, target2_copy = calculation.create_duplicates(target_set1, target_set2)
-    target1, target2 = calculation.transform_multiple_dicts_to_lists(target1_copy, target2_copy)
-    vector_space = target1 + target2
-    word_space_list = list(target_set1) + list(target_set2)
-    matrix_xt1 = stack_vectors(target1)
-    matrix_xt2 = stack_vectors(target2)
-    matrix_wx = orthogonal_map(matrix_xt1, matrix_xt2)
-    debiased_space = bam_debiased_space(vector_space, matrix_wx)
+    attr1_copy, attr2_copy = calculation.create_duplicates(attributes1, attributes2)
+    augments1_copy, augments2_copy = calculation.create_duplicates(augments1, augments2)
+    augments3_copy, augments4_copy = calculation.create_duplicates(augments3, augments4)
+
+    term_list,  vector_list = [], []
+    augments_list, aug_vecs, aug1_list, aug2_list, = [], [], [], [],
+
+    for word in target1_copy:
+        term_list.append(word)
+        vector_list.append(list(target1_copy[word]))
+    for word in target2_copy:
+        term_list.append(word)
+        vector_list.append(list(target2_copy[word]))
+    for word in attr1_copy:
+        term_list.append(word)
+        vector_list.append(numpy.array(list(attr1_copy[word])))
+    for word in attr2_copy:
+        term_list.append(word)
+        vector_list.append(numpy.array(list(attr2_copy[word])))
+
+    for word in augments1:
+        augments_list.append(word)
+        aug1_list.append(numpy.array(list(augments1_copy[word])))
+    for word in augments2:
+        augments_list.append(word)
+        aug2_list.append(numpy.array(list(augments2_copy[word])))
+    for word in augments3:
+        augments_list.append(word)
+        aug1_list.append(numpy.array(list(augments3_copy[word])))
+    for word in augments4:
+        augments_list.append(word)
+        aug2_list.append(numpy.array(list(augments4_copy[word])))
+
+    term_pairs = []
+    for i in range(len(aug1_list)):
+        for j in range(len(aug2_list)):
+            term_pairs.append([aug1_list[i], aug2_list[j]])
+
+    x_t1 = numpy.array([term_pairs[i][0] for i in range(len(term_pairs))])
+    x_t2 = numpy.array([term_pairs[i][1] for i in range(len(term_pairs))])
+    multi = numpy.matmul(numpy.transpose(x_t1), x_t2)
+    u, s, vh = numpy.linalg.svd(multi)
+    w_matrix = numpy.matmul(u, vh)
+    new_x_matrix = numpy.matmul(vector_list, w_matrix)
+    result_matrix = 0.5 * (numpy.array(vector_list) + new_x_matrix)
     result_dict = {}
-    for i in range(len(word_space_list)):
-        result_dict[word_space_list[i]] = debiased_space[i]
-    return result_dict
+    for i in range(len(term_list)):
+        result_dict[term_list[i]] = result_matrix[i]
+    t1, t2, a1, a2 = {}, {}, {}, {}
+    for word in result_dict:
+        if word in target1_copy:
+            t1[word] = result_dict[word]
+        if word in target2_copy:
+            t2[word] = result_dict[word]
+        if word in attr1_copy:
+            a1[word] = result_dict[word]
+        if word in attr2_copy:
+            a2[word] = result_dict[word]
 
-
-def stack_vectors(target_list1, target_list2):
-    stacked_vecs = []
-    matrix = []
-    for i in range(len(target_list1)):
-        for j in range(len(target_list2)):
-            array = numpy.array(target_list1[i]) - numpy.array((target_list2[j]))
-            matrix.append(array)
-    for i in range(1, len(vector_list)-1):
-        vector = numpy.concatenate((numpy.array(vector_list[i-1]), numpy.array(vector_list[i+1])), axis=None)
-        stacked_vecs.append(vector)
-    stacked_vecs.append(numpy.concatenate((numpy.array(vector_list[0]), numpy.array(vector_list[len(vector_list)-1])), axis=None))
-    stacked_vecs.append(numpy.concatenate((numpy.array(vector_list[len(vector_list)-1]), numpy.array(vector_list[0])), axis=None))
-    return stacked_vecs
-
-
-def orthogonal_map(xt1, xt2):
-    u, s, vh = numpy.linalg.svd(numpy.matmul(xt2, numpy.transpose(xt1)))
-    wx = numpy.matmul(u, vh)
-    return wx
-
-
-def bam_debiased_space(vector_space, wx):
-    new_vec_space = (0.5 * numpy.array(vector_space) + numpy.matmul(numpy.array(vector_space), numpy.array(wx)))
-    return new_vec_space
+    return t1, t2, a1, a2

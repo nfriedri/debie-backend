@@ -1,73 +1,91 @@
+import numpy as np
+
 import calculation
-import logging
 
 
-# Method starts biased analogy test
-def biased_analogy_test(test_set1, test_set2, argument_set1, argument_set2):
-    logging.info("BAT: Calculation started:")
-    test1, test2, argument1, argument2 = calculation.create_duplicates(test_set1, test_set2, argument_set1,
-                                                                       argument_set2)
-    numpy_test1 = calculation.create_numpy_vector(test1)
-    numpy_test2 = calculation.create_numpy_vector(test2)
-    numpy_arg1 = calculation.create_numpy_vector(argument1)
-    numpy_arg2 = calculation.create_numpy_vector(argument2)
-    logging.info("BAT: Vector dictionaries and lists prepared successfully")
-    # Calculate query vectors for each combination of words
-    query_vectors1, query_vectors2 = query_calculation(numpy_test1, numpy_test2, numpy_arg1, numpy_arg2)
+def bias_analogy_test(target_set1, target_set2, attribute_set1, attribute_set2):
+    target1, target2, attribute1, attribute2 = calculation.create_duplicates(target_set1, target_set2, attribute_set1, attribute_set2)
+    counter = 0
+    vocab = {}
+    vectors = []
+    target_1 = []
+    target_2 = []
+    attributes_1 = []
+    attributes_2 = []
 
-    # Rank vectors after euclidean distance to query vectors
-    rank_result = vector_ranking(query_vectors1, query_vectors2, numpy_arg1, numpy_arg2)
-    logging.info("BAT: Finished calculation")
-    logging.info("BAT: Results: " + str(rank_result))
-    return rank_result
+    for word in target1:
+        vocab[word] = counter
+        counter += 1
+        target_1.append(word)
+        vectors.append(np.array(list(target1[word])))
+    for word in target2:
+        vocab[word] = counter
+        counter += 1
+        target_2.append(word)
+        vectors.append(np.array(list(target2[word])))
+    for word in attribute1:
+        vocab[word] = counter
+        counter += 1
+        attributes_1.append(word)
+        vectors.append(np.array(list(attribute1[word])))
+    for word in attribute2:
+        vocab[word] = counter
+        counter += 1
+        attributes_2.append(word)
+        vectors.append(np.array(list(attribute2[word])))
+    attributes_paired = []
+    for a1 in attributes_1:
+        for a2 in attributes_2:
+            attributes_paired.append((a1, a2))
 
+    temporary_vocab = list(set(target_1 + target_2 + attributes_1 + attributes_2))
+    dictionary_list = []
+    vector_matrix = []
+    for w in temporary_vocab:
+        if w in vocab:
+            vector_matrix.append(vectors[vocab[w]])
+            dictionary_list.append(w)
 
-# Calculate query vectors for each combination of words
-def query_calculation(numpy_test1, numpy_test2, numpy_arg1, numpy_arg2):
-    query_vec1 = []
-    query_vec2 = []
-    logging.info("BAT: Started Query Calculation")
-    integer = 0
-    for i in range(len(numpy_test1)):
-        for j in range(len(numpy_test2)):
-            for k in range(len(numpy_arg1)):
-                for l in range(len(numpy_arg2)):
-                    query1 = numpy_test1[i] - numpy_test2[j] + numpy_arg2[l]
-                    query2 = numpy_arg1[k] - numpy_test1[i] + numpy_test2[j]
-                    query_vec1.append(query1)
-                    query_vec2.append(query2)
-                    integer += 1
-                    if integer % 100 == 0:
-                        # print(integer)
-                        print("Query_vec     " + str(len(query_vec1)))
+    vector_matrix = np.array(vector_matrix)
+    vocab = {dictionary_list[i]: i for i in range(len(dictionary_list))}
+    eq_pairs = []
+    for t1 in target_1:
+        for t2 in target_2:
+            eq_pairs.append((t1, t2))
 
+    for pair in eq_pairs:
+        t1 = pair[0]
+        t2 = pair[1]
+        vec_t1 = vector_matrix[vocab[t1]]
+        vec_t2 = vector_matrix[vocab[t2]]
 
-    logging.info("BAT: Finished query calculation successfully")
-    return query_vec1, query_vec2
+        biased = []
+        totals = []
+        for a1, a2 in attributes_paired:
+            vectors_a1 = vector_matrix[vocab[a1]]
+            vectors_a2 = vector_matrix[vocab[a2]]
 
+            diff_vec = vec_t1 - vec_t2
 
-# Rank vectors after euclidean distance to query vectors
-def vector_ranking(query_vectors1, query_vectors2, arg_vectors1, arg_vectors2):
-    logging.info("BAT: Started vector ranking")
-    biased = 0
-    others = 0
-    print(len(query_vectors1) * len(arg_vectors2))
-    for i in range(len(query_vectors1)):
-        for j in range(len(arg_vectors2)):
-            if calculation.euclidean_distance(query_vectors1[i], arg_vectors2[j]) > calculation.euclidean_distance(
-                    query_vectors1[i], arg_vectors1[j]):
-                biased += 1
-                # if biased % 1000 == 0:
-                # print(biased)
-            else:
-                others += 1
-    for i in range(len(query_vectors2)):
-        for j in range(len(arg_vectors1)):
-            if calculation.euclidean_distance(query_vectors2[i], arg_vectors1[j]) > calculation.euclidean_distance(
-                    query_vectors2[i], arg_vectors2[j]):
-                biased += 1
-                # print('BIASED')
-            else:
-                others += 1
-    logging.info("BAT: Finished vector ranking")
-    return biased / others
+            query_1 = diff_vec + vectors_a2
+            query_2 = vectors_a1 - diff_vec
+
+            sims_q1 = np.sum(np.square(vector_matrix - query_1), axis=1)
+            sorted_q1 = np.argsort(sims_q1)
+            indices = np.where(sorted_q1 == vocab[a1])[0][0]
+            other_attr_2 = [x for x in attributes_2 if x != a2]
+            indices_other = [np.where(sorted_q1 == vocab[x])[0][0] for x in other_attr_2]
+            number_biased = [x for x in indices_other if indices < x]
+            biased.append(len(number_biased))
+            totals.append(len(indices_other))
+
+            sims_q2 = np.sum(np.square(vector_matrix - query_2), axis=1)
+            sorted_q2 = np.argsort(sims_q2)
+            indices = np.where(sorted_q2 == vocab[a2])[0][0]
+            other_attr_1 = [x for x in attributes_1 if x != a1]
+            indices_other = [np.where(sorted_q2 == vocab[x])[0][0] for x in other_attr_1]
+            number_biased = [x for x in indices_other if indices < x]
+            biased.append(len(number_biased))
+            totals.append(len(indices_other))
+
+        return sum(biased) / sum(totals)
