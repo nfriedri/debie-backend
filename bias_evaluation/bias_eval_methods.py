@@ -1,14 +1,36 @@
-import numpy
 from flask import jsonify
-import traceback
 
+import JSONFormatter
 import calculation
 from bias_evaluation import weat, ect, bat, k_means, bat2
 import logging
 
 
-def return_bias_evaluation(methods, target1, target2, arg1, arg2):
+def return_bias_evaluation(methods, arguments, content):
     logging.info("APP-BE: Forwarding to related definitions")
+    database = 'fasttext'
+    if 'space' in arguments.keys:
+        database = arguments['space']
+    vector_flag = 'false'
+    if 'vectors' in arguments.keys():
+        vector_flag = arguments['vectors']
+
+    if vector_flag == 'false':
+        target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_evaluation(content, database)
+    else:
+        target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_json(content)
+
+    target1, target2 = calculation.check_sizes(target1, target2)
+    arg1, arg2 = calculation.check_sizes(arg1, arg2)
+    if len(target1) == 0 or len(target2) == 0:
+        logging.info("APP: Stopped, no values found in database")
+        return jsonify(message="ERROR: No values found in database."), 404
+    if len(arg1) == 0 and len(arg2) == 0 and methods != 'kmeans':
+        return jsonify(message="No attribute sets provided, only k means++ is executable"), 400
+    logging.info("APP: Final retrieved set sizes: T1=" + str(len(target1)) + " T2=" + str(len(target2)) + " A1=" + str(
+        len(arg1)) + " A2=" + str(len(arg2)))
+    logging.info("APP: Evaluation process started")
+
     if methods is None:
         return return_eval_all(target1, target2, arg1, arg2)
     if methods == 'all':

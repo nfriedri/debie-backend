@@ -17,7 +17,7 @@ def get_vector_from_database(word, database):
     """.format(word)
     # print(command)
     try:
-        conn = psycopg2.connect(dbname=database, user='postgres', host='', password='audi')
+        conn = psycopg2.connect(dbname=database, user='postgres', host='localhost', password='audi')
         cur = conn.cursor()
         cur.execute(command)
         logging.info("DB: Connected successfully to " + database)
@@ -44,7 +44,7 @@ def get_multiple_vectors_from_db(word_list, database):
     tablename = database
 
     try:
-        conn = psycopg2.connect(dbname=database, user='postgres', host='', password='audi')
+        conn = psycopg2.connect(dbname=database, user='postgres', host='localhost', password='audi')
         cur = conn.cursor()
         logging.info("DB: Connected successfully to " + database)
         for word in word_list:
@@ -81,7 +81,7 @@ def get_augmentation_from_db(word):
     conn = None
     augmentation = []
     try:
-        conn = psycopg2.connect(dbname='augmentation', user='postgres', host='', password='audi')
+        conn = psycopg2.connect(dbname='augmentation', user='postgres', host='localhost', password='audi')
         cur = conn.cursor()
         logging.info("DB: Connected successfully to augmentation")
         print("DB: Connected successfully to augmentation")
@@ -104,7 +104,7 @@ def get_multiple_augmentation_from_db(word_list, database):
     conn = None
     augmentations = {}
     try:
-        conn = psycopg2.connect(dbname='augmentation', user='postgres', host='', password='audi')
+        conn = psycopg2.connect(dbname='augmentation', user='postgres', host='localhost', password='audi')
         cur = conn.cursor()
         logging.info("DB: Connected successfully to augmentation")
         for word in word_list:
@@ -138,7 +138,7 @@ def word_for_nearest_vector(request_vector, database):
     maximum_vector = []
     maximum_cosine = 0.0
     try:
-        conn = psycopg2.connect(dbname=database, user='postgres', host='', password='audi')
+        conn = psycopg2.connect(dbname=database, user='postgres', host='localhost', password='audi')
         cur = conn.cursor()
         command = """SELECT vector FROM {} FETCH FIRST 10000 ONLY""".format(database)
         cur.execute(command)
