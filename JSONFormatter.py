@@ -153,7 +153,7 @@ def retrieve_vectors_debiasing(content, database, augment_flag):
     return target_vectors1, target_vectors2, attributes1, attributes2, augments_T1, augments_T2, augments_A1, augments_A2
 
 
-def retrieve_vectors_from_json(content):
+def retrieve_vectors_from_json_evaluation(content):
     logging.info("DB: Loading Vectors from JSON Input.")
     target_dict1 = {}
     target_dict2 = {}
@@ -177,6 +177,52 @@ def retrieve_vectors_from_json(content):
         attribute_dict2[word] = vec.split(' ')
     logging.info("DB: Loaded JSON Input successfully.")
     return target_dict1, target_dict2, attribute_dict1, attribute_dict2
+
+
+def retrieve_vectors_from_json_debiasing(content):
+    logging.info("DB: Loading Vectors from JSON Input.")
+    target_dict1 = {}
+    target_dict2 = {}
+    attribute_dict1 = {}
+    attribute_dict2 = {}
+    augmentation_dict1 = {}
+    augmentation_dict2 = {}
+    augmentation_dict3 = {}
+    augmentation_dict4 = {}
+    for pair in content['T1']:
+        word = pair['word']
+        vec = pair['vec']
+        target_dict1[word] = vec.split(' ')
+    for pair in content['T2']:
+        word = pair['word']
+        vec = pair['vec']
+        target_dict2[word] = vec.split(' ')
+    for pair in content['A1']:
+        word = pair['word']
+        vec = pair['vec']
+        attribute_dict1[word] = vec.split(' ')
+    for pair in content['A2']:
+        word = pair['word']
+        vec = pair['vec']
+        attribute_dict2[word] = vec.split(' ')
+    for pair in content['AugT1']:
+        word = pair['word']
+        vec = pair['vec']
+        augmentation_dict1[word] = vec.split(' ')
+    for pair in content['AugT2']:
+        word = pair['word']
+        vec = pair['vec']
+        augmentation_dict1[word] = vec.split(' ')
+    for pair in content['AugA1']:
+        word = pair['word']
+        vec = pair['vec']
+        augmentation_dict1[word] = vec.split(' ')
+    for pair in content['AugA2']:
+        word = pair['word']
+        vec = pair['vec']
+        augmentation_dict1[word] = vec.split(' ')
+    logging.info("DB: Loaded JSON Input successfully.")
+    return target_dict1, target_dict2, attribute_dict1, attribute_dict2, augmentation_dict1, augmentation_dict2, augmentation_dict3, augmentation_dict4
 
 
 def dict_to_json(vector_dict):
