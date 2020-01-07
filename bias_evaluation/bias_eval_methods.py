@@ -9,7 +9,7 @@ import logging
 def return_bias_evaluation(methods, arguments, content):
     logging.info("APP-BE: Forwarding to related definitions")
     database = 'fasttext'
-    if 'space' in arguments.keys:
+    if 'space' in arguments.keys():
         database = arguments['space']
     vector_flag = 'false'
     if 'vectors' in arguments.keys():
@@ -18,7 +18,7 @@ def return_bias_evaluation(methods, arguments, content):
     if vector_flag == 'false':
         target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_evaluation(content, database)
     else:
-        target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_json(content)
+        target1, target2, arg1, arg2 = JSONFormatter.retrieve_vectors_from_json_evaluation(content)
 
     target1, target2 = calculation.check_sizes(target1, target2)
     arg1, arg2 = calculation.check_sizes(arg1, arg2)

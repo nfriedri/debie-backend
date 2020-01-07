@@ -40,7 +40,7 @@ def test():
 def valid_JSON():
     print('Valid JSON called')
     content = request.get_json()
-    t1, t2, a1, a2 = JSONFormatter.retrieve_vectors_from_json(content)
+    t1, t2, a1, a2 = JSONFormatter.retrieve_vectors_from_json_evaluation(content)
     print(t1)
     print(t2)
     print(a1)
