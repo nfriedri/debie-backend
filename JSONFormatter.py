@@ -231,3 +231,11 @@ def dict_to_json(vector_dict):
     for word in vector_dict_copy:
         string_dict[word] = str(list(vector_dict_copy[word]))
     return string_dict
+
+
+def dict_keys_to_string(vector_dict):
+    vector_dict_copy = calculation.create_duplicates(vector_dict)
+    keys = ''
+    for word in vector_dict_copy.keys():
+        keys += str(word) + ' '
+    return keys

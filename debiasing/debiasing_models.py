@@ -8,7 +8,7 @@ import calculation
 from debiasing import bam, gbdd
 
 
-def return_full_debiasing(methods, arguments, content):
+def return_full_debiasing(models, arguments, content):
     logging.info("APP-DE: Forwarding to related definitions")
     database = 'fasttext'
     augment_flag = 'false'
@@ -35,24 +35,24 @@ def return_full_debiasing(methods, arguments, content):
     logging.info("APP: Debiasing process started")
     res1, res2, res3, res4 = {}, {}, {}, {}
     try:
-        if methods is None:
+        if models is None:
             res1, res2, res3, res4 = gbdd.generalized_bias_direction_debiasing(target1, target2, attr1, attr2,
                                                                                augments1, augments2, augments3,
                                                                                augments4)
-        if methods == 'gbdd':
+        if models == 'gbdd':
             res1, res2, res3, res4 = gbdd.generalized_bias_direction_debiasing(target1, target2, attr1, attr2,
                                                                                augments1, augments2, augments3,
                                                                                augments4)
-        if methods == 'bam':
+        if models == 'bam':
             res1, res2, res3, res4 = bam.bias_alignment_model(target1, target2, attr1, attr2, augments1, augments2,
                                                               augments3, augments4)
-        if methods == 'gbddxbam':
+        if models == 'gbddxbam':
             res1, res2, res3, res4 = gbdd.generalized_bias_direction_debiasing(target1, target2, attr1, attr2,
                                                                                augments1, augments2, augments3,
                                                                                augments4)
             res1, res2, res3, res4 = bam.bias_alignment_model(res1, res2, res3, res4, augments1, augments2, augments3,
                                                               augments4)
-        if methods == 'bamxgbdd':
+        if models == 'bamxgbdd':
             res1, res2, res3, res4 = bam.bias_alignment_model(target1, target2, attr1, attr2, augments1, augments2,
                                                               augments3, augments4)
             res1, res2, res3, res4 = gbdd.generalized_bias_direction_debiasing(res1, res2, res3, res4, augments1,
@@ -60,7 +60,7 @@ def return_full_debiasing(methods, arguments, content):
         biased_terms = calculation.concatenate_dicts(target1, target2, attr1, attr2)
         debiased_terms = calculation.concatenate_dicts(res1, res2, res3, res4)
         response = json.dumps(
-            {"EmbeddingSpace": database, "Method": methods,
+            {"EmbeddingSpace": database, "Model": models,
              "BiasedVecs:": JSONFormatter.dict_to_json(biased_terms),
              "DebiasedVecs": JSONFormatter.dict_to_json(debiased_terms)})
     except:
@@ -69,7 +69,7 @@ def return_full_debiasing(methods, arguments, content):
     return response, 200
 
 
-def return_pca_debiasing(methods, arguments, content):
+def return_pca_debiasing(models, arguments, content):
     logging.info("APP-DE: Forwarding to related definitions")
     database = arguments['space']
     augment_flag = arguments['augments']
@@ -86,25 +86,26 @@ def return_pca_debiasing(methods, arguments, content):
     logging.info("APP: Debiasing process started")
     res1, res2, res3, res4 = {}, {}, {}, {}
     try:
-        if methods is None:
+        if models is None:
             res1, res2, res3, res4 = gbdd.generalized_bias_direction_debiasing(target1, target2, attr1, attr2,
                                                                                augments1, augments2, augments3,
                                                                                augments4)
-        if methods == 'gbdd':
+        if models == 'gbdd':
             res1, res2, res3, res4 = gbdd.generalized_bias_direction_debiasing(target1, target2, attr1, attr2,
                                                                                augments1, augments2, augments3,
                                                                                augments4)
-        if methods == 'bam':
+        if models == 'bam':
             res1, res2, res3, res4 = bam.bias_alignment_model(target1, target2, attr1, attr2, augments1, augments2,
                                                               augments3, augments4)
-        if methods == 'gbddxbam':
+        if models == 'gbddxbam':
             res1, res2, res3, res4 = gbdd.generalized_bias_direction_debiasing(target1, target2, attr1, attr2,
                                                                                augments1, augments2, augments3,
                                                                                augments4)
             res1, res2, res3, res4 = bam.bias_alignment_model(res1, res2, res3, res4, augments1, augments2, augments3,
                                                               augments4)
-        if methods == 'bamxgbdd':
-            res1, res2, res3, res4 = bam.bias_alignment_model(target1, target2, attr1, attr2, augments1, augments2)
+        if models == 'bamxgbdd':
+            res1, res2, res3, res4 = bam.bias_alignment_model(target1, target2, attr1, attr2, augments1, augments2,
+                                                              augments3, augments4)
             res1, res2, res3, res4 = gbdd.generalized_bias_direction_debiasing(res1, res2, res3, res4, augments1,
                                                                                augments2, augments3, augments4)
         target1_copy, target2_copy = calculation.create_duplicates(target1, target2)
@@ -115,7 +116,7 @@ def return_pca_debiasing(methods, arguments, content):
         biased_pca = calculation.principal_componant_analysis(target1, target2, attr1, attr2)
         debiased_pca = calculation.principal_componant_analysis(res1, res2, res3, res4)
         response = json.dumps(
-            {"EmbeddingSpace": database, "Method": methods,
+            {"EmbeddingSpace": database, "Model": models,
              "BiasedVectorsPCA": JSONFormatter.dict_to_json(biased_pca),
              "DebiasedVectorsPCA": JSONFormatter.dict_to_json(debiased_pca),
              "BiasedVecs:": JSONFormatter.dict_to_json(biased_terms),

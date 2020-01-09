@@ -1,9 +1,12 @@
+import logging
+
 import numpy as np
 
 import calculation
 
 
 def bias_analogy_test(target_set1, target_set2, attribute_set1, attribute_set2):
+    logging.info("BAT: Calculation started")
     target1, target2, attribute1, attribute2 = calculation.create_duplicates(target_set1, target_set2, attribute_set1, attribute_set2)
     counter = 0
     vocab = {}
@@ -88,4 +91,6 @@ def bias_analogy_test(target_set1, target_set2, attribute_set1, attribute_set2):
             biased.append(len(number_biased))
             totals.append(len(indices_other))
 
-        return sum(biased) / sum(totals)
+        result = sum(biased) / sum(totals)
+        logging.info("BAT: Calculated successfully, result: " + str(result))
+        return result

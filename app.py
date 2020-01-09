@@ -288,7 +288,7 @@ def upload_embedding_space():
         print('Case 3')
         return resp
     else:
-        resp = jsonify({'message': 'Allowed file types are txt, pdf, png, jpg, jpeg, gif'})
+        resp = jsonify({'message': 'Allowed file types are txt, vec or vocab'})
         resp.status_code = 400
         print('Case 4')
         return resp
