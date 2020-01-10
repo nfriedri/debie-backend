@@ -94,15 +94,15 @@ def retrieve_single_augmentation():
     return response, 200
 
 
-@app.route('/REST/augmentations/first10k', methods=['POST'])
-def retrieve_multiple_augmentations_10k():
-    logging.info("APP: " + str(datetime.datetime.now()) + " Retrieve single augmentation is called")
+@app.route('/REST/augmentations/multiple', methods=['POST'])
+def retrieve_multiple_augmentations():
+    logging.info("APP: " + str(datetime.datetime.now()) + " Retrieve multiple augmentations is called")
     bar = request.args.to_dict()
     space = bar['space']
     content = request.get_json()
     word_list = content['data'].split(' ')
     try:
-        augmentations = database_handler.get_multiple_augmentation_from_db(word_list)
+        augmentations = database_handler.get_multiple_augmentation_from_db(word_list, 'augmentation')
         print(word for word in augmentations)
         print(augmentations[word] for word in augmentations)
         response = jsonify(words=[word for word in word_list],

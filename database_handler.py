@@ -7,7 +7,7 @@ import calculation
 
 database_user = 'postgres'
 database_host = 'localhost'
-database_password = 'audi'
+database_password = ''
 
 
 def get_vector_from_database(word, database):
