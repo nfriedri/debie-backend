@@ -5,6 +5,7 @@ import random
 import logging
 
 
+# Computes K-Means++ clustering on a bias specification
 def k_means_clustering(target_set1, target_set2, accuracy=50):
     logging.info("KMeans: Calculation started with " + str(accuracy) + " iterations")
     target1, target2 = calculation.create_duplicates(target_set1, target_set2)

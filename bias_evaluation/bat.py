@@ -5,6 +5,7 @@ import numpy as np
 import calculation
 
 
+# Computes the Bias Analogy Test (BAT) on a bias specification
 def bias_analogy_test(target_set1, target_set2, attribute_set1, attribute_set2):
     logging.info("BAT: Calculation started")
     target1, target2, attribute1, attribute2 = calculation.create_duplicates(target_set1, target_set2, attribute_set1, attribute_set2)

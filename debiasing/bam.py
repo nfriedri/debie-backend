@@ -2,6 +2,7 @@ import numpy
 import calculation
 
 
+# Debiasing computation of the Bias Alignment Model
 def bias_alignment_model(target_set1, target_set2, attributes1, attributes2, augments1, augments2, augments3, augments4):
     target1_copy, target2_copy = calculation.create_duplicates(target_set1, target_set2)
     attr1_copy, attr2_copy = calculation.create_duplicates(attributes1, attributes2)

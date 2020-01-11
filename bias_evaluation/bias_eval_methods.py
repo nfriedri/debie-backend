@@ -8,6 +8,7 @@ from bias_evaluation import weat, ect, k_means, bat
 import logging
 
 
+# Computes bias evaluation methods for a bias specification
 def return_bias_evaluation(methods, arguments, content):
     logging.info("APP-BE: Forwarding to related definitions")
     database = 'fasttext'
@@ -48,6 +49,7 @@ def return_bias_evaluation(methods, arguments, content):
     return 400
 
 
+# Evaluates the specification with all methods
 def return_eval_all(target_vectors1, target_vectors2, attr_vectors1, attr_vectors2, database):
     logging.info("APP-BE: Starting all evaluations")
     try:
@@ -88,6 +90,7 @@ def return_eval_all(target_vectors1, target_vectors2, attr_vectors1, attr_vector
     return jsonify(message="Internal Calculation Error")
 
 
+# Evaluates the specifications with ECT
 def return_eval_ect(target_vectors1, target_vectors2, attr_vectors1, attr_vectors2, database):
     logging.info("APP-BE: Starting ECT evaluation")
     arg_vecs = calculation.concatenate_dicts(calculation.create_duplicates(attr_vectors1),
@@ -112,6 +115,7 @@ def return_eval_ect(target_vectors1, target_vectors2, attr_vectors1, attr_vector
     return response
 
 
+# Evaluates the specifications with BAT
 def return_eval_bat(target_vectors1, target_vectors2, attr_vectors1, attr_vectors2, database):
     logging.info("APP-BE: Starting BAT evaluation")
     bat_result = bat.bias_analogy_test(target_vectors1, target_vectors2, attr_vectors1, attr_vectors2)
@@ -129,6 +133,7 @@ def return_eval_bat(target_vectors1, target_vectors2, attr_vectors1, attr_vector
     return response
 
 
+# Evaluates the specifications with WEAT
 def return_eval_weat(target_vectors1, target_vectors2, attr_vectors1, attr_vectors2, database):
     logging.info("APP-BE: Starting WEAT evaluation")
     weat_effect_size, weat_p_value = weat.word_embedding_association_test(target_vectors1, target_vectors2, attr_vectors1,
@@ -147,6 +152,7 @@ def return_eval_weat(target_vectors1, target_vectors2, attr_vectors1, attr_vecto
     return response
 
 
+# Evaluates the specifications with K-Means++
 def return_eval_kmeans(target_vectors1, target_vectors2, database):
     logging.info("APP-BE: Starting KMeans evaluation")
     kmeans = k_means.k_means_clustering(target_vectors1, target_vectors2)

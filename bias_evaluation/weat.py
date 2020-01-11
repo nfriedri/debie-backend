@@ -3,7 +3,7 @@ import calculation
 import logging
 
 
-# TODO: Make accuracy optional
+# Computes the Word Embedding Coherence Test (WEAT)
 def word_embedding_association_test(target_set1, target_set2, argument_set1, argument_set2, accuracy=100):
     logging.info("WEAT: Started calculation")
     target1, target2, arg1, arg2 = calculation.create_duplicates(target_set1, target_set2, argument_set1,
@@ -24,6 +24,7 @@ def word_embedding_association_test(target_set1, target_set2, argument_set1, arg
     return effect_size, p_value
 
 
+# Compute a differential association
 def differential_association(target_list1, target_list2, argument_list1, argument_list2):
     minuend = []
     subtrahend = []
@@ -35,6 +36,7 @@ def differential_association(target_list1, target_list2, argument_list1, argumen
     return result
 
 
+# Compute an association
 def association(target_word, argument_list1, argument_list2):
     minuend = []
     subtrahend = []
@@ -47,12 +49,14 @@ def association(target_word, argument_list1, argument_list2):
     return minuend - subtrahend
 
 
+# Retrieve a reandom permutation
 def random_permutation(test_list):
     half = int(len(test_list) / 2)
     permutation_list = numpy.random.permutation(test_list)
     return permutation_list[half:], permutation_list[:half]
 
 
+# Sum up all differential associations of the permutations
 def sum_up_diff_ass_all_permutations(test_list, argument_list1, argument_list2, accuracy):
     sum_up = []
     for i in range(accuracy):
@@ -61,6 +65,7 @@ def sum_up_diff_ass_all_permutations(test_list, argument_list1, argument_list2, 
     return sum_up
 
 
+# Compute the p-value
 def p_value_calculation(s_b_e, s_b_e_all):
     is_bigger = 0
     for i in range(len(s_b_e_all)):
@@ -69,6 +74,7 @@ def p_value_calculation(s_b_e, s_b_e_all):
     return is_bigger / len(s_b_e_all)
 
 
+# Compute the effect-size
 def effect_size_calculation(target_all, target_list1, target_list2, argument_list1, argument_list2):
     logging.info("WEAT: Started effect size calculation")
     mean_association1 = numpy.mean([association(word, argument_list1, argument_list2) for word in target_list1])

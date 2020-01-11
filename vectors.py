@@ -1,6 +1,7 @@
 import io
 
 
+# Loads vectors from a file into the memory
 def load_vectors(fname):
     fin = io.open(fname, 'r', encoding='utf-8', newline='\n', errors='ignore')
     n, d = map(int, fin.readline().split())
@@ -11,6 +12,7 @@ def load_vectors(fname):
     return data
 
 
+# Loads the vector for one word out of the file
 def load_word(fname, word):
     fin = io.open(fname, 'r', encoding='utf-8', newline='\n', errors='ignore')
     # n, d = map(int, fin.readline().split())
@@ -22,6 +24,7 @@ def load_word(fname, word):
             return data
 
 
+# Loads the vectors for a word list into the memory
 def load_word_list(fname, word_list):
     fin = io.open(fname, 'r', encoding='utf-8', newline='\n', errors='ignore')
     # n, d = map(int, fin.readline().split())
@@ -36,6 +39,7 @@ def load_word_list(fname, word_list):
     return data
 
 
+# Loads the vectors for a word list into the memory
 def load_multiple_words(fname, word_list):
     vectors = {}
     for word in word_list:

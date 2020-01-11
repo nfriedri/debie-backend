@@ -6,6 +6,7 @@ import copy
 from sklearn.decomposition import PCA
 
 
+# Creates deep-copies of one ore more dictionaries
 def create_duplicates(set1, set2=None, set3=None, set4=None):
     copy1 = copy.deepcopy(set1)
     if set2 is not None:
@@ -28,6 +29,7 @@ def transform_dict_to_list(dict1):
     return numpy.array(vector_list)
 
 
+# Extracts vectors from  two, three or four dictionaries into vector lists
 def transform_multiple_dicts_to_lists(dict1, dict2, dict3=None, dict4=None):
     vectors1 = transform_dict_to_list(dict1)
     vectors2 = transform_dict_to_list(dict2)
@@ -40,6 +42,7 @@ def transform_multiple_dicts_to_lists(dict1, dict2, dict3=None, dict4=None):
     return vectors1, vectors2
 
 
+# Checks if sizes of vectors are equal, deletes random elements from the larger dict if not
 def check_sizes(vector_set1, vector_set2):
     if (len(vector_set1) > 0) & (len(vector_set2) > 0):
         if len(vector_set1) == len(vector_set2):
@@ -149,6 +152,7 @@ def euclidean_distance(vector1, vector2):
     return distance
 
 
+# Computes a Principal Component Analysis (PCA) on up to four dictionaries
 def principal_componant_analysis(vector_dict1, vector_dict2=None, vector_dict3=None, vector_dict4=None):
     logging.info("PCA: Principal composant analysis started")
     vector_dict1_copy = create_duplicates(vector_dict1)

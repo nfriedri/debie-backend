@@ -7,6 +7,7 @@ import logging
 fasttext = ''
 
 
+# Parses JSON-input and calls methods for vector retrieval from above specified file
 def get_json_vector_from_file(content):
     logging.info("DB: Vector retrieval started")
     logging.info("DB: Searching for following vectors:")
@@ -32,6 +33,7 @@ def get_json_vector_from_file(content):
     return test_vectors1, test_vectors2, arg_vectors1, arg_vectors2
 
 
+# Parses JSON-input and calls methods for vector retrieval from databases
 def retrieve_vector_from_db(content):
     logging.info("DB: Retrieval of single vector started")
     logging.info("DB: Searching for following vector:")
@@ -43,6 +45,7 @@ def retrieve_vector_from_db(content):
     return vector
 
 
+# Parses JSON-input for bias evaluation and calls methods for vector retrieval from databases
 def retrieve_vectors_evaluation(content, database):
     logging.info("DB: Retrieval of multiple vectors started")
     logging.info("DB: Searching for following vectors:")
@@ -77,6 +80,7 @@ def retrieve_vectors_evaluation(content, database):
     return test_vectors1, test_vectors2, arg_vectors1, arg_vectors2
 
 
+# Parses JSON-input for debiasing and calls methods for vector retrieval from databases with optional augmentations
 def retrieve_vectors_debiasing(content, database, augment_flag):
     logging.info("DB: Retrieval of multiple vectors started")
     logging.info("DB: Searching for following vectors:")
@@ -153,6 +157,7 @@ def retrieve_vectors_debiasing(content, database, augment_flag):
     return target_vectors1, target_vectors2, attributes1, attributes2, augments_T1, augments_T2, augments_A1, augments_A2
 
 
+# Parses JSON-input for bias evaluation and calls methods for vector retrieval from the input JSON-file
 def retrieve_vectors_from_json_evaluation(content):
     logging.info("DB: Loading Vectors from JSON Input.")
     target_dict1 = {}
@@ -179,6 +184,7 @@ def retrieve_vectors_from_json_evaluation(content):
     return target_dict1, target_dict2, attribute_dict1, attribute_dict2
 
 
+# Parses JSON-input for debiasing and calls methods for vector retrieval from the input JSON-file
 def retrieve_vectors_from_json_debiasing(content):
     logging.info("DB: Loading Vectors from JSON Input.")
     target_dict1 = {}
@@ -225,6 +231,7 @@ def retrieve_vectors_from_json_debiasing(content):
     return target_dict1, target_dict2, attribute_dict1, attribute_dict2, augmentation_dict1, augmentation_dict2, augmentation_dict3, augmentation_dict4
 
 
+# Transformes dictionaries into JSON-format
 def dict_to_json(vector_dict):
     vector_dict_copy = calculation.create_duplicates(vector_dict)
     string_dict = {}
@@ -233,6 +240,7 @@ def dict_to_json(vector_dict):
     return string_dict
 
 
+# Transforms keys of a dictioanry into a string
 def dict_keys_to_string(vector_dict):
     vector_dict_copy = calculation.create_duplicates(vector_dict)
     keys = ''

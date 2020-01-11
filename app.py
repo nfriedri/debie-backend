@@ -15,8 +15,8 @@ from debiasing import debiasing_models
 ''' RestAPI '''
 # FLASK, CORS & Logging configuration
 
-UPLOAD_FOLDER = 'C:\\Users\\Niklas Friedrich\\Documents\\GitHub\\debie_backend\\uploads\\files'  # Change required
-# UPLOAD_FOLDER = '/home/nfriedri/debie-backend/uploads/files' # Remove for server deployment
+# UPLOAD_FOLDER = 'C:\\Users\\Niklas Friedrich\\Documents\\GitHub\\debie_backend\\uploads\\files'  # Change required
+UPLOAD_FOLDER = '/home/nfriedri/debie-backend/uploads/files' # Remove for server deployment
 ALLOWED_EXTENSIONS = {'txt', 'vec'}
 MAX_CONTENT_LENGTH = 250 * 1024 * 1024
 
@@ -31,11 +31,13 @@ logging.basicConfig(filename="logfiles.log", level=logging.INFO)
 print("logging configured")
 
 
+# API-Connection Test
 @app.route('/REST/', methods=['GET'])
 def test():
     return 'CONNECTION WORKS'
 
 
+# Check if JSON-upload works
 @app.route('/REST/uploads/validJSON', methods=['POST'])
 def valid_JSON():
     print('Valid JSON called')
@@ -48,6 +50,7 @@ def valid_JSON():
     return 'VALID', 200
 
 
+# Retrieval of word vector representations for single words
 # Example: http://127.0.0.1:5000/REST/retrieve_single_vector?embedding_space=fasttext&word=car
 @app.route('/REST/vectors/single', methods=['GET'])
 def retrieve_single_vector():
@@ -64,6 +67,7 @@ def retrieve_single_vector():
     return response, 200
 
 
+# Retrieval of word vector representations for a list of words
 @app.route('/REST/vectors/multiple', methods=['POST'])
 def retrieve_multiple_vectors():
     logging.info("APP: " + str(datetime.datetime.now()) + " Retrieve multiple vectors is called")
@@ -80,6 +84,7 @@ def retrieve_multiple_vectors():
     return response, 200
 
 
+# Retrieves four augmentations for a word
 @app.route('/REST/augmentations/single', methods=['GET'])
 def retrieve_single_augmentation():
     logging.info("APP: " + str(datetime.datetime.now()) + " Retrieve single augmentation is called")
@@ -94,6 +99,7 @@ def retrieve_single_augmentation():
     return response, 200
 
 
+# Retrieves 4 augmentations for a list of words
 @app.route('/REST/augmentations/multiple', methods=['POST'])
 def retrieve_multiple_augmentations():
     logging.info("APP: " + str(datetime.datetime.now()) + " Retrieve multiple augmentations is called")
@@ -114,6 +120,7 @@ def retrieve_multiple_augmentations():
     return response, 200
 
 
+# Evaluates a bias specification with all implemented evaluation methods
 @app.route('/REST/bias-evaluation/all', methods=['POST'])
 def bias_evaluations_all():
     logging.info("APP: " + str(datetime.datetime.now()) + " Bias Evaluation ALL Methods is called")
@@ -128,6 +135,7 @@ def bias_evaluations_all():
     return result, 200
 
 
+# Evaluates a bias specification with the Embedding Coherence Test (ECT)
 @app.route('/REST/bias-evaluation/ect', methods=['POST'])
 def bias_evaluations_ect():
     logging.info("APP: " + str(datetime.datetime.now()) + " Bias Evaluation ECT Method is called")
@@ -142,6 +150,7 @@ def bias_evaluations_ect():
     return result, 200
 
 
+# Evaluates a bias specification with the Bias Analogy Test (BAT)
 @app.route('/REST/bias-evaluation/bat', methods=['POST'])
 def bias_evaluations_bat():
     logging.info("APP: " + str(datetime.datetime.now()) + " Bias Evaluation BAT Method is called")
@@ -156,6 +165,7 @@ def bias_evaluations_bat():
     return result, 200
 
 
+# Evaluates a bias specification with the Word Embedding Association Test (WEAT)
 @app.route('/REST/bias-evaluation/weat', methods=['POST'])
 def bias_evaluations_weat():
     logging.info("APP: " + str(datetime.datetime.now()) + " Bias Evaluation WEAT Method is called")
@@ -170,6 +180,7 @@ def bias_evaluations_weat():
     return result, 200
 
 
+# Evaluates a bias specification with K-Means++ clustering
 @app.route('/REST/bias-evaluation/kmeans', methods=['POST'])
 def bias_evaluations_kmeans():
     logging.info("APP: " + str(datetime.datetime.now()) + " Bias Evaluation kMeans Method is called")
@@ -184,6 +195,7 @@ def bias_evaluations_kmeans():
     return result, 200
 
 
+# General Bias-Direction Debiasing of a bias specifiication returning values in full size
 @app.route('/REST/debiasing/full/gbdd', methods=['POST'])
 def debiasing_full_gbdd():
     logging.info("APP: " + str(datetime.datetime.now()) + " GBDD Debiasing full is called")
@@ -194,6 +206,7 @@ def debiasing_full_gbdd():
     return response
 
 
+# General Bias-Direction Debiasing of a bias specifiication returning compressed values
 @app.route('/REST/debiasing/pca/gbdd', methods=['POST'])
 def debiasing_pca_gbdd():
     logging.info("APP: " + str(datetime.datetime.now()) + " GBDD Debiasing PCA is called")
@@ -204,6 +217,7 @@ def debiasing_pca_gbdd():
     return response
 
 
+# Bias Analogy Model debiasing of a bias specifiication returning values in full size
 @app.route('/REST/debiasing/full/bam', methods=['POST'])
 def debiasing_full_bam():
     logging.info("APP: " + str(datetime.datetime.now()) + " BAM Debiasing full is called")
@@ -214,6 +228,7 @@ def debiasing_full_bam():
     return response
 
 
+# Bias Analogy Model debiasing of a bias specifiication returning compressed values
 @app.route('/REST/debiasing/pca/bam', methods=['POST'])
 def debiasing_pca_bam():
     logging.info("APP: " + str(datetime.datetime.now()) + " BAM Debiasing PCA is called")
@@ -224,6 +239,7 @@ def debiasing_pca_bam():
     return response
 
 
+# Debiasing of bias specifications using GBDD and BAM, returning values in full size
 @app.route('/REST/debiasing/full/gbddxbam', methods=['POST'])
 def debiasing_full_gbdd_bam():
     logging.info("APP: " + str(datetime.datetime.now()) + " GBDD x BAM Debiasing full is called")
@@ -235,6 +251,7 @@ def debiasing_full_gbdd_bam():
     return response
 
 
+# Debiasing of bias specifications using GBDD and BAM, returning compressed values
 @app.route('/REST/debiasing/pca/gbddxbam', methods=['POST'])
 def debiasing_pca_gbdd_bam():
     logging.info("APP: " + str(datetime.datetime.now()) + " GBDD x BAM Debiasing PCA is called")
@@ -245,6 +262,7 @@ def debiasing_pca_gbdd_bam():
     return response
 
 
+# Debiasing of bias specifications using BAM and GBDD, returning values in full size
 @app.route('/REST/debiasing/full/bamxgbdd', methods=['POST'])
 def debiasing_full_bam_gbdd():
     logging.info("APP: " + str(datetime.datetime.now()) + " BAM x GBDD Debiasing full is called")
@@ -255,6 +273,7 @@ def debiasing_full_bam_gbdd():
     return response
 
 
+# Debiasing of bias specifications using BAM and GBDD, returning compressed values
 @app.route('/REST/debiasing/pca/bamxgbdd', methods=['POST'])
 def debiasing_pca_bam_gbdd():
     logging.info("APP: " + str(datetime.datetime.now()) + " BAM x GBDD Debiasing PCA is called")
@@ -265,6 +284,7 @@ def debiasing_pca_bam_gbdd():
     return response
 
 
+# Upload of complete embedding spaces
 @app.route('/REST/uploads/embedding-spaces', methods=['POST'])
 def upload_embedding_space():
     logging.info("APP: Receiving file from upload " + str(datetime.datetime.now()))
@@ -294,6 +314,7 @@ def upload_embedding_space():
         return resp
 
 
+# Check if uploaded file-name is accepted
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS

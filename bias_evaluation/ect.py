@@ -3,6 +3,7 @@ import calculation
 import logging
 
 
+# Computes the Embedding Coherence Test (ECT) on a bias specification
 def embedding_coherence_test(test_set1, test_set2, attribute_set):
     logging.info("ECT: Calculation started")
     # Create duplicates

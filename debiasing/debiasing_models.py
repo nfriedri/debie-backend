@@ -8,6 +8,7 @@ import calculation
 from debiasing import bam, gbdd
 
 
+# Debiasing with full vector size, computes the results with the selected models
 def return_full_debiasing(models, arguments, content):
     logging.info("APP-DE: Forwarding to related definitions")
     database = 'fasttext'
@@ -69,6 +70,7 @@ def return_full_debiasing(models, arguments, content):
     return response, 200
 
 
+# Debiasing with compressed vector size, computes the results with the selected models and a PCA
 def return_pca_debiasing(models, arguments, content):
     logging.info("APP-DE: Forwarding to related definitions")
     database = arguments['space']

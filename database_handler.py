@@ -5,11 +5,13 @@ import datetime
 
 import calculation
 
+# Has to be adjusted depending on server setup
 database_user = 'postgres'
 database_host = 'localhost'
 database_password = ''
 
 
+# Retrieved the word vector representation out of a database
 def get_vector_from_database(word, database):
     # t1 = datetime.datetime.now()
     # print(t1)
@@ -40,6 +42,7 @@ def get_vector_from_database(word, database):
     return vector_dict
 
 
+# Retrieves multiple word vectors of word lists out of the databases
 def get_multiple_vectors_from_db(word_list, database):
     conn = None
     # integer = 0
@@ -80,6 +83,7 @@ def get_multiple_vectors_from_db(word_list, database):
     return vector_dict
 
 
+# Retrieves four augmentations for a word from the database
 def get_augmentation_from_db(word):
     conn = None
     augmentation = []
@@ -103,6 +107,7 @@ def get_augmentation_from_db(word):
     return augmentation
 
 
+# Retrieves four augmentations for each word of a word list
 def get_multiple_augmentation_from_db(word_list, database):
     conn = None
     augmentations = {}
@@ -133,6 +138,8 @@ def get_multiple_augmentation_from_db(word_list, database):
     return augmentations
 
 
+# In Development -- Needed for word analogy computing
+# Retrieves vectors from first 10k database entries
 def word_for_nearest_vector(request_vector, database):
     print(datetime.datetime.now())
     conn = None

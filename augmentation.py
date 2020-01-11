@@ -4,6 +4,7 @@ import database_handler
 import calculation
 
 
+# Computes augmentations for a given word in the fasttext embedding space
 def load_augment(word, sourcefile):
     fin = io.open(sourcefile, 'r', encoding='utf-8', newline='\n', errors='ignore')
     database = 'fasttext'
@@ -33,6 +34,7 @@ def load_augment(word, sourcefile):
     return [maximum1, maximum2, maximum3, maximum4]
 
 
+# Computes word augmentations for word lists out of the fasttext embedding space
 def load_multiple_augments(word_list, sourcefile):
     fin = io.open(sourcefile, 'r', encoding='utf-8', newline='\n', errors='ignore')
     database = 'fasttext'

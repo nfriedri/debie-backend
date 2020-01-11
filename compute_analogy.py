@@ -2,7 +2,10 @@ import numpy
 import calculation
 import database_handler
 
+# In development
 
+
+# Will return the result of a computed analogy
 def full_analogy(word1, word2, word3):
     word1_copy, word2_copy, word3_copy = calculation.create_duplicates(word1, word2, word3)
     v1 = get_vector_from_small_dict(word1_copy)

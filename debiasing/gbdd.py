@@ -3,6 +3,7 @@ import numpy
 import logging
 
 
+# Method computing General Bias-Direction Debiasing
 def generalized_bias_direction_debiasing(target_set1, target_set2, attributes1, attributes2, augments1, augments2,
                                          augments3, augments4):
     logging.info("GBDD: Debiasing started")
@@ -24,6 +25,7 @@ def generalized_bias_direction_debiasing(target_set1, target_set2, attributes1, 
     return new_target1, new_target2, new_attributes1, new_attributes2
 
 
+# Computation of the bias direction matrix
 def calculate_bias_direction_matrix(aug_list1, aug_list2):
     logging.info("GBDD: Calculating bias direction matrix")
     matrix = []
@@ -40,6 +42,7 @@ def calculate_bias_direction_matrix(aug_list1, aug_list2):
     return gbdv
 
 
+# Computation of the global bias direction vectors
 def calculate_gbdd(gdv, dict1):
     logging.info("GBDD: Calculating debiased vectors")
     list_words = [word for word in dict1]
@@ -53,6 +56,7 @@ def calculate_gbdd(gdv, dict1):
     return create_dict_from_lists(list_words, gbdd_vecs)
 
 
+# Create a dictionary out of a word and a vector list of the same size
 def create_dict_from_lists(word_list, vector_list):
     dict1 = {}
     for i in range(len(word_list)):
