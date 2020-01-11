@@ -10,6 +10,8 @@ The used word embeddings are retrieved from databases containing word vector rep
 
 For using other vector representations, the possibility is offered to upload embedding spaces or to provide the exact vectors together with the bias specification in the request.
 
-The exact documentation of the API can be found here:
+The front-end files are published here: https://github.com/nfriedri/debie-frontend
 
-The front-end to the application can be found here:
+The scripts for creating databases etc. are published here: https://github.com/nfriedri/debie-scripts
+
+The application is accessible under: http://wifo5-29.informatik.uni-mannheim.de
