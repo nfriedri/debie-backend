@@ -8,7 +8,7 @@ import calculation
 # Has to be adjusted depending on server setup
 database_user = 'postgres'
 database_host = 'localhost'
-database_password = ''
+database_password = 'audi'
 
 
 # Retrieved the word vector representation out of a database
@@ -108,7 +108,7 @@ def get_augmentation_from_db(word):
 
 
 # Retrieves four augmentations for each word of a word list
-def get_multiple_augmentation_from_db(word_list, database):
+def get_multiple_augmentation_from_db(word_list):
     conn = None
     augmentations = {}
     try:
@@ -126,7 +126,6 @@ def get_multiple_augmentation_from_db(word_list, database):
             except:
                 logging.info("DB: No vector found for " + word)
                 # data = augmentation.load_augment(word, da)
-                data = get_vector_from_database(word, database)
                 # augmentations[word] = data
                 pass
     except psycopg2.DatabaseError as error:
