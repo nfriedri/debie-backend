@@ -109,3 +109,6 @@ venv.bak/
 
 # file uploads
 uploads/
+
+# vector file data
+data/
