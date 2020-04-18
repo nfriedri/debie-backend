@@ -2,13 +2,14 @@ import datetime
 import logging
 import os
 import vector_retrieval
-import data_controller
 import json_controller
 
 from flask import Flask, request
 from flask import jsonify
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
+
+from bias_evaluation import evaluation_controller
 
 ''' RestAPI '''
 # FLASK, CORS & Logging configuration
@@ -22,7 +23,6 @@ app.secret_key = "secret key"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['ALLOWED_EXTENSIONS'] = ALLOWED_EXTENSIONS
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
-
 
 # logging.basicConfig(filename="logfiles.log", level=logging.INFO)
 # print("logging configured")
@@ -38,20 +38,30 @@ def test():
 # Example: http://127.0.0.1:5000/REST/retrieve_single_vector?embedding_space=fasttext&word=car
 @app.route('/REST/vectors/single', methods=['GET'])
 def retrieve_single_vector():
+    print('retrieve vectors')
     # logging.info("APP:" + str(datetime.datetime.now()) + " Retrieve single vector is called")
     bar = request.args.to_dict()
+    if 'word' not in bar or 'space' not in bar:
+        return 'BAD REQUEST', 400
     space = bar['space']
     search = bar['word']
-    uploaded = bar['uploaded']
+
+    uploaded = 'false'
+    lower = 'false'
+    if 'uploaded' in bar:
+        uploaded = bar['uploaded']
+    if 'lower' in bar:
+        lower = bar['lower']
     # binary = bar['binary']
 
-    vector, not_found = vector_retrieval.retrieve_vector('single', uploaded, space, search)
-    if vector is not None:
+    print('API call: ' + str(space) + ' ' + str(search))
+    vector, not_found = vector_retrieval.retrieve_vector('single', uploaded, space, search, lower)
+    if vector and not_found is not None:
         response = json_controller.json_vector_retrieval(vector, not_found)
         logging.info("APP: Retrieved vector")
         return response, 200
     else:
-        return jsonify(message="NOT FOUND"), 404
+        return "BAD REQUEST", 400
 
 
 # Retrieval of word vector representations for a list of words
@@ -59,13 +69,20 @@ def retrieve_single_vector():
 def retrieve_multiple_vectors():
     logging.info("APP: " + str(datetime.datetime.now()) + " Retrieve multiple vectors is called")
     bar = request.args.to_dict()
+    if 'space' not in bar:
+        return 'BAD REQUEST', 400
     space = bar['space']
-    uploaded = bar['uploaded']
+    uploaded = 'false'
+    lower = 'false'
+    if 'uploaded' in bar:
+        uploaded = bar['uploaded']
+    if 'lower' in bar:
+        lower = bar['lower']
     # binary = bar['binary']
-    content = request.get_json()
-    word_list = content['data'].split(' ')
+    content = request.get_json()['Words'].split(' ')
+#    word_list = content
 
-    vectors, not_found = vector_retrieval.retrieve_vector('multiple', uploaded, space, word_list)
+    vectors, not_found = vector_retrieval.retrieve_vector('multiple', uploaded, space, content, lower)
     if vectors is not None:
         response = json_controller.json_vector_retrieval(vectors, not_found)
         logging.info("APP: Retrieved vectors")
@@ -77,66 +94,63 @@ def retrieve_multiple_vectors():
 # Retrieves four augmentations for a word
 @app.route('/REST/augmentations/single', methods=['GET'])
 def retrieve_single_augmentation():
-    logging.info("APP: " + str(datetime.datetime.now()) + " Retrieve single augmentation is called")
-    bar = request.args.to_dict()
-    search = bar['word']
-    try:
-        augmentations = database_handler.get_augmentation_from_db(search)
-        response = jsonify(word=search, augments=[augmentations[i] for i in range(len(augmentations))])
-        logging.info("APP: Retrieved vector")
-    except:
-        return jsonify(message="NOT FOUND"), 404
-    return response, 200
+    return 200
 
 
 # Retrieves 4 augmentations for a list of words
 @app.route('/REST/augmentations/multiple', methods=['POST'])
 def retrieve_multiple_augmentations():
-    logging.info("APP: " + str(datetime.datetime.now()) + " Retrieve multiple augmentations is called")
-    bar = request.args.to_dict()
-    content = request.get_json()
-    word_list = content['data'].split(' ')
-    try:
-        augmentations = data_controller.get_multiple_augmentation_from_db(word_list)
-        print(word for word in augmentations)
-        print(augmentations[word] for word in augmentations)
-        response = jsonify(words=[word for word in word_list],
-                           augments=[list(augmentations[word]) for word in augmentations])
-        # response = json.dumps(augmentations)
-        logging.info("APP: Retrieved vector")
-    except:
-        return jsonify(message="NOT FOUND"), 404
-    return response, 200
+    return 200
 
 
 # Evaluates a bias specification with all implemented evaluation methods
 @app.route('/REST/bias-evaluation/all', methods=['POST'])
 def bias_evaluations_all():
-    return 200
+    content = request.get_json()
+    bar = request.args.to_dict()
+    response, status_code = evaluation_controller.evaluation('all', content, bar)
+
+    return response, status_code
 
 
 # Evaluates a bias specification with the Embedding Coherence Test (ECT)
 @app.route('/REST/bias-evaluation/ect', methods=['POST'])
 def bias_evaluations_ect():
-    return 200
+    content = request.get_json()
+    bar = request.args.to_dict()
+    response, status_code = evaluation_controller.evaluation('ect', content, bar)
+
+    return response, status_code
 
 
 # Evaluates a bias specification with the Bias Analogy Test (BAT)
 @app.route('/REST/bias-evaluation/bat', methods=['POST'])
 def bias_evaluations_bat():
-    return 200
+    content = request.get_json()
+    bar = request.args.to_dict()
+    response, status_code = evaluation_controller.evaluation('bat', content, bar)
+
+    return response, status_code
 
 
 # Evaluates a bias specification with the Word Embedding Association Test (WEAT)
 @app.route('/REST/bias-evaluation/weat', methods=['POST'])
 def bias_evaluations_weat():
-    return 200
+    content = request.get_json()
+    bar = request.args.to_dict()
+    response, status_code = evaluation_controller.evaluation('weat', content, bar)
+
+    return response, status_code
 
 
 # Evaluates a bias specification with K-Means++ clustering
 @app.route('/REST/bias-evaluation/kmeans', methods=['POST'])
 def bias_evaluations_kmeans():
-    return 200
+    content = request.get_json()
+    bar = request.args.to_dict()
+    response, status_code = evaluation_controller.evaluation('kmeans', content, bar)
+
+    return response, status_code
 
 
 # General Bias-Direction Debiasing of a bias specifiication returning values
