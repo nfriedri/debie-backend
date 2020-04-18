@@ -8,6 +8,7 @@ glove_200k_vocab = 'data/glove_200k.vocab'
 glove_200k_vectors = 'data/glove_200k.vec'
 cbow_200k_vocab = 'data/w2v_cbow_200k.vocab'
 cbow_200k_vectors = 'data/w2v_cbow_200k.vec'
+augmentations_postspec = 'data/augmentations_postspec.vocab'
 
 
 def load_vocab_binary(path, inverse=False):
@@ -34,6 +35,12 @@ def load_binary_embeddings(vocab_path, vecs_path, inverse=False, normalize=False
     return vocab, vecs
 
 
+def load_augmentations(augmentations_path):
+    with open(augmentations_path, 'rb') as handle:
+        augmentations = pickle.load(handle)
+        return augmentations
+
+
 def load_embeddings_by_start():
     fasttext_vocab, fasttext_vectors = load_binary_embeddings(fasttext_200k_vocab, fasttext_200k_vectors, inverse=False, normalize=False)
     glove_vocab, glove_vectors = load_binary_embeddings(glove_200k_vocab, glove_200k_vectors, inverse=False, normalize=False)
@@ -42,4 +49,5 @@ def load_embeddings_by_start():
 
 
 fasttext_vocab, fasttext_vectors, glove_vocab, glove_vectors, cbow_vocab, cbow_vectors = load_embeddings_by_start()
+augmentations = load_augmentations(augmentations_postspec)
 print('Data_Handler started')
