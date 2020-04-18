@@ -21,6 +21,11 @@ def json_vector_retrieval(vector_dict, not_found):
     return response
 
 
+def json_augmentation_retrieval(augments, not_postspec):
+    response = json.dumps({'Augmentations': augments, 'NotPostspecialized': not_postspec})
+    return response
+
+
 def json_to_bias_spec(content):
     target1, target2, attributes1, attributes2 = [], [], [], []
     if 'BiasSpecification' in content:

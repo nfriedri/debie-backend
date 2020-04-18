@@ -1,6 +1,8 @@
 import datetime
 import logging
 import os
+
+import augmentation_retrieval
 import vector_retrieval
 import json_controller
 
@@ -24,6 +26,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['ALLOWED_EXTENSIONS'] = ALLOWED_EXTENSIONS
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
+
 # logging.basicConfig(filename="logfiles.log", level=logging.INFO)
 # print("logging configured")
 
@@ -38,69 +41,37 @@ def test():
 # Example: http://127.0.0.1:5000/REST/retrieve_single_vector?embedding_space=fasttext&word=car
 @app.route('/REST/vectors/single', methods=['GET'])
 def retrieve_single_vector():
-    print('retrieve vectors')
     # logging.info("APP:" + str(datetime.datetime.now()) + " Retrieve single vector is called")
     bar = request.args.to_dict()
-    if 'word' not in bar or 'space' not in bar:
-        return 'BAD REQUEST', 400
-    space = bar['space']
-    search = bar['word']
-
-    uploaded = 'false'
-    lower = 'false'
-    if 'uploaded' in bar:
-        uploaded = bar['uploaded']
-    if 'lower' in bar:
-        lower = bar['lower']
-    # binary = bar['binary']
-
-    print('API call: ' + str(space) + ' ' + str(search))
-    vector, not_found = vector_retrieval.retrieve_vector('single', uploaded, space, search, lower)
-    if vector and not_found is not None:
-        response = json_controller.json_vector_retrieval(vector, not_found)
-        logging.info("APP: Retrieved vector")
-        return response, 200
-    else:
-        return "BAD REQUEST", 400
+    response, status_code = vector_retrieval.retrieve_vector('single', None, bar)
+    return response, status_code
 
 
 # Retrieval of word vector representations for a list of words
 @app.route('/REST/vectors/multiple', methods=['POST'])
 def retrieve_multiple_vectors():
-    logging.info("APP: " + str(datetime.datetime.now()) + " Retrieve multiple vectors is called")
+    # logging.info("APP: " + str(datetime.datetime.now()) + " Retrieve multiple vectors is called")
+    content = request.get_json()
     bar = request.args.to_dict()
-    if 'space' not in bar:
-        return 'BAD REQUEST', 400
-    space = bar['space']
-    uploaded = 'false'
-    lower = 'false'
-    if 'uploaded' in bar:
-        uploaded = bar['uploaded']
-    if 'lower' in bar:
-        lower = bar['lower']
-    # binary = bar['binary']
-    content = request.get_json()['Words'].split(' ')
-#    word_list = content
-
-    vectors, not_found = vector_retrieval.retrieve_vector('multiple', uploaded, space, content, lower)
-    if vectors is not None:
-        response = json_controller.json_vector_retrieval(vectors, not_found)
-        logging.info("APP: Retrieved vectors")
-        return response, 200
-    else:
-        return jsonify(message="NOT FOUND"), 404
+    response, status_code = vector_retrieval.retrieve_vector('multiple', content, bar)
+    return response, status_code
 
 
 # Retrieves four augmentations for a word
 @app.route('/REST/augmentations/single', methods=['GET'])
 def retrieve_single_augmentation():
-    return 200
+    bar = request.args.to_dict()
+    response, status_code = augmentation_retrieval.retrieve_augmentations('single', None, bar)
+    return response, status_code
 
 
 # Retrieves 4 augmentations for a list of words
 @app.route('/REST/augmentations/multiple', methods=['POST'])
 def retrieve_multiple_augmentations():
-    return 200
+    content = request.get_json()
+    bar = request.args.to_dict()
+    response, status_code = augmentation_retrieval.retrieve_augmentations('multiple', content, bar)
+    return response, status_code
 
 
 # Evaluates a bias specification with all implemented evaluation methods
