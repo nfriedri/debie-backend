@@ -53,6 +53,16 @@ def retrieve_single_augmentations(target):
         return augments, computed
 
 
+def retrieve_multiple_augmentations(target):
+    augments = {}
+    computed_augments = []
+    for word in target:
+        augments[word], computed = retrieve_single_augmentations(word)
+        if computed:
+            computed_augments.append(word)
+    return augments, computed_augments
+
+
 def compute_augmentations(target, vocab=fasttext_vocab, vecs=fasttext_vectors, iterations=4):
     print('COMPUTED')
     augments = []

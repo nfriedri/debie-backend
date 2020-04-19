@@ -41,6 +41,29 @@ def json_to_bias_spec(content):
     return target1, target2, attributes1, attributes2
 
 
+def json_to_debias_spec(content):
+    target1, target2, attributes1, attributes2, augments1, augments2 = [], [], [], [], [], []
+    if 'BiasSpecification' in content:
+        target1 = content['BiasSpecification']['T1'].split(' ')
+        target2 = content['BiasSpecification']['T2'].split(' ')
+        attributes1 = content['BiasSpecification']['A1'].split(' ')
+        attributes2 = content['BiasSpecification']['A2'].split(' ')
+        if 'augments1' in content['BiasSpecification']:
+            augments1 = content['BiasSpecification']['Augmentations1']
+        if 'augments1' in content['BiasSpecification']:
+            augments2 = content['BiasSpecification']['Augmentations2']
+    else:
+        target1 = content['T1'].split(' ')
+        target2 = content['T2'].split(' ')
+        attributes1 = content['A1'].split(' ')
+        attributes2 = content['A2'].split(' ')
+        if ['Augmentations1'] in content:
+            augments1 = content['Augmentations1']
+        if ['Augmentations2'] in content:
+            augments2 = content['Augmentations2']
+    return target1, target2, attributes1, attributes2, augments1, augments2
+
+
 def bias_evaluation_json(scores, space, lower, t1, t2, a1, a2, not_found, deleted):
     # scores = dict_to_json(scores)
     t1 = dict_keys_to_string(t1)
@@ -50,4 +73,33 @@ def bias_evaluation_json(scores, space, lower, t1, t2, a1, a2, not_found, delete
     response = json.dumps({"Scores": scores, "Space": space, "Lower": lower,
                            "BiasSpecification": {"T1": t1, "T2": t2, "A1": a1, "A2": a2,
                                                  "NotFound": not_found, "Deleted": deleted}})
+    return response, 200
+
+
+def debiasisng_json(space, lower, method, pca, aug1_list, aug2_list,
+                    t1, t2, a1, a2,
+                    t1_deb, t2_deb, a1_deb, a2_deb, not_found, deleted,
+                    t1_pca_bias=None, t2_pca_bias=None, a1_pca_bias=None, a2_pca_bias=None,
+                    t1_pca_deb=None, t2_pca_deb=None, a1_pca_deb=None, a2_pca_deb=None):
+    t1 = dict_keys_to_string(t1)
+    t2 = dict_keys_to_string(t2)
+    a1 = dict_keys_to_string(a1)
+    a2 = dict_keys_to_string(a2)
+    if pca == 'false':
+        response = json.dumps(
+            {"Space": space, "Model": method, "Lower": lower, "PCA": pca,
+             "UsedAugmentations": {"A1": aug1_list, "A2": aug2_list},
+             "BiasedSpace:": {"T1": t1, "T2": t2, "A1": a1, "A2": a2},
+             "DebiasedSpace": {"T1": t1_deb, "T2": t2_deb, "A1": a1_deb, "A2": a2_deb},
+             "NotFound": not_found, "Deleted": deleted})
+    else:
+        response = json.dumps(
+            {"Space": space, "Model": method, "Lower": lower, "PCA": pca,
+             "UsedAugmentations": {"A1": aug1_list, "A2": aug2_list},
+             "BiasedSpace:": {"T1": t1, "T2": t2, "A1": a1, "A2": a2},
+             "DebiasedSpace": {"T1": t1_deb, "T2": t2_deb, "A1": a1_deb, "A2": a2_deb},
+             "BiasedSpacePCA": {"T1": t1_pca_bias, "T2": t2_pca_bias, "A1": a1_pca_bias, "A2": a2_pca_bias},
+             "DebiasedSpacePCA": {"T1": t1_pca_deb, "T2": t2_pca_deb, "A1": a1_pca_deb, "A2": a2_pca_deb},
+             "NotFound": not_found, "Deleted": deleted})
+
     return response, 200
