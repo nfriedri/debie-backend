@@ -1,5 +1,5 @@
-import data_controller
 import json_controller
+import upload_controller
 from data_controller import fasttext_vocab as ft_vocab
 from data_controller import fasttext_vectors as ft_vecs
 from data_controller import glove_vocab as gv_vocab
@@ -30,6 +30,29 @@ def retrieve_vector_multiple(vocab, vectors, word_list):
     return found, not_found
 
 
+def retrieve_uploaded_vector_single(space, target):
+    found = {}
+    not_found = []
+    if space == upload_controller.uploaded_filename:
+        if target in upload_controller.uploaded_space:
+            found[target] = upload_controller.uploaded_space[target]
+        else:
+            not_found.append(target)
+    return found, not_found
+
+
+def retrieve_uploaded_vector_multiple(space, word_list):
+    not_found = []
+    found = {}
+    if space == upload_controller.uploaded_filename:
+        for word in word_list:
+            if word in upload_controller.uploaded_space:
+                found[word] = upload_controller.uploaded_space[word]
+            else:
+                not_found.append(word)
+    return found, not_found
+
+
 def retrieve_vector(number, content, bar):
     vectors = {}
     not_found = []
@@ -50,6 +73,8 @@ def retrieve_vector(number, content, bar):
         target = bar['word']
         if lower == 'true':
             target = target.lower()
+        if uploaded == 'true':
+            vectors, not_found = retrieve_uploaded_vector_single(space, target)
         if space == 'fasttext':
             vectors, not_found = retrieve_vector_single(ft_vocab, ft_vecs, target)
         if space == 'glove':
@@ -63,6 +88,8 @@ def retrieve_vector(number, content, bar):
         target = content['Words'].split(' ')
         if lower == 'true':
             target = [t.lower() for t in target]
+        if uploaded == 'true':
+            vectors, not_found = retrieve_uploaded_vector_multiple(space, target)
         if space == 'fasttext':
             vectors, not_found = retrieve_vector_multiple(ft_vocab, ft_vecs, target)
         if space == 'glove':
@@ -74,4 +101,6 @@ def retrieve_vector(number, content, bar):
         response = json_controller.json_vector_retrieval(vectors, not_found)
         return response, 200
     else:
-        return "BAD REQUEST", 400
+        return "NOT FOUND", 404
+
+

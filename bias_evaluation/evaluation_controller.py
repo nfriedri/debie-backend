@@ -12,13 +12,21 @@ def evaluation(methods, content, bar):
     space = bar['space']
     uploaded = 'false'
     lower = 'false'
+    json = 'false'
     if 'uploaded' in bar:
         uploaded = bar['uploaded']
     if 'lower' in bar:
         lower = bar['lower']
+    if 'json' in bar:
+        json = bar['json']
 
-    t1, t2, a1, a2 = json_controller.json_to_bias_spec(content)
-    t1, t2, a1, a2, not_found, deleted = specification_controller.get_vectors_for_spec(space, lower, t1, t2, a1, a2)
+    if json == 'true':
+        t1, t2, a1, a2, aug1, aug2 = json_controller.json_with_vector_data(content)
+        t1, t2, a1, a2, deleted = specification_controller.string_dicts_to_numpy_array_dicts(t1, t2, a1, a2)
+        not_found = []
+    else:
+        t1, t2, a1, a2 = json_controller.json_to_bias_spec(content)
+        t1, t2, a1, a2, not_found, deleted = specification_controller.get_vectors_for_spec(space, lower, uploaded, t1, t2, a1, a2)
     scores = {}
     if methods is None:
         scores = evaluate_all(t1, t2, a1, a2)

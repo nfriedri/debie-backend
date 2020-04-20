@@ -54,10 +54,12 @@ def retrieve_single_augmentations(target):
 
 
 def retrieve_multiple_augmentations(target):
-    augments = {}
+    augments = []
     computed_augments = []
     for word in target:
-        augments[word], computed = retrieve_single_augmentations(word)
+        aug, computed = retrieve_single_augmentations(word)
+        for w in aug:
+            augments.append(w)
         if computed:
             computed_augments.append(word)
     return augments, computed_augments

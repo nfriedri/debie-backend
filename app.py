@@ -3,8 +3,9 @@ import logging
 import os
 
 import augmentation_retrieval
+import data_controller
+import upload_controller
 import vector_retrieval
-import json_controller
 
 from flask import Flask, request
 from flask import jsonify
@@ -12,12 +13,13 @@ from flask_cors import CORS
 from werkzeug.utils import secure_filename
 
 from bias_evaluation import evaluation_controller
+from debiasing import debiasing_controller
 
 ''' RestAPI '''
 # FLASK, CORS & Logging configuration
-UPLOAD_FOLDER = '/uploads'
+UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'txt', 'vec', 'vocab', 'vector'}
-MAX_CONTENT_LENGTH = 250 * 1024 * 1024
+MAX_CONTENT_LENGTH = 500 * 1024 * 1024
 
 app = Flask(__name__)
 CORS(app)
@@ -127,25 +129,41 @@ def bias_evaluations_kmeans():
 # General Bias-Direction Debiasing of a bias specifiication returning values
 @app.route('/REST/debiasing/gbdd', methods=['POST'])
 def debiasing_gbdd():
-    return 200
+    content = request.get_json()
+    bar = request.args.to_dict()
+    response, status_code = debiasing_controller.debiasing('gbdd', content, bar)
+
+    return response, status_code
 
 
 # Bias Analogy Model debiasing of a bias specifiication returning values
 @app.route('/REST/debiasing/bam', methods=['POST'])
 def debiasing_bam():
-    return 200
+    content = request.get_json()
+    bar = request.args.to_dict()
+    response, status_code = debiasing_controller.debiasing('bam', content, bar)
+
+    return response, status_code
 
 
 # Debiasing of bias specifications using GBDD and BAM, returning values
 @app.route('/REST/debiasing/full/gbddxbam', methods=['POST'])
 def debiasing_gbdd_bam():
-    return 200
+    content = request.get_json()
+    bar = request.args.to_dict()
+    response, status_code = debiasing_controller.debiasing('gbddXbam', content, bar)
+
+    return response, status_code
 
 
 # Debiasing of bias specifications using BAM and GBDD, returning values in full size
 @app.route('/REST/debiasing/full/bamxgbdd', methods=['POST'])
 def debiasing_bam_gbdd():
-    return 200
+    content = request.get_json()
+    bar = request.args.to_dict()
+    response, status_code = debiasing_controller.debiasing('bamXgbdd', content, bar)
+
+    return response, status_code
 
 
 # Upload of complete embedding spaces
@@ -169,13 +187,35 @@ def upload_embedding_space():
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         resp = jsonify({'message': 'File successfully uploaded'})
         resp.status_code = 201
-        print('Case 3')
         return resp
     else:
         resp = jsonify({'message': 'Allowed file types are txt, vec or vocab'})
         resp.status_code = 400
         print('Case 4')
         return resp
+
+
+@app.route('/REST/uploads/print-upload', methods=['GET'])
+def print_upload():
+    bar = request.args.to_dict()
+    space = bar['space']
+    data_controller.load_dict_uploaded_file(space)
+    print('Data Retrieved')
+    value = upload_controller.uploaded_space['car']
+    print(value)
+    return 'SEE CONSOLE', 200
+
+
+@app.route('/REST/uploads/delete', methods=['DELETE'])
+def delete_uploaded_file():
+    bar = request.args.to_dict()
+    filename = bar['space']
+    path = 'uploads/' + filename
+    try:
+        os.remove(path)
+    except FileNotFoundError:
+        return 'NOT FOUND', 404
+    return 'REMOVED FILE SUCCESFULLY', 200
 
 
 # Check if uploaded file-name is accepted

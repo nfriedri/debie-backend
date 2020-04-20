@@ -170,3 +170,9 @@ def principal_componant_analysis(vector_dict1, vector_dict2=None, vector_dict3=N
         results[array_words[i]] = prinicpal_components[i]
     logging.info("PCA: Prinicipal composant analysis completed")
     return results
+
+
+def principal_componant_analysis2(vecs):
+    pca2 = PCA(n_components=2)
+    prinicpal_components = pca2.fit_transform(numpy.array(vecs))
+    return prinicpal_components

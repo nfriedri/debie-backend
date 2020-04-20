@@ -1,6 +1,8 @@
 import pickle
-
+import io
 import numpy as np
+
+import upload_controller
 
 fasttext_200k_vocab = 'data/ft.wiki.en.300.vocab'
 fasttext_200k_vectors = 'data/ft.wiki.en.300.vectors'
@@ -39,6 +41,20 @@ def load_augmentations(augmentations_path):
     with open(augmentations_path, 'rb') as handle:
         augmentations = pickle.load(handle)
         return augmentations
+
+
+def load_dict_uploaded_file(filename):
+    path = "uploads/" + filename
+    fin = io.open(path, 'r', encoding='utf-8', newline='\n', errors='ignore')
+    data = {}
+    print('here')
+    for line in fin:
+        tokens = line.rstrip().split(' ')
+        ln = np.array(tokens[1:])
+        data[tokens[0]] = ln.astype(np.float)
+    upload_controller.uploaded_filename = filename
+    upload_controller.uploaded_space = data
+    return 'SEE CONSOLE'
 
 
 def load_embeddings_by_start():
