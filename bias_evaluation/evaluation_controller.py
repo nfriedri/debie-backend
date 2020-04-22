@@ -7,12 +7,14 @@ from bias_evaluation import ect, bat, weat, kmeans
 def evaluation(methods, content, bar):
     if content is None:
         return 'BAD REQUEST - NO BIAS SPEC JSON FOUND', 400
-    if 'space' not in bar:
-        return 'BAD REQUEST - NO SPACE SELECTED', 400
-    space = bar['space']
+    if 'space' and 'uploaded' not in bar:
+        return 'BAD REQUEST - NO EMBEDDING SPACE SELECTED', 400
+    space = 'fasttext'
     uploaded = 'false'
     lower = 'false'
     json = 'false'
+    if 'space' in bar:
+        space = bar['space']
     if 'uploaded' in bar:
         uploaded = bar['uploaded']
     if 'lower' in bar:

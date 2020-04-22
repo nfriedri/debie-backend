@@ -6,6 +6,8 @@ from data_controller import glove_vocab as gv_vocab
 from data_controller import glove_vectors as gv_vecs
 from data_controller import cbow_vocab as cb_vocab
 from data_controller import cbow_vectors as cb_vecs
+from upload_controller import uploaded_vocab as up_vocab
+from upload_controller import uploaded_vecs as up_vecs
 
 
 def retrieve_vector_single(vocab, vectors, target_word):
@@ -44,12 +46,16 @@ def retrieve_uploaded_vector_single(space, target):
 def retrieve_uploaded_vector_multiple(space, word_list):
     not_found = []
     found = {}
-    if space == upload_controller.uploaded_filename:
-        for word in word_list:
-            if word in upload_controller.uploaded_space:
-                found[word] = upload_controller.uploaded_space[word]
-            else:
-                not_found.append(word)
+    if upload_controller.uploaded_binary == 'false':
+        if space == upload_controller.uploaded_filename:
+            for word in word_list:
+                if word in upload_controller.uploaded_space:
+                    found[word] = upload_controller.uploaded_space[word]
+                else:
+                    not_found.append(word)
+    if upload_controller.uploaded_binary == 'true':
+        found, not_found = retrieve_vector_multiple(upload_controller.uploaded_vocab, upload_controller.uploaded_vecs,
+                                                    word_list)
     return found, not_found
 
 
@@ -57,11 +63,13 @@ def retrieve_vector(number, content, bar):
     vectors = {}
     not_found = []
 
-    if 'space' not in bar:
+    if 'space' and 'uploaded' not in bar:
         return 'BAD REQUEST - NO SPACE SELECTED', 400
-    space = bar['space']
+    space = 'fasttext'
     uploaded = 'false'
     lower = 'false'
+    if 'space' in bar:
+        space = bar['space']
     if 'uploaded' in bar:
         uploaded = bar['uploaded']
     if 'lower' in bar:
@@ -74,7 +82,10 @@ def retrieve_vector(number, content, bar):
         if lower == 'true':
             target = target.lower()
         if uploaded == 'true':
-            vectors, not_found = retrieve_uploaded_vector_single(space, target)
+            if upload_controller.uploaded_binary == 'false':
+                vectors, not_found = retrieve_uploaded_vector_single(space, target)
+            if upload_controller.uploaded_binary == 'true':
+                vectors, not_found = retrieve_vector_single(up_vocab, up_vecs, target)
         if space == 'fasttext':
             vectors, not_found = retrieve_vector_single(ft_vocab, ft_vecs, target)
         if space == 'glove':
@@ -89,7 +100,10 @@ def retrieve_vector(number, content, bar):
         if lower == 'true':
             target = [t.lower() for t in target]
         if uploaded == 'true':
-            vectors, not_found = retrieve_uploaded_vector_multiple(space, target)
+            if upload_controller.uploaded_binary == 'false':
+                vectors, not_found = retrieve_uploaded_vector_multiple(space, target)
+            if upload_controller.uploaded_binary == 'true':
+                vectors, not_found = retrieve_vector_multiple(up_vocab, up_vecs, target)
         if space == 'fasttext':
             vectors, not_found = retrieve_vector_multiple(ft_vocab, ft_vecs, target)
         if space == 'glove':

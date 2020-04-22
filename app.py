@@ -18,7 +18,7 @@ from debiasing import debiasing_controller
 ''' RestAPI '''
 # FLASK, CORS & Logging configuration
 UPLOAD_FOLDER = 'uploads'
-ALLOWED_EXTENSIONS = {'txt', 'vec', 'vocab', 'vector'}
+ALLOWED_EXTENSIONS = {'txt', 'vec', 'vocab', 'vectors'}
 MAX_CONTENT_LENGTH = 500 * 1024 * 1024
 
 app = Flask(__name__)
@@ -170,40 +170,79 @@ def debiasing_bam_gbdd():
 @app.route('/REST/uploads/embedding-spaces', methods=['POST'])
 def upload_embedding_space():
     logging.info("APP: Receiving file from upload " + str(datetime.datetime.now()))
-    print('Receiving file form upload')
+    print('Receiving file from upload')
 
-    if 'uploadFile' not in request.files:
-        resp = jsonify({'message': 'No file part in the request'})
+    if 'vectorFile' and ('vocab' and 'vecs') not in request.files:
+        print('Here1')
+        resp = jsonify({'message': 'No file(s) part of the request'})
         resp.status_code = 400
         return resp
-    file = request.files['uploadFile']
-    # print(file.read())
-    if file.filename == '':
-        resp = jsonify({'message': 'No file selected for uploading'})
-        resp.status_code = 400
-        return resp
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        resp = jsonify({'message': 'File successfully uploaded'})
-        resp.status_code = 201
-        return resp
-    else:
-        resp = jsonify({'message': 'Allowed file types are txt, vec or vocab'})
-        resp.status_code = 400
-        print('Case 4')
-        return resp
+
+    if 'vectorFile' in request.files:
+        file = request.files['vectorFile']
+        if file.filename == '':
+            resp = jsonify({'message': 'No file selected for uploading'})
+            resp.status_code = 400
+            upload_controller.uploaded_binary = ''
+            return resp
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            resp = jsonify({'message': 'File successfully uploaded'})
+            upload_controller.uploaded_binary = 'false'
+            resp.status_code = 201
+            return resp
+        else:
+            resp = jsonify({'message': 'Allowed file types are txt, vec or vocab'})
+            resp.status_code = 400
+            upload_controller.uploaded_binary = ''
+            return resp
+
+    if 'vocab' and 'vecs' in request.files:
+        vocab = request.files['vocab']
+        vecs = request.files['vecs']
+        if vocab.filename and vecs.filename == '':
+            resp = jsonify({'message': 'No files selected for uploading'})
+            resp.status_code = 400
+            upload_controller.uploaded_binary = ''
+            return resp
+        if vocab.filename and allowed_file(vocab.filename) and vecs.filename and allowed_file(vecs.filename):
+            vocab_filename = secure_filename(vocab.filename)
+            vocab.save(os.path.join(app.config['UPLOAD_FOLDER'], vocab_filename))
+            vecs_filename = secure_filename(vecs.filename)
+            vecs.save(os.path.join(app.config['UPLOAD_FOLDER'], vecs_filename))
+            resp = jsonify({'message': 'Files successfully uploaded'})
+            upload_controller.uploaded_binary = 'true'
+            resp.status_code = 201
+            return resp
+        else:
+            resp = jsonify({'message': 'Allowed file types are txt, vec or vocab'})
+            resp.status_code = 400
+            upload_controller.uploaded_binary = ''
+            return resp
 
 
-@app.route('/REST/uploads/print-upload', methods=['GET'])
-def print_upload():
+@app.route('/REST/uploads/initialize', methods=['GET'])
+def initialize_uploaded_embeddings():
     bar = request.args.to_dict()
-    space = bar['space']
-    data_controller.load_dict_uploaded_file(space)
-    print('Data Retrieved')
-    value = upload_controller.uploaded_space['car']
-    print(value)
-    return 'SEE CONSOLE', 200
+    print(upload_controller.uploaded_binary)
+    if upload_controller.uploaded_binary == 'true':
+        vocab = bar['vocab']
+        vecs = bar['vecs']
+        data_controller.load_binary_uploads(vocab, vecs)
+        resp = jsonify({'message': 'INITIALIZED BINARY VOCAB AND VEC FILE SUCCESSFULLY'})
+        resp.status_code = 200
+        return resp, resp.status_code
+    if upload_controller.uploaded_binary == 'false':
+        file = bar['file']
+        data_controller.load_dict_uploaded_file(file)
+        resp = jsonify({'message': 'INITIALIZED VECTOR FILE SUCCESSFULLY'})
+        resp.status_code = 200
+        return resp, resp.status_code
+    else:
+        resp = jsonify({'message': 'NO UPLOADED FILE(S) FOUND'})
+        resp.status_code = 404
+    return resp, resp.status_code
 
 
 @app.route('/REST/uploads/delete', methods=['DELETE'])
@@ -213,9 +252,11 @@ def delete_uploaded_file():
     path = 'uploads/' + filename
     try:
         os.remove(path)
+        resp = jsonify({'message': 'REMOVED FILE SUCCESFULLY'})
     except FileNotFoundError:
-        return 'NOT FOUND', 404
-    return 'REMOVED FILE SUCCESFULLY', 200
+        resp = jsonify({'message': 'FILE NOT FOUND'})
+        return resp, 404
+    return resp, 200
 
 
 # Check if uploaded file-name is accepted

@@ -11,12 +11,14 @@ def debiasing(methods, content, bar):
     # bar params: lower, uploaded, pca, space
     if content is None:
         return 'BAD REQUEST - NO BIAS SPEC JSON FOUND', 400
-    if 'space' not in bar:
+    if 'space' and 'uploaded' not in bar:
         return 'BAD REQUEST - NO SPACE SELECTED', 400
-    space = bar['space']
+    space = 'fasttext'
     uploaded = 'false'
     lower = 'false'
     pca = 'true'
+    if 'space' in bar:
+        space = bar['space']
     if 'uploaded' in bar:
         uploaded = bar['uploaded']
     if 'lower' in bar:

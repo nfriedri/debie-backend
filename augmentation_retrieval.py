@@ -1,9 +1,17 @@
 import json_controller
-from data_controller import augmentations
-from data_controller import fasttext_vocab
-from data_controller import fasttext_vectors
 import calculation
 import numpy as np
+
+import upload_controller
+from data_controller import augmentations
+from data_controller import fasttext_vocab as ft_vocab
+from data_controller import fasttext_vectors as ft_vecs
+from data_controller import glove_vocab as gv_vocab
+from data_controller import glove_vectors as gv_vecs
+from data_controller import cbow_vocab as cb_vocab
+from data_controller import cbow_vectors as cb_vecs
+from upload_controller import uploaded_vocab as up_vocab
+from upload_controller import uploaded_vecs as up_vecs
 
 
 def retrieve_augmentations(number, content, bar):
@@ -13,12 +21,15 @@ def retrieve_augmentations(number, content, bar):
     uploaded = 'false'
     lower = 'false'
     iterations = 4
+    space = 'fasttext'
     if 'uploaded' in bar:
         uploaded = bar['uploaded']
     if 'lower' in bar:
         lower = bar['lower']
     if 'iterations' in bar:
         iterations = bar['iterations']
+    if 'space' in bar:
+        space = bar['space']
 
     if number == 'single':
         if 'word' not in bar:
@@ -26,7 +37,15 @@ def retrieve_augmentations(number, content, bar):
         target = bar['word']
         if lower == 'true':
             target.lower()
-        augments[target], computed = retrieve_single_augmentations(target)
+        if space == 'glove':
+            augments[target], computed = retrieve_single_augmentations(target, gv_vocab, gv_vecs)
+        if space == 'cbow':
+            augments[target], computed = retrieve_single_augmentations(target, cb_vocab, cb_vecs)
+        if uploaded == 'true' and upload_controller.uploaded_binary == 'true':
+            augments[target], computed = retrieve_single_augmentations(target, upload_controller.uploaded_vocab,
+                                                                       upload_controller.uploaded_vecs)
+        else:
+            augments[target], computed = retrieve_single_augmentations(target)
         if computed:
             computed_augments.append(target)
     if number == 'multiple':
@@ -35,21 +54,32 @@ def retrieve_augmentations(number, content, bar):
         target = content['Words'].split(' ')
         if lower == 'true':
             target = [x.lower() for x in target]
+        vocab = ft_vocab
+        vecs = ft_vecs
+        if space == 'glove':
+            vocab = gv_vocab
+            vecs = gv_vecs
+        if space == 'cbow':
+            vocab = cb_vocab
+            vecs = cb_vecs
+        if uploaded == 'true' and upload_controller.uploaded_binary == 'true':
+            vocab = upload_controller.uploaded_vocab
+            vecs = upload_controller.uploaded_vecs
         for word in target:
-            augments[word], computed = retrieve_single_augmentations(word)
+            augments[word], computed = retrieve_single_augmentations(word, vocab, vecs)
             if computed:
                 computed_augments.append(word)
     response = json_controller.json_augmentation_retrieval(augments, computed_augments)
     return response, 200
 
 
-def retrieve_single_augmentations(target):
+def retrieve_single_augmentations(target, vocab=ft_vocab, vecs=ft_vecs):
     if target in augmentations:
         return augmentations[target], False
     # TODO elif: search whether augmentation has already been computed once, if yes retrieve it
     # TODO inform user whether augments are postspecialized or not
     else:
-        augments, computed = compute_augmentations(target)
+        augments, computed = compute_augmentations(target, vocab, vecs)
         return augments, computed
 
 
@@ -65,7 +95,7 @@ def retrieve_multiple_augmentations(target):
     return augments, computed_augments
 
 
-def compute_augmentations(target, vocab=fasttext_vocab, vecs=fasttext_vectors, iterations=4):
+def compute_augmentations(target, vocab, vecs, iterations=4):
     print('COMPUTED')
     augments = []
     cosinesim = {}

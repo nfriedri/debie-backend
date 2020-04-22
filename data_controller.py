@@ -57,6 +57,17 @@ def load_dict_uploaded_file(filename):
     return 'SEE CONSOLE'
 
 
+def load_binary_uploads(vocab_filename, vecs_filename):
+    path_vocab = "uploads/" + vocab_filename
+    path_vecs = "uploads/" + vecs_filename
+    vocab, vecs = load_binary_embeddings(path_vocab, path_vecs)
+    upload_controller.uploaded_vocabfile = vocab_filename
+    upload_controller.uploaded_vectorfile = vecs_filename
+    upload_controller.uploaded_vocab = vocab
+    upload_controller.uploaded_vecs = vecs
+    return 'SEE CONSOLE'
+
+
 def load_embeddings_by_start():
     fasttext_vocab, fasttext_vectors = load_binary_embeddings(fasttext_200k_vocab, fasttext_200k_vectors, inverse=False, normalize=False)
     glove_vocab, glove_vectors = load_binary_embeddings(glove_200k_vocab, glove_200k_vectors, inverse=False, normalize=False)
