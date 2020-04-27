@@ -172,12 +172,6 @@ def upload_embedding_space():
     logging.info("APP: Receiving file from upload " + str(datetime.datetime.now()))
     print('Receiving file from upload')
 
-    if 'vectorFile' and ('vocab' and 'vecs') not in request.files:
-        print('Here1')
-        resp = jsonify({'message': 'No file(s) part of the request'})
-        resp.status_code = 400
-        return resp
-
     if 'vectorFile' in request.files:
         file = request.files['vectorFile']
         if file.filename == '':
@@ -220,6 +214,12 @@ def upload_embedding_space():
             resp.status_code = 400
             upload_controller.uploaded_binary = ''
             return resp
+
+    if 'vectorFile' and ('vocab' and 'vecs') not in request.files:
+        print('Here1')
+        resp = jsonify({'message': 'No file(s) part of the request'})
+        resp.status_code = 400
+        return resp
 
 
 @app.route('/REST/uploads/initialize', methods=['GET'])
