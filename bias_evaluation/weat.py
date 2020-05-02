@@ -5,20 +5,19 @@ import numpy
 
 # Computes the Word Embedding Coherence Test (WEAT)
 def word_embedding_association_test(target1, target2, attribute1, attribute2, accuracy=100):
-    # print("WEAT: Started calculation")
+    logging.info("Eval-Engine: WEAT started")
     # target1, target2, arg1, arg2 = calculation.create_duplicates(target_set1, target_set2, attribute_set1, attribute_set2)
     t1, t2, a1, a2 = calculation.transform_multiple_dicts_to_lists(target1, target2, attribute1, attribute2)
     target_list = numpy.concatenate((t1, t2))
     # Calculate effect size
     effect_size = effect_size_calculation(target_list, t1, t2, a1, a2)
+    logging.info("Eval-Engine: WEAT effect-size: " + str(effect_size))
     # Calculate p_value
     # print("WEAT: Started p-value calculation")
     s_b_e = differential_association(t1, t2, a1, a2)
     s_b_e_all = sum_up_diff_ass_all_permutations(target_list, a1, a2, accuracy)
     p_value = p_value_calculation(s_b_e, s_b_e_all)
-    # print("WEAT: Finished p-value calculation with result " + str(p_value))
-    # print("WEAT: Finished calculation")
-    # print("WEAT: Results: effect-size: " + str(effect_size) + " p-value: " + str(p_value))
+    logging.info("Eval-Engine: WEAT p-value " + str(p_value))
 
     return effect_size, p_value
 

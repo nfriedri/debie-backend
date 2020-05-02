@@ -1,8 +1,9 @@
 import numpy as np
-
+import logging
 
 # Computes the Bias Analogy Test (BAT) on a bias specification
 def bias_analogy_test(target1, target2, attribute1, attribute2):
+    logging.info("Eval-Engine: BAT started")
     # target1, target2, attribute1, attribute2 = calculation.create_duplicates(target_set1, target_set2, attribute_set1, attribute_set2)
     counter = 0
     vocab = {}
@@ -32,19 +33,13 @@ def bias_analogy_test(target1, target2, attribute1, attribute2):
         counter += 1
         attributes_2.append(word)
         vectors.append(np.array(list(attribute2[word])))
-    # print(len(vectors))
-    # print(vectors[0])
 
     attributes_paired = []
     for a1 in attributes_1:
         for a2 in attributes_2:
             attributes_paired.append((a1, a2))
-    # print(len(attributes_paired))
-    # print(len(attributes_paired[0]))
-    # print(attributes_paired)
 
     temporary_vocab = list(set(target_1 + target_2 + attributes_1 + attributes_2))
-    # print(temporary_vocab)
     dictionary_list = []
     vector_matrix = []
     for w in temporary_vocab:
@@ -53,24 +48,18 @@ def bias_analogy_test(target1, target2, attribute1, attribute2):
             dictionary_list.append(w)
 
     vector_matrix = np.array(vector_matrix)
-    # print(vector_matrix[10])
     vocab = {dictionary_list[i]: i for i in range(len(dictionary_list))}
 
     eq_pairs = []
     for t1 in target_1:
         for t2 in target_2:
             eq_pairs.append((t1, t2))
-    # print(len(eq_pairs))
-    # print(eq_pairs)
 
     for pair in eq_pairs:
         t1 = pair[0]
         t2 = pair[1]
-        # print(t1)
-        # print(t2)
         vec_t1 = vector_matrix[vocab[t1]]
         vec_t2 = vector_matrix[vocab[t2]]
-        # print(len(vec_t1))
         biased = []
         totals = []
         for a1, a2 in attributes_paired:
@@ -101,4 +90,5 @@ def bias_analogy_test(target1, target2, attribute1, attribute2):
             totals.append(len(indices_other))
 
     result = sum(biased) / sum(totals)
+    logging.info("Eval-Engine: BAT score: " + str(result))
     return result

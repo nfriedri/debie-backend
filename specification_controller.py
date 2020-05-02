@@ -1,3 +1,4 @@
+import logging
 import random
 
 import numpy
@@ -31,14 +32,14 @@ def format_set_sizes(vector_set1, vector_set2):
                 key = random.choice(list(vector_set1.keys()))
                 del vector_set1[key]
                 deleted_keys.append(key)
-                # logging.info("CM: Removed keys from dictionary 2: " + str(key))
+                logging.info("SpecController: Removed keys from dictionary 1: " + str(key))
         elif len(vector_set2) > len(vector_set1):
             difference = len(vector_set2) - len(vector_set1)
             for i in range(difference):
                 key = random.choice(list(vector_set2.keys()))
                 del vector_set2[key]
                 deleted_keys.append(key)
-                # logging.info("CM: Removed keys from dictionary 2: " + str(key))
+                logging.info("SpecController: Removed keys from dictionary 2: " + str(key))
         return vector_set1, vector_set2, deleted_keys
 
 
@@ -85,7 +86,6 @@ def get_vectors_for_spec(space, lower, uploaded, t1, t2, a1, a2, aug1=None, aug2
             not_found += aug1_not_found + aug2_not_found
 
     if uploaded == 'true':
-        print('uploaded data in coming')
         t1_found, t1_not_found = retrieve_uploaded_vector_multiple(space, t1)
         t2_found, t2_not_found = retrieve_uploaded_vector_multiple(space, t2)
         a1_found, a1_not_found = retrieve_uploaded_vector_multiple(space, a1)
@@ -102,6 +102,8 @@ def get_vectors_for_spec(space, lower, uploaded, t1, t2, a1, a2, aug1=None, aug2
     if aug1 is not None and aug2 is not None:
         aug1, aug2, aug_del = format_set_sizes(aug1_found, aug2_found)
         deleted_keys += aug_del
+        logging.info("SpecController: Returning found vectors")
+        logging.info("SpecController: NotFound: " + str(not_found) + " ; DeletedKeys: " + str(deleted_keys))
         return t1, t2, a1, a2, aug1, aug2, not_found, deleted_keys
     return t1, t2, a1, a2, not_found, deleted_keys
 

@@ -1,9 +1,9 @@
 import numpy as np
-import augmentation_retrieval
-import calculation
+import logging
 
 
 def debias_proc(equality_sets, vecs, vocab):
+    logging.info("Debi-Engine: BAM Debiasing started")
     A = []
     B = []
     vocab_list = []
@@ -21,6 +21,7 @@ def debias_proc(equality_sets, vecs, vocab):
     print(U.shape, V.shape)
     proj_mat = V  # np.matmul(U, V)
     res = np.matmul(vecs, proj_mat)
+    logging.info("Debi-Engine: BAM Debiasing finished")
     return (res + vecs) / 2, proj_mat, vocab_list
 
 

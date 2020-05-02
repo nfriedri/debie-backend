@@ -1,4 +1,5 @@
 import json
+import logging
 
 
 def dict_to_json(vector_dict):
@@ -37,6 +38,8 @@ def json_to_bias_spec(content):
         target2 = content['T2'].split(' ')
         attributes1 = content['A1'].split(' ')
         attributes2 = content['A2'].split(' ')
+    logging.info("JsonController: Found following bias spec: T1: " + str(target1) + "; T2: " + str(target2) + "; A1: " +
+                 str(attributes1) + " ; A2: " + str(attributes2))
     return target1, target2, attributes1, attributes2
 
 
@@ -60,6 +63,9 @@ def json_to_debias_spec(content):
             augments1 = content['Augmentations1']
         if 'Augmentations2' in content:
             augments2 = content['Augmentations2']
+    logging.info("JsonController: Found following bias spec: T1: " + str(target1) + "; T2: " + str(target2) + "; A1: " +
+                 str(attributes1) + " ; A2: " + str(attributes2) + " ; Aug1: " + str(augments1) + " ; Aug2: " +
+                 str(augments2))
     return target1, target2, attributes1, attributes2, augments1, augments2
 
 

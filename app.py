@@ -22,15 +22,17 @@ ALLOWED_EXTENSIONS = {'txt', 'vec', 'vocab', 'vectors'}
 MAX_CONTENT_LENGTH = 500 * 1024 * 1024
 
 app = Flask(__name__)
-CORS(app)
+# CORS(app)
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 app.secret_key = "secret key"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['ALLOWED_EXTENSIONS'] = ALLOWED_EXTENSIONS
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
 
-# logging.basicConfig(filename="logfiles.log", level=logging.INFO)
-# print("logging configured")
+logging.basicConfig(filename="logfile.log", level=logging.INFO)
+logging.info("APP: APP started at " + str(datetime.datetime.now()))
+print("logging configured")
 
 
 # API-Connection Test
@@ -43,7 +45,7 @@ def test():
 # Example: http://127.0.0.1:5000/REST/retrieve_single_vector?embedding_space=fasttext&word=car
 @app.route('/REST/vectors/single', methods=['GET'])
 def retrieve_single_vector():
-    # logging.info("APP:" + str(datetime.datetime.now()) + " Retrieve single vector is called")
+    logging.info("APP:" + str(datetime.datetime.now()) + " Retrieve single vector is called")
     bar = request.args.to_dict()
     response, status_code = vector_retrieval.retrieve_vector('single', None, bar)
     return response, status_code
@@ -52,7 +54,7 @@ def retrieve_single_vector():
 # Retrieval of word vector representations for a list of words
 @app.route('/REST/vectors/multiple', methods=['POST'])
 def retrieve_multiple_vectors():
-    # logging.info("APP: " + str(datetime.datetime.now()) + " Retrieve multiple vectors is called")
+    logging.info("APP: " + str(datetime.datetime.now()) + " Retrieve multiple vectors is called")
     content = request.get_json()
     bar = request.args.to_dict()
     response, status_code = vector_retrieval.retrieve_vector('multiple', content, bar)
@@ -62,6 +64,7 @@ def retrieve_multiple_vectors():
 # Retrieves four augmentations for a word
 @app.route('/REST/augmentations/single', methods=['GET'])
 def retrieve_single_augmentation():
+    logging.info("APP: " + str(datetime.datetime.now()) + " Retrieve single augmentation is called")
     bar = request.args.to_dict()
     response, status_code = augmentation_retrieval.retrieve_augmentations('single', None, bar)
     return response, status_code
@@ -70,6 +73,7 @@ def retrieve_single_augmentation():
 # Retrieves 4 augmentations for a list of words
 @app.route('/REST/augmentations/multiple', methods=['POST'])
 def retrieve_multiple_augmentations():
+    logging.info("APP: " + str(datetime.datetime.now()) + " Retrieve multiple augmentations is called")
     content = request.get_json()
     bar = request.args.to_dict()
     response, status_code = augmentation_retrieval.retrieve_augmentations('multiple', content, bar)
@@ -79,6 +83,7 @@ def retrieve_multiple_augmentations():
 # Evaluates a bias specification with all implemented evaluation methods
 @app.route('/REST/bias-evaluation/all', methods=['POST'])
 def bias_evaluations_all():
+    logging.info("APP: " + str(datetime.datetime.now()) + " Bias Evaluation with ALL scores started")
     content = request.get_json()
     bar = request.args.to_dict()
     response, status_code = evaluation_controller.evaluation('all', content, bar)
@@ -89,6 +94,7 @@ def bias_evaluations_all():
 # Evaluates a bias specification with the Embedding Coherence Test (ECT)
 @app.route('/REST/bias-evaluation/ect', methods=['POST'])
 def bias_evaluations_ect():
+    logging.info("APP: " + str(datetime.datetime.now()) + " Bias Evaluation with ECT scores started")
     content = request.get_json()
     bar = request.args.to_dict()
     response, status_code = evaluation_controller.evaluation('ect', content, bar)
@@ -99,6 +105,7 @@ def bias_evaluations_ect():
 # Evaluates a bias specification with the Bias Analogy Test (BAT)
 @app.route('/REST/bias-evaluation/bat', methods=['POST'])
 def bias_evaluations_bat():
+    logging.info("APP: " + str(datetime.datetime.now()) + " Bias Evaluation with BAT scores started")
     content = request.get_json()
     bar = request.args.to_dict()
     response, status_code = evaluation_controller.evaluation('bat', content, bar)
@@ -109,6 +116,7 @@ def bias_evaluations_bat():
 # Evaluates a bias specification with the Word Embedding Association Test (WEAT)
 @app.route('/REST/bias-evaluation/weat', methods=['POST'])
 def bias_evaluations_weat():
+    logging.info("APP: " + str(datetime.datetime.now()) + " Bias Evaluation with WEAT scores started")
     content = request.get_json()
     bar = request.args.to_dict()
     response, status_code = evaluation_controller.evaluation('weat', content, bar)
@@ -119,6 +127,7 @@ def bias_evaluations_weat():
 # Evaluates a bias specification with K-Means++ clustering
 @app.route('/REST/bias-evaluation/kmeans', methods=['POST'])
 def bias_evaluations_kmeans():
+    logging.info("APP: " + str(datetime.datetime.now()) + " Bias Evaluation with KMEANS scores started")
     content = request.get_json()
     bar = request.args.to_dict()
     response, status_code = evaluation_controller.evaluation('kmeans', content, bar)
@@ -129,6 +138,7 @@ def bias_evaluations_kmeans():
 # General Bias-Direction Debiasing of a bias specifiication returning values
 @app.route('/REST/debiasing/gbdd', methods=['POST'])
 def debiasing_gbdd():
+    logging.info("APP: " + str(datetime.datetime.now()) + " GBDD Debiasing started")
     content = request.get_json()
     bar = request.args.to_dict()
     response, status_code = debiasing_controller.debiasing('gbdd', content, bar)
@@ -139,6 +149,7 @@ def debiasing_gbdd():
 # Bias Analogy Model debiasing of a bias specifiication returning values
 @app.route('/REST/debiasing/bam', methods=['POST'])
 def debiasing_bam():
+    logging.info("APP: " + str(datetime.datetime.now()) + " BAM Debiasing started")
     content = request.get_json()
     bar = request.args.to_dict()
     response, status_code = debiasing_controller.debiasing('bam', content, bar)
@@ -149,6 +160,7 @@ def debiasing_bam():
 # Debiasing of bias specifications using GBDD and BAM, returning values
 @app.route('/REST/debiasing/full/gbddxbam', methods=['POST'])
 def debiasing_gbdd_bam():
+    logging.info("APP: " + str(datetime.datetime.now()) + " GBDDxBAM Debiasing started")
     content = request.get_json()
     bar = request.args.to_dict()
     response, status_code = debiasing_controller.debiasing('gbddXbam', content, bar)
@@ -159,6 +171,7 @@ def debiasing_gbdd_bam():
 # Debiasing of bias specifications using BAM and GBDD, returning values in full size
 @app.route('/REST/debiasing/full/bamxgbdd', methods=['POST'])
 def debiasing_bam_gbdd():
+    logging.info("APP: " + str(datetime.datetime.now()) + " BAMxGBDD Debiasing started")
     content = request.get_json()
     bar = request.args.to_dict()
     response, status_code = debiasing_controller.debiasing('bamXgbdd', content, bar)
@@ -224,6 +237,7 @@ def upload_embedding_space():
 
 @app.route('/REST/uploads/initialize', methods=['GET'])
 def initialize_uploaded_embeddings():
+    logging.info("APP: " + str(datetime.datetime.now()) + " Initializing uploaded file(s)")
     bar = request.args.to_dict()
     print(upload_controller.uploaded_binary)
     if upload_controller.uploaded_binary == 'true':
@@ -250,6 +264,7 @@ def delete_uploaded_file():
     bar = request.args.to_dict()
     filename = bar['space']
     path = 'uploads/' + filename
+    logging.info("APP: " + str(datetime.datetime.now()) + " Deleting uploaded file")
     try:
         os.remove(path)
         resp = jsonify({'message': 'REMOVED FILE SUCCESFULLY'})
