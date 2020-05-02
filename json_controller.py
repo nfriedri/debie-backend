@@ -13,6 +13,7 @@ def dict_keys_to_string(vector_dict):
     keys = ''
     for word in vector_dict.keys():
         keys += str(word) + ' '
+    keys = keys[:len(keys)-1]
     return keys
 
 

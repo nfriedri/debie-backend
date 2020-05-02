@@ -1,17 +1,17 @@
-import specification_controller
 import augmentation_retrieval
-import json_controller
-import numpy as np
 import calculation
-
+import json_controller
+import specification_controller
 from debiasing import bam, gbdd
 
 
 def debiasing(methods, content, bar):
+    print("Debiasing-Engine: Started")
+
     # bar params: lower, uploaded, pca, space
     if content is None:
         return 'BAD REQUEST - NO BIAS SPEC JSON FOUND', 400
-    if 'space' and 'uploaded' not in bar:
+    if 'space' not in bar and 'uploaded' not in bar:
         return 'BAD REQUEST - NO SPACE SELECTED', 400
     space = 'fasttext'
     uploaded = 'false'
@@ -25,8 +25,9 @@ def debiasing(methods, content, bar):
         lower = bar['lower']
     if 'pca' in bar:
         pca = bar['pca']
-
+    print('bar okay')
     t1_list, t2_list, a1_list, a2_list, aug1_list, aug2_list = json_controller.json_to_debias_spec(content)
+    print("JOSN okay")
     if len(aug1_list) == 0:
         aug1_list, computed = augmentation_retrieval.retrieve_multiple_augmentations(a1_list)
     if len(aug2_list) == 0:
@@ -44,31 +45,44 @@ def debiasing(methods, content, bar):
         for j in range(len(aug2_list)):
             equality_sets.append([aug1_list[i], aug2_list[j]])
 
-    t1, t2, a1, a2, aug1, aug2, not_found, deleted = specification_controller.\
+    t1, t2, a1, a2, aug1, aug2, not_found, deleted = specification_controller. \
         get_vectors_for_spec(space, lower, uploaded, t1_list, t2_list, a1_list, a2_list, aug1_list, aug2_list)
     vocab, vecs = create_vocab_and_vecs(t1, t2, a1, a2, aug1, aug2)
     t1_deb, t2_deb, a1_deb, a2_deb, new_vecs = [], [], [], [], []
+    print("Debiasing-Engine: Specs loaded, starting computing")
     if methods == 'bam':
-        t1_deb, t2_deb, a1_deb, a2_deb, new_vecs = debiasing_bam(equality_sets, vocab, vecs, t1_list, t2_list, a1_list, a2_list)
+        t1_deb, t2_deb, a1_deb, a2_deb, new_vecs = debiasing_bam(equality_sets, vocab, vecs, t1_list, t2_list, a1_list,
+                                                                 a2_list)
     if methods == 'gbdd':
-        t1_deb, t2_deb, a1_deb, a2_deb, new_vecs = debiasing_gbdd(equality_sets, vocab, vecs, t1_list, t2_list, a1_list, a2_list)
+        print(t1_list)
+        print(t2_list)
+        print(a1_list)
+        print(a2_list)
+        t1_deb, t2_deb, a1_deb, a2_deb, new_vecs = debiasing_gbdd(equality_sets, vocab, vecs, t1_list, t2_list, a1_list,
+                                                                  a2_list)
     if methods == 'bamXgbdd':
-        t1_deb, t2_deb, a1_deb, a2_deb = debiasing_bam_gbdd(equality_sets, vocab, vecs, t1_list, t2_list, a1_list, a2_list)
+        t1_deb, t2_deb, a1_deb, a2_deb = debiasing_bam_gbdd(equality_sets, vocab, vecs, t1_list, t2_list, a1_list,
+                                                            a2_list)
     if methods == 'gbddXbam':
-        t1_deb, t2_deb, a1_deb, a2_deb = debiasing_gbdd_bam(equality_sets, vocab, vecs, t1_list, t2_list, a1_list, a2_list)
+        t1_deb, t2_deb, a1_deb, a2_deb = debiasing_gbdd_bam(equality_sets, vocab, vecs, t1_list, t2_list, a1_list,
+                                                            a2_list)
 
     if pca == 'true':
         biased_space = calculation.principal_componant_analysis2(vecs)
         debiased_space = calculation.principal_componant_analysis2(new_vecs)
-        t1_pca_bias, t2_pca_bias, a1_pca_bias, a2_pca_bias = vocab_to_dicts(vocab, biased_space, t1_list, t2_list, a1_list, a2_list)
-        t1_pca_deb, t2_pca_deb, a1_pca_deb, a2_pca_deb = vocab_to_dicts(vocab, debiased_space, t1_list, t2_list, a1_list, a2_list)
+        t1_pca_bias, t2_pca_bias, a1_pca_bias, a2_pca_bias = vocab_to_dicts(vocab, biased_space, t1_list, t2_list,
+                                                                            a1_list, a2_list)
+        t1_pca_deb, t2_pca_deb, a1_pca_deb, a2_pca_deb = vocab_to_dicts(vocab, debiased_space, t1_list, t2_list,
+                                                                        a1_list, a2_list)
         response = json_controller.debiasing_json(space, lower, methods, pca, aug1_list, aug2_list, t1, t2, a1, a2,
-                                                   t1_deb, t2_deb, a1_deb, a2_deb, not_found, deleted,
-                                                   t1_pca_bias, t2_pca_bias, a1_pca_bias, a2_pca_bias,
-                                                   t1_pca_deb, t2_pca_deb, a1_pca_deb, a2_pca_deb)
+                                                  t1_deb, t2_deb, a1_deb, a2_deb, not_found, deleted,
+                                                  t1_pca_bias, t2_pca_bias, a1_pca_bias, a2_pca_bias,
+                                                  t1_pca_deb, t2_pca_deb, a1_pca_deb, a2_pca_deb)
     else:
         response = json_controller.debiasing_json(space, lower, methods, pca, aug1_list, aug2_list, t1, t2, a1, a2,
-                                                   t1_deb, t2_deb, a1_deb, a2_deb, not_found, deleted)
+                                                  t1_deb, t2_deb, a1_deb, a2_deb, not_found, deleted)
+
+    print("Debiasing-Engine: Finished")
     return response, 200
 
 
@@ -130,5 +144,3 @@ def vocab_to_dicts(vocab, vecs, t1_list, t2_list, a1_list, a2_list):
     for word in a2_list:
         a2[word] = vecs[vocab[word]]
     return t1, t2, a1, a2
-
-

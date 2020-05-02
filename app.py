@@ -22,16 +22,16 @@ ALLOWED_EXTENSIONS = {'txt', 'vec', 'vocab', 'vectors'}
 MAX_CONTENT_LENGTH = 500 * 1024 * 1024
 
 app = Flask(__name__)
-# CORS(app)
-cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+CORS(app)
+#cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 app.secret_key = "secret key"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['ALLOWED_EXTENSIONS'] = ALLOWED_EXTENSIONS
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
 
-logging.basicConfig(filename="logfile.log", level=logging.INFO)
-logging.info("APP: APP started at " + str(datetime.datetime.now()))
+# logging.basicConfig(filename="logfile.log", level=logging.INFO)
+# logging.info("APP: APP started at " + str(datetime.datetime.now()))
 print("logging configured")
 
 
@@ -84,6 +84,7 @@ def retrieve_multiple_augmentations():
 @app.route('/REST/bias-evaluation/all', methods=['POST'])
 def bias_evaluations_all():
     logging.info("APP: " + str(datetime.datetime.now()) + " Bias Evaluation with ALL scores started")
+    print("APP: " + str(datetime.datetime.now()) + " Bias Evaluation with ALL scores started")
     content = request.get_json()
     bar = request.args.to_dict()
     response, status_code = evaluation_controller.evaluation('all', content, bar)
@@ -139,6 +140,7 @@ def bias_evaluations_kmeans():
 @app.route('/REST/debiasing/gbdd', methods=['POST'])
 def debiasing_gbdd():
     logging.info("APP: " + str(datetime.datetime.now()) + " GBDD Debiasing started")
+    print("APP: " + str(datetime.datetime.now()) + " GBDD Debiasing started")
     content = request.get_json()
     bar = request.args.to_dict()
     response, status_code = debiasing_controller.debiasing('gbdd', content, bar)

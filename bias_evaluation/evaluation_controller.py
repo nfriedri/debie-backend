@@ -5,6 +5,7 @@ from bias_evaluation import ect, bat, weat, kmeans
 
 
 def evaluation(methods, content, bar):
+    print("Bias Eval")
     if content is None:
         return 'BAD REQUEST - NO BIAS SPEC JSON FOUND', 400
     if 'space' not in bar and 'uploaded' not in bar:
@@ -30,6 +31,7 @@ def evaluation(methods, content, bar):
         t1, t2, a1, a2 = json_controller.json_to_bias_spec(content)
         t1, t2, a1, a2, not_found, deleted = specification_controller.get_vectors_for_spec(space, lower, uploaded, t1, t2, a1, a2)
     scores = {}
+    print("Retrieved SPecs")
     if methods is None:
         scores = evaluate_all(t1, t2, a1, a2)
     if methods == 'all':
