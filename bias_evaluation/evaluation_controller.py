@@ -23,8 +23,10 @@ def evaluation(methods, content, bar):
     if 'json' in bar:
         json = bar['json']
 
+    print('searching error 1')
     if json == 'true':
         t1, t2, a1, a2, aug1, aug2 = json_controller.json_with_vector_data(content)
+        print('problem')
         t1, t2, a1, a2, deleted = specification_controller.string_dicts_to_numpy_array_dicts(t1, t2, a1, a2)
         not_found = []
     else:

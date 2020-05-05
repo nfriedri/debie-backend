@@ -54,10 +54,6 @@ def debiasing(methods, content, bar):
         t1_deb, t2_deb, a1_deb, a2_deb, new_vecs = debiasing_bam(equality_sets, vocab, vecs, t1_list, t2_list, a1_list,
                                                                  a2_list)
     if methods == 'gbdd':
-        print(t1_list)
-        print(t2_list)
-        print(a1_list)
-        print(a2_list)
         t1_deb, t2_deb, a1_deb, a2_deb, new_vecs = debiasing_gbdd(equality_sets, vocab, vecs, t1_list, t2_list, a1_list,
                                                                   a2_list)
     if methods == 'bamXgbdd':

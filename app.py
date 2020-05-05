@@ -30,8 +30,8 @@ app.config['ALLOWED_EXTENSIONS'] = ALLOWED_EXTENSIONS
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
 
-# logging.basicConfig(filename="logfile.log", level=logging.INFO)
-# logging.info("APP: APP started at " + str(datetime.datetime.now()))
+logging.basicConfig(filename="logfile.log", level=logging.INFO)
+logging.info("APP: APP started at " + str(datetime.datetime.now()))
 print("logging configured")
 
 
@@ -86,6 +86,7 @@ def bias_evaluations_all():
     logging.info("APP: " + str(datetime.datetime.now()) + " Bias Evaluation with ALL scores started")
     print("APP: " + str(datetime.datetime.now()) + " Bias Evaluation with ALL scores started")
     content = request.get_json()
+    print('error?')
     bar = request.args.to_dict()
     response, status_code = evaluation_controller.evaluation('all', content, bar)
 

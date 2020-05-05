@@ -4,6 +4,9 @@ import logging
 
 def debias_proc(equality_sets, vecs, vocab):
     logging.info("Debi-Engine: BAM Debiasing started")
+    print('Starting BAM Debiasing')
+    print(np.shape(vecs))
+    print(np.shape(vocab))
     A = []
     B = []
     vocab_list = []
