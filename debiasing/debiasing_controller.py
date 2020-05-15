@@ -1,3 +1,4 @@
+import logging
 import augmentation_retrieval
 import calculation
 import json_controller
@@ -6,7 +7,7 @@ from debiasing import bam, gbdd
 
 
 def debiasing(methods, content, bar):
-    print("Debiasing-Engine: Started")
+    logging.info("Debiasing-Engine: Started")
 
     # bar params: lower, uploaded, pca, space
     if content is None:
@@ -25,9 +26,7 @@ def debiasing(methods, content, bar):
         lower = bar['lower']
     if 'pca' in bar:
         pca = bar['pca']
-    print('bar okay')
     t1_list, t2_list, a1_list, a2_list, aug1_list, aug2_list = json_controller.json_to_debias_spec(content)
-    print("JOSN okay")
     if len(aug1_list) == 0:
         aug1_list, computed = augmentation_retrieval.retrieve_multiple_augmentations(a1_list)
     if len(aug2_list) == 0:
@@ -49,7 +48,7 @@ def debiasing(methods, content, bar):
         get_vectors_for_spec(space, lower, uploaded, t1_list, t2_list, a1_list, a2_list, aug1_list, aug2_list)
     vocab, vecs = create_vocab_and_vecs(t1, t2, a1, a2, aug1, aug2)
     t1_deb, t2_deb, a1_deb, a2_deb, new_vecs = [], [], [], [], []
-    print("Debiasing-Engine: Specs loaded, starting computing")
+    # print("Debiasing-Engine: Specs loaded, starting computing")
     if methods == 'bam':
         t1_deb, t2_deb, a1_deb, a2_deb, new_vecs = debiasing_bam(equality_sets, vocab, vecs, t1_list, t2_list, a1_list,
                                                                  a2_list)
@@ -78,13 +77,13 @@ def debiasing(methods, content, bar):
         response = json_controller.debiasing_json(space, lower, methods, pca, aug1_list, aug2_list, t1, t2, a1, a2,
                                                   t1_deb, t2_deb, a1_deb, a2_deb, not_found, deleted)
 
-    print("Debiasing-Engine: Finished")
+    # print("Debiasing-Engine: Finished")
     return response, 200
 
 
 def debiasing_bam(equality_sets, vocab, vecs, t1_list, t2_list, a1_list, a2_list):
-    new_vocab, new_vecs = bam.debias_proc(equality_sets, vocab, vecs)
-    t1, t2, a1, a2 = vocab_to_dicts(new_vocab, new_vecs, t1_list, t2_list, a1_list, a2_list)
+    new_vecs, proj_mat, new_vocab = bam.debias_proc(equality_sets, vocab, vecs)
+    t1, t2, a1, a2 = vocab_to_dicts(vocab, new_vecs, t1_list, t2_list, a1_list, a2_list)
     return t1, t2, a1, a2, new_vecs
 
 

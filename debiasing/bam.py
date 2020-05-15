@@ -2,11 +2,8 @@ import numpy as np
 import logging
 
 
-def debias_proc(equality_sets, vecs, vocab):
+def debias_proc(equality_sets, vocab, vecs):
     logging.info("Debi-Engine: BAM Debiasing started")
-    print('Starting BAM Debiasing')
-    print(np.shape(vecs))
-    print(np.shape(vocab))
     A = []
     B = []
     vocab_list = []
@@ -21,7 +18,7 @@ def debias_proc(equality_sets, vecs, vocab):
 
     product = np.matmul(A.transpose(), B)
     U, s, V = np.linalg.svd(product)
-    print(U.shape, V.shape)
+    # print(U.shape, V.shape)
     proj_mat = V  # np.matmul(U, V)
     res = np.matmul(vecs, proj_mat)
     logging.info("Debi-Engine: BAM Debiasing finished")

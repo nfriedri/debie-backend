@@ -84,9 +84,8 @@ def retrieve_multiple_augmentations():
 @app.route('/REST/bias-evaluation/all', methods=['POST'])
 def bias_evaluations_all():
     logging.info("APP: " + str(datetime.datetime.now()) + " Bias Evaluation with ALL scores started")
-    print("APP: " + str(datetime.datetime.now()) + " Bias Evaluation with ALL scores started")
+    # print("APP: " + str(datetime.datetime.now()) + " Bias Evaluation with ALL scores started")
     content = request.get_json()
-    print('error?')
     bar = request.args.to_dict()
     response, status_code = evaluation_controller.evaluation('all', content, bar)
 
@@ -141,7 +140,7 @@ def bias_evaluations_kmeans():
 @app.route('/REST/debiasing/gbdd', methods=['POST'])
 def debiasing_gbdd():
     logging.info("APP: " + str(datetime.datetime.now()) + " GBDD Debiasing started")
-    print("APP: " + str(datetime.datetime.now()) + " GBDD Debiasing started")
+    # print("APP: " + str(datetime.datetime.now()) + " GBDD Debiasing started")
     content = request.get_json()
     bar = request.args.to_dict()
     response, status_code = debiasing_controller.debiasing('gbdd', content, bar)
@@ -186,7 +185,7 @@ def debiasing_bam_gbdd():
 @app.route('/REST/uploads/embedding-spaces', methods=['POST'])
 def upload_embedding_space():
     logging.info("APP: Receiving file from upload " + str(datetime.datetime.now()))
-    print('Receiving file from upload')
+    # print('Receiving file from upload')
 
     if 'vectorFile' in request.files:
         file = request.files['vectorFile']
@@ -232,7 +231,6 @@ def upload_embedding_space():
             return resp
 
     if 'vectorFile' and ('vocab' and 'vecs') not in request.files:
-        print('Here1')
         resp = jsonify({'message': 'No file(s) part of the request'})
         resp.status_code = 400
         return resp
@@ -242,7 +240,7 @@ def upload_embedding_space():
 def initialize_uploaded_embeddings():
     logging.info("APP: " + str(datetime.datetime.now()) + " Initializing uploaded file(s)")
     bar = request.args.to_dict()
-    print(upload_controller.uploaded_binary)
+    #print(upload_controller.uploaded_binary)
     if upload_controller.uploaded_binary == 'true':
         vocab = bar['vocab']
         vecs = bar['vecs']
@@ -265,7 +263,7 @@ def initialize_uploaded_embeddings():
 @app.route('/REST/uploads/delete', methods=['DELETE'])
 def delete_uploaded_file():
     bar = request.args.to_dict()
-    filename = bar['space']
+    filename = bar['file']
     path = 'uploads/' + filename
     logging.info("APP: " + str(datetime.datetime.now()) + " Deleting uploaded file")
     try:

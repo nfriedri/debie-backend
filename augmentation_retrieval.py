@@ -96,7 +96,7 @@ def retrieve_multiple_augmentations(target):
 
 
 def compute_augmentations(target, vocab, vecs, iterations=4):
-    print('COMPUTED')
+    # print('COMPUTED')
     augments = []
     cosinesim = {}
     if target not in vocab:
