@@ -3,6 +3,7 @@ import random
 
 import numpy
 
+import upload_controller
 from vector_retrieval import retrieve_vector_multiple
 from vector_retrieval import retrieve_uploaded_vector_multiple
 
@@ -131,7 +132,7 @@ def get_vectors_for_augments(space, lower, uploaded, aug1_list, aug2_list):
     not_found1, not_found2 = [], []
     if lower == 'true':
         aug1_list = [x.lower() for x in aug1_list]
-        aug1_list = [x.lower() for x in aug1_list]
+        aug2_list = [x.lower() for x in aug2_list]
     if space == 'fasttext':
         found1, not_found1 = retrieve_vector_multiple(ft_vocab, ft_vecs, aug1_list)
         found2, not_found2 = retrieve_vector_multiple(ft_vocab, ft_vecs, aug2_list)
@@ -149,3 +150,19 @@ def get_vectors_for_augments(space, lower, uploaded, aug1_list, aug2_list):
     aug1, aug2, deleted = format_set_sizes(found1, found2)
 
     return aug1, aug2, not_found, deleted
+
+
+def return_vocab_vecs(space, uploaded):
+    vocab = {}
+    vecs = []
+    if space == 'fasttext':
+        print("here should i be")
+        return ft_vocab, ft_vecs
+    if space == 'glove':
+        return gv_vocab, gv_vecs
+    if space == 'cbow':
+        return cb_vocab, cb_vecs
+    if uploaded == 'true':
+        return upload_controller.get_vocab_vecs_from_upload()
+    else:
+        return vocab, vecs

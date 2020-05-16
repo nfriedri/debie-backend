@@ -3,11 +3,10 @@ import random
 from sklearn import svm
 
 
-def eval_svm(augmentations1, augmentations2, target1, target2, vecs, vocab):
+def eval_svm(augmentations1, augmentations2, target1, target2, vocab, vecs):
     logging.info('Eval-Engine: SVM Classifier started')
     X_train = []
     y_train = []
-
     train = [(w, 0) for w in augmentations1 if w in vocab] + [(w, 1) for w in augmentations2 if w in vocab]
 
     scores = []

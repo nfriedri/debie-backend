@@ -11,7 +11,6 @@ def eval_simlex(vocab, vecs, sim_type):
         simlex = load_simlex(simlex_999)
     if sim_type == 'WordSim':
         simlex = load_simlex(wordsim)
-
     preds = []
     golds = []
     cnt = 0
