@@ -16,11 +16,6 @@ def get_bias_direction(equality_sets, vecs, vocab):
     v_b = v[0]
     return v_b
 
-    # scores = np.dot(v_b, np.transpose(vecs_norm))
-    # order = np.argsort(scores)
-    # sorted_pairs = [(vocab_inv[i], scores[i]) for i in order]
-    # return sorted_pairs
-
 
 def get_pis(v_b, vecs_norm):
     dots = np.dot(v_b, np.transpose(vecs_norm))

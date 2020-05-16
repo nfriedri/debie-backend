@@ -46,7 +46,7 @@ def debiasing(methods, content, bar):
 
     t1, t2, a1, a2, aug1, aug2, not_found, deleted = specification_controller. \
         get_vectors_for_spec(space, lower, uploaded, t1_list, t2_list, a1_list, a2_list, aug1_list, aug2_list)
-    vocab, vecs = create_vocab_and_vecs(t1, t2, a1, a2, aug1, aug2)
+    vocab, vecs = calculation.create_vocab_and_vecs(t1, t2, a1, a2, aug1, aug2)
     t1_deb, t2_deb, a1_deb, a2_deb, new_vecs = [], [], [], [], []
     # print("Debiasing-Engine: Specs loaded, starting computing")
     if methods == 'bam':
@@ -65,9 +65,9 @@ def debiasing(methods, content, bar):
     if pca == 'true':
         biased_space = calculation.principal_componant_analysis2(vecs)
         debiased_space = calculation.principal_componant_analysis2(new_vecs)
-        t1_pca_bias, t2_pca_bias, a1_pca_bias, a2_pca_bias = vocab_to_dicts(vocab, biased_space, t1_list, t2_list,
+        t1_pca_bias, t2_pca_bias, a1_pca_bias, a2_pca_bias = calculation.vocab_to_dicts(vocab, biased_space, t1_list, t2_list,
                                                                             a1_list, a2_list)
-        t1_pca_deb, t2_pca_deb, a1_pca_deb, a2_pca_deb = vocab_to_dicts(vocab, debiased_space, t1_list, t2_list,
+        t1_pca_deb, t2_pca_deb, a1_pca_deb, a2_pca_deb = calculation.vocab_to_dicts(vocab, debiased_space, t1_list, t2_list,
                                                                         a1_list, a2_list)
         response = json_controller.debiasing_json(space, lower, methods, pca, aug1_list, aug2_list, t1, t2, a1, a2,
                                                   t1_deb, t2_deb, a1_deb, a2_deb, not_found, deleted,
@@ -83,14 +83,14 @@ def debiasing(methods, content, bar):
 
 def debiasing_bam(equality_sets, vocab, vecs, t1_list, t2_list, a1_list, a2_list):
     new_vecs, proj_mat, new_vocab = bam.debias_proc(equality_sets, vocab, vecs)
-    t1, t2, a1, a2 = vocab_to_dicts(vocab, new_vecs, t1_list, t2_list, a1_list, a2_list)
+    t1, t2, a1, a2 = calculation.vocab_to_dicts(vocab, new_vecs, t1_list, t2_list, a1_list, a2_list)
     return t1, t2, a1, a2, new_vecs
 
 
 def debiasing_gbdd(equality_sets, vocab, vecs, t1_list, t2_list, a1_list, a2_list):
     v_b = gbdd.get_bias_direction(equality_sets, vecs, vocab)
     new_vecs = gbdd.debias_direction_linear(v_b, vecs)
-    t1, t2, a1, a2 = vocab_to_dicts(vocab, new_vecs, t1_list, t2_list, a1_list, a2_list)
+    t1, t2, a1, a2 = calculation.vocab_to_dicts(vocab, new_vecs, t1_list, t2_list, a1_list, a2_list)
     return t1, t2, a1, a2, new_vecs
 
 
@@ -98,7 +98,7 @@ def debiasing_bam_gbdd(equality_sets, vocab, vecs, t1_list, t2_list, a1_list, a2
     new_vocab, new_vecs = bam.debias_proc(equality_sets, vocab, vecs)
     v_b = gbdd.get_bias_direction(equality_sets, new_vecs, new_vocab)
     new_vocab, new_vecs = gbdd.debias_direction_linear(v_b, new_vecs)
-    t1, t2, a1, a2 = vocab_to_dicts(new_vocab, new_vecs, t1_list, t2_list, a1_list, a2_list)
+    t1, t2, a1, a2 = calculation.vocab_to_dicts(new_vocab, new_vecs, t1_list, t2_list, a1_list, a2_list)
     return t1, t2, a1, a2
 
 
@@ -106,36 +106,5 @@ def debiasing_gbdd_bam(equality_sets, vocab, vecs, t1_list, t2_list, a1_list, a2
     v_b = gbdd.get_bias_direction(equality_sets, vecs, vocab)
     new_vocab, new_vecs = gbdd.debias_direction_linear(v_b, vecs)
     new_vocab, new_vecs = bam.debias_proc(equality_sets, new_vocab, new_vecs)
-    t1, t2, a1, a2 = vocab_to_dicts(new_vocab, new_vecs, t1_list, t2_list, a1_list, a2_list)
-    return t1, t2, a1, a2
-
-
-def create_vocab_and_vecs(t1, t2, a1, a2, aug1, aug2):
-    vocab = {}
-    vecs = []
-    counter = 0
-    dicts = {}
-    dicts.update(t1)
-    dicts.update(t2)
-    dicts.update(a1)
-    dicts.update(a2)
-    dicts.update(aug1)
-    dicts.update(aug2)
-    for word in dicts:
-        vocab[word] = counter
-        vecs.append(dicts[word])
-        counter += 1
-    return vocab, vecs
-
-
-def vocab_to_dicts(vocab, vecs, t1_list, t2_list, a1_list, a2_list):
-    t1, t2, a1, a2 = {}, {}, {}, {}
-    for word in t1_list:
-        t1[word] = vecs[vocab[word]]
-    for word in t2_list:
-        t2[word] = vecs[vocab[word]]
-    for word in a1_list:
-        a1[word] = vecs[vocab[word]]
-    for word in a2_list:
-        a2[word] = vecs[vocab[word]]
+    t1, t2, a1, a2 = calculation.vocab_to_dicts(new_vocab, new_vecs, t1_list, t2_list, a1_list, a2_list)
     return t1, t2, a1, a2

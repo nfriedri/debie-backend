@@ -1,3 +1,4 @@
+import codecs
 import pickle
 import io
 import numpy as np
@@ -11,6 +12,8 @@ glove_200k_vectors = 'data/glove_200k.vec'
 cbow_200k_vocab = 'data/w2v_cbow_200k.vocab'
 cbow_200k_vectors = 'data/w2v_cbow_200k.vec'
 augmentations_postspec = 'data/augmentations_postspec.vocab'
+simlex_999 = 'data/simlex999/SimLex-999.txt'
+wordsim = 'data/wsim353/wsim.txt'
 
 
 def load_vocab_binary(path, inverse=False):
@@ -67,11 +70,31 @@ def load_binary_uploads(vocab_filename, vecs_filename):
     return 'SEE CONSOLE'
 
 
+def load_simlex(path):
+    simlex_data = [line.strip() for line in list(codecs.open(path, "r", encoding='utf8', errors='replace').readlines())]
+    simlex = [(line.split("\t")[0].lower(), line.split("\t")[1].lower(), float(line.split("\t"))) for line in simlex_data]
+    return simlex
+
+
 def load_embeddings_by_start():
-    fasttext_vocab, fasttext_vectors = load_binary_embeddings(fasttext_200k_vocab, fasttext_200k_vectors, inverse=False, normalize=False)
-    glove_vocab, glove_vectors = load_binary_embeddings(glove_200k_vocab, glove_200k_vectors, inverse=False, normalize=False)
-    cbow_vocab, cbow_vectors = load_binary_embeddings(cbow_200k_vocab, cbow_200k_vectors, inverse=False, normalize=False)
+    fasttext_vocab, fasttext_vectors = load_binary_embeddings(fasttext_200k_vocab, fasttext_200k_vectors, inverse=False,
+                                                              normalize=False)
+    glove_vocab, glove_vectors = load_binary_embeddings(glove_200k_vocab, glove_200k_vectors, inverse=False,
+                                                        normalize=False)
+    cbow_vocab, cbow_vectors = load_binary_embeddings(cbow_200k_vocab, cbow_200k_vectors, inverse=False,
+                                                      normalize=False)
     return fasttext_vocab, fasttext_vectors, glove_vocab, glove_vectors, cbow_vocab, cbow_vectors
+
+
+def return_vocab_vecs(space, uploaded):
+    if space is 'fasttext':
+        return fasttext_vocab, fasttext_vectors
+    if space is 'glove':
+        return glove_vocab, glove_vectors
+    if space is 'cbow':
+        return cbow_vocab, cbow_vectors
+    if uploaded is 'true':
+        return upload_controller.get_vocab_vecs_from_upload()
 
 
 fasttext_vocab, fasttext_vectors, glove_vocab, glove_vectors, cbow_vocab, cbow_vectors = load_embeddings_by_start()

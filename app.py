@@ -30,9 +30,9 @@ app.config['ALLOWED_EXTENSIONS'] = ALLOWED_EXTENSIONS
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
 
-logging.basicConfig(filename="logfile.log", level=logging.INFO)
-logging.info("APP: APP started at " + str(datetime.datetime.now()))
-print("logging configured")
+# logging.basicConfig(filename="logfile.log", level=logging.INFO)
+# logging.info("APP: APP started at " + str(datetime.datetime.now()))
+# print("logging configured")
 
 
 # API-Connection Test
@@ -132,6 +132,39 @@ def bias_evaluations_kmeans():
     content = request.get_json()
     bar = request.args.to_dict()
     response, status_code = evaluation_controller.evaluation('kmeans', content, bar)
+
+    return response, status_code
+
+
+# Evaluates a bias specification with SVM-Classifier
+@app.route('/REST/bias-evaluation/svm', methods=['POST'])
+def bias_evaluations_svm():
+    logging.info("APP: " + str(datetime.datetime.now()) + " Bias Evaluation with SVM-Classifier scores started")
+    content = request.get_json()
+    bar = request.args.to_dict()
+    response, status_code = evaluation_controller.evaluation('svm', content, bar)
+
+    return response, status_code
+
+
+#
+@app.route('/REST/bias-evaluation/simlex', methods=['POST'])
+def bias_evaluations_simlex():
+    logging.info("APP: " + str(datetime.datetime.now()) + " Semantic Quality Test SimLex started")
+    content = request.get_json()
+    bar = request.args.to_dict()
+    response, status_code = evaluation_controller.evaluation('simlex', content, bar)
+
+    return response, status_code
+
+
+#
+@app.route('/REST/bias-evaluation/wordsim', methods=['POST'])
+def bias_evaluations_wordsim():
+    logging.info("APP: " + str(datetime.datetime.now()) + " Semantic Quality Test WordSim started")
+    content = request.get_json()
+    bar = request.args.to_dict()
+    response, status_code = evaluation_controller.evaluation('wordsim', content, bar)
 
     return response, status_code
 

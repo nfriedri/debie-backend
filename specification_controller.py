@@ -124,3 +124,28 @@ def string_dicts_to_numpy_array_dicts(t1, t2, a1, a2):
         attribute2[value] = val.astype(numpy.float)
     target1, target2, attribute1, attribute2, deleted = format_sets(target1, target2, attribute1, attribute2)
     return target1, target2, attribute1, attribute2, deleted
+
+
+def get_vectors_for_augments(space, lower, uploaded, aug1_list, aug2_list):
+    found1, found2 = {}, {}
+    not_found1, not_found2 = [], []
+    if lower == 'true':
+        aug1_list = [x.lower() for x in aug1_list]
+        aug1_list = [x.lower() for x in aug1_list]
+    if space == 'fasttext':
+        found1, not_found1 = retrieve_vector_multiple(ft_vocab, ft_vecs, aug1_list)
+        found2, not_found2 = retrieve_vector_multiple(ft_vocab, ft_vecs, aug2_list)
+    if space == 'glove':
+        found1, not_found1 = retrieve_vector_multiple(gv_vocab, gv_vecs, aug1_list)
+        found2, not_found2 = retrieve_vector_multiple(gv_vocab, gv_vecs, aug2_list)
+    if space == 'cbow':
+        found1, not_found1 = retrieve_vector_multiple(cb_vocab, cb_vecs, aug1_list)
+        found2, not_found2 = retrieve_vector_multiple(cb_vocab, cb_vecs, aug2_list)
+    if uploaded == 'true':
+        found1, not_found1 = retrieve_uploaded_vector_multiple(space, aug1_list)
+        found2, not_found2 = retrieve_uploaded_vector_multiple(space, aug2_list)
+
+    not_found = not_found1 + not_found2
+    aug1, aug2, deleted = format_set_sizes(found1, found2)
+
+    return aug1, aug2, not_found, deleted

@@ -139,6 +139,52 @@ def euclidean_distance(vector1, vector2):
     return distance
 
 
+def create_vocab_and_vecs(t1, t2, a1=None, a2=None, aug1=None, aug2=None):
+    vocab = {}
+    vecs = []
+    counter = 0
+    dicts = {}
+    dicts.update(t1)
+    dicts.update(t2)
+    if a1 is not None:
+        dicts.update(a1)
+    if a2 is not None:
+        dicts.update(a2)
+    if aug1 is not None:
+        dicts.update(aug1)
+    if aug2 is not None:
+        dicts.update(aug2)
+    for word in dicts:
+        vocab[word] = counter
+        vecs.append(dicts[word])
+        counter += 1
+    return vocab, vecs
+
+
+def vocab_to_dicts(vocab, vecs, t1_list, t2_list, a1_list, a2_list):
+    t1, t2, a1, a2 = {}, {}, {}, {}
+    for word in t1_list:
+        t1[word] = vecs[vocab[word]]
+    for word in t2_list:
+        t2[word] = vecs[vocab[word]]
+    for word in a1_list:
+        a1[word] = vecs[vocab[word]]
+    for word in a2_list:
+        a2[word] = vecs[vocab[word]]
+    return t1, t2, a1, a2
+
+
+def dict_to_vocab_vecs(dictionary):
+    vocab = {}
+    vecs = []
+    counter = 0
+    for word in dictionary:
+        vocab[word] = counter
+        vecs.append(dictionary[word])
+        counter += 1
+    return vocab, vecs
+
+
 # Computes a Principal Component Analysis (PCA) on up to four dictionaries
 def principal_componant_analysis(vector_dict1, vector_dict2=None, vector_dict3=None, vector_dict4=None):
     logging.info("PCA: Principal composant analysis started")
