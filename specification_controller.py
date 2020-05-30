@@ -156,7 +156,6 @@ def return_vocab_vecs(space, uploaded):
     vocab = {}
     vecs = []
     if space == 'fasttext':
-        print("here should i be")
         return ft_vocab, ft_vecs
     if space == 'glove':
         return gv_vocab, gv_vecs

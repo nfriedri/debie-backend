@@ -23,7 +23,6 @@ def eval_simlex(vocab, vecs, sim_type):
             golds.append(s[2])
         else:
             cnt += 1
-    print("Didn't find " + str(cnt) + " pairs")
     pearson = stats.pearsonr(golds, preds)[0]
     spearman = stats.spearmanr(golds, preds)[0]
     return pearson, spearman

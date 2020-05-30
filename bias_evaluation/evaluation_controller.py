@@ -99,7 +99,6 @@ def evaluate_svm(space, lower, uploaded, t1, t2):
     aug1, aug2, not_found, deleted = specification_controller.get_vectors_for_augments(space, lower, uploaded, augments1_list, augments2_list)
     vocab, vecs = calculation.create_vocab_and_vecs(t1, t2, aug1, aug2)
     svm = svm_classifier.eval_svm(augments1_list, augments2_list, t1_list, t2_list, vocab, vecs)
-    # print(svm)
     scores = {'SVM': svm}
     return scores
 

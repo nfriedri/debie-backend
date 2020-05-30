@@ -30,9 +30,9 @@ app.config['ALLOWED_EXTENSIONS'] = ALLOWED_EXTENSIONS
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
 
-# logging.basicConfig(filename="logfile.log", level=logging.INFO)
-# logging.info("APP: APP started at " + str(datetime.datetime.now()))
-# print("logging configured")
+logging.basicConfig(filename="logfile.log", level=logging.INFO)
+logging.info("APP: APP started at " + str(datetime.datetime.now()))
+print("logging configured")
 
 
 # API-Connection Test
@@ -273,7 +273,7 @@ def upload_embedding_space():
 def initialize_uploaded_embeddings():
     logging.info("APP: " + str(datetime.datetime.now()) + " Initializing uploaded file(s)")
     bar = request.args.to_dict()
-    #print(upload_controller.uploaded_binary)
+    # print(upload_controller.uploaded_binary)
     if upload_controller.uploaded_binary == 'true':
         vocab = bar['vocab']
         vecs = bar['vecs']
