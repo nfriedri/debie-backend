@@ -86,7 +86,7 @@ def debiasing_json(space, lower, method, pca, aug1_list, aug2_list,
                    t1, t2, a1, a2,
                    t1_deb, t2_deb, a1_deb, a2_deb, not_found, deleted,
                    t1_pca_bias=None, t2_pca_bias=None, a1_pca_bias=None, a2_pca_bias=None,
-                   t1_pca_deb=None, t2_pca_deb=None, a1_pca_deb=None, a2_pca_deb=None):
+                   t1_pca_deb=None, t2_pca_deb=None, a1_pca_deb=None, a2_pca_deb=None, lex_dict=None):
 
     t1 = dict_to_json(t1)
     t2 = dict_to_json(t2)
@@ -98,12 +98,21 @@ def debiasing_json(space, lower, method, pca, aug1_list, aug2_list,
     a2_deb = dict_to_json(a2_deb)
 
     if pca == 'false':
-        response = json.dumps(
-            {"Space": space, "Model": method, "Lower": lower, "PCA": pca,
-             "UsedAugmentations": {"A1": aug1_list, "A2": aug2_list},
-             "BiasedSpace:": {"T1": t1, "T2": t2, "A1": a1, "A2": a2},
-             "DebiasedSpace": {"T1": t1_deb, "T2": t2_deb, "A1": a1_deb, "A2": a2_deb},
-             "NotFound": not_found, "Deleted": deleted})
+        if lex_dict is None:
+            response = json.dumps(
+                {"Space": space, "Model": method, "Lower": lower, "PCA": pca,
+                 "UsedAugmentations": {"A1": aug1_list, "A2": aug2_list},
+                 "BiasedSpace:": {"T1": t1, "T2": t2, "A1": a1, "A2": a2},
+                 "DebiasedSpace": {"T1": t1_deb, "T2": t2_deb, "A1": a1_deb, "A2": a2_deb},
+                 "NotFound": not_found, "Deleted": deleted})
+        else:
+            lex_dict = dict_to_json(lex_dict)
+            response = json.dumps(
+                {"Space": space, "Model": method, "Lower": lower, "PCA": pca,
+                 "UsedAugmentations": {"A1": aug1_list, "A2": aug2_list},
+                 "BiasedSpace:": {"T1": t1, "T2": t2, "A1": a1, "A2": a2},
+                 "DebiasedSpace": {"T1": t1_deb, "T2": t2_deb, "A1": a1_deb, "A2": a2_deb},
+                 "NotFound": not_found, "Deleted": deleted, "LexDictionary": lex_dict})
     else:
         t1_pca_bias = dict_to_json(t1_pca_bias)
         t2_pca_bias = dict_to_json(t2_pca_bias)
@@ -113,14 +122,25 @@ def debiasing_json(space, lower, method, pca, aug1_list, aug2_list,
         t2_pca_deb = dict_to_json(t2_pca_deb)
         a1_pca_deb = dict_to_json(a1_pca_deb)
         a2_pca_deb = dict_to_json(a2_pca_deb)
-        response = json.dumps(
-            {"Space": space, "Model": method, "Lower": lower, "PCA": pca,
-             "UsedAugmentations": {"A1": aug1_list, "A2": aug2_list},
-             "BiasedSpace:": {"T1": t1, "T2": t2, "A1": a1, "A2": a2},
-             "DebiasedSpace": {"T1": t1_deb, "T2": t2_deb, "A1": a1_deb, "A2": a2_deb},
-             "BiasedSpacePCA": {"T1": t1_pca_bias, "T2": t2_pca_bias, "A1": a1_pca_bias, "A2": a2_pca_bias},
-             "DebiasedSpacePCA": {"T1": t1_pca_deb, "T2": t2_pca_deb, "A1": a1_pca_deb, "A2": a2_pca_deb},
-             "NotFound": not_found, "Deleted": deleted})
+        if lex_dict is None:
+            response = json.dumps(
+                {"Space": space, "Model": method, "Lower": lower, "PCA": pca,
+                 "UsedAugmentations": {"A1": aug1_list, "A2": aug2_list},
+                 "BiasedSpace:": {"T1": t1, "T2": t2, "A1": a1, "A2": a2},
+                 "DebiasedSpace": {"T1": t1_deb, "T2": t2_deb, "A1": a1_deb, "A2": a2_deb},
+                 "BiasedSpacePCA": {"T1": t1_pca_bias, "T2": t2_pca_bias, "A1": a1_pca_bias, "A2": a2_pca_bias},
+                 "DebiasedSpacePCA": {"T1": t1_pca_deb, "T2": t2_pca_deb, "A1": a1_pca_deb, "A2": a2_pca_deb},
+                 "NotFound": not_found, "Deleted": deleted})
+        else:
+            lex_dict = dict_to_json(lex_dict)
+            response = json.dumps(
+                {"Space": space, "Model": method, "Lower": lower, "PCA": pca,
+                 "UsedAugmentations": {"A1": aug1_list, "A2": aug2_list},
+                 "BiasedSpace:": {"T1": t1, "T2": t2, "A1": a1, "A2": a2},
+                 "DebiasedSpace": {"T1": t1_deb, "T2": t2_deb, "A1": a1_deb, "A2": a2_deb},
+                 "BiasedSpacePCA": {"T1": t1_pca_bias, "T2": t2_pca_bias, "A1": a1_pca_bias, "A2": a2_pca_bias},
+                 "DebiasedSpacePCA": {"T1": t1_pca_deb, "T2": t2_pca_deb, "A1": a1_pca_deb, "A2": a2_pca_deb},
+                 "NotFound": not_found, "Deleted": deleted, "LexDictionary": lex_dict})
 
     return response
 
@@ -137,3 +157,8 @@ def json_with_vector_data(content):
         if 'augments1' in content['DebiasedSpace']:
             augments2 = content['DebiasedSpace']['Augmentations2']
     return target1, target2, attributes1, attributes2, augments1, augments2
+
+
+def json_lex_vector_data(content):
+    if 'LexDictionary' in content:
+        return content['LexDictionary']

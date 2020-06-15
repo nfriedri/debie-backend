@@ -24,14 +24,18 @@ def evaluation(methods, content, bar):
         lower = bar['lower']
     if 'json' in bar:
         json = bar['json']
+    scores, lex_dict = {}, {}
     if json == 'true':
         t1, t2, a1, a2, aug1, aug2 = json_controller.json_with_vector_data(content)
         t1, t2, a1, a2, deleted = specification_controller.string_dicts_to_numpy_array_dicts(t1, t2, a1, a2)
         not_found = []
+        if methods == 'simlex' or methods == 'wordsim':
+            lex_data = json_controller.json_lex_vector_data(content)
+            lex_dict = specification_controller.string_lex_to_numpy_array_dicts(lex_data)
     else:
         t1, t2, a1, a2 = json_controller.json_to_bias_spec(content)
         t1, t2, a1, a2, not_found, deleted = specification_controller.get_vectors_for_spec(space, lower, uploaded, t1, t2, a1, a2)
-    scores = {}
+
     if methods is None:
         scores = evaluate_all(space, lower, uploaded, t1, t2, a1, a2)
     if methods == 'all':
@@ -47,9 +51,9 @@ def evaluation(methods, content, bar):
     if methods == 'svm':
         scores = evaluate_svm(space, lower, uploaded, t1, t2)
     if methods == 'simlex':
-        scores = evaluate_simlex(space, uploaded)
+        scores = evaluate_simlex(space, uploaded, json, lex_dict)
     if methods == 'wordsim':
-        scores = evaluate_wordsim(space, uploaded)
+        scores = evaluate_wordsim(space, uploaded, json, lex_dict)
     return json_controller.bias_evaluation_json(scores, space, lower, t1, t2, a1, a2, not_found, deleted)
 
 
@@ -103,15 +107,23 @@ def evaluate_svm(space, lower, uploaded, t1, t2):
     return scores
 
 
-def evaluate_simlex(space, uploaded):
-    vocab, vecs = specification_controller.return_vocab_vecs(space, uploaded)
+def evaluate_simlex(space, uploaded, json, lex_dict):
+    if json == 'true':
+        vocab, vecs = calculation.create_vocab_and_vecs(lex_dict)
+    else:
+        vocab, vecs = specification_controller.return_vocab_vecs(space, uploaded)
     pearson, spearman = semantic_quality.eval_simlex(vocab, vecs, 'SimLex')
     scores = {'SimLexPearson': pearson, 'SimLexSpearman': spearman}
     return scores
 
 
-def evaluate_wordsim(space, uploaded):
-    vocab, vecs = specification_controller.return_vocab_vecs(space, uploaded)
+def evaluate_wordsim(space, uploaded, json, lex_dict):
+    if json == 'true':
+        print('here1')
+        vocab, vecs = calculation.create_vocab_and_vecs(lex_dict)
+    else:
+        print('here5')
+        vocab, vecs = specification_controller.return_vocab_vecs(space, uploaded)
     pearson, spearman = semantic_quality.eval_simlex(vocab, vecs, 'WordSim')
     scores = {'WordSimPearson': pearson, 'WordSimSpearman': spearman}
     return scores

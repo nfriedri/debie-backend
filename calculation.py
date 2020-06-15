@@ -139,13 +139,14 @@ def euclidean_distance(vector1, vector2):
     return distance
 
 
-def create_vocab_and_vecs(t1, t2, a1=None, a2=None, aug1=None, aug2=None):
+def create_vocab_and_vecs(t1, t2=None, a1=None, a2=None, aug1=None, aug2=None, lex_dict=None):
     vocab = {}
     vecs = []
     counter = 0
     dicts = {}
     dicts.update(t1)
-    dicts.update(t2)
+    if t2 is not None:
+        dicts.update(t2)
     if a1 is not None:
         dicts.update(a1)
     if a2 is not None:
@@ -154,6 +155,8 @@ def create_vocab_and_vecs(t1, t2, a1=None, a2=None, aug1=None, aug2=None):
         dicts.update(aug1)
     if aug2 is not None:
         dicts.update(aug2)
+    if lex_dict is not None:
+        dicts.update(lex_dict)
     for word in dicts:
         vocab[word] = counter
         vecs.append(dicts[word])

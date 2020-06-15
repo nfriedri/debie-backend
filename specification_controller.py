@@ -13,6 +13,8 @@ from data_controller import glove_vocab as gv_vocab
 from data_controller import glove_vectors as gv_vecs
 from data_controller import cbow_vocab as cb_vocab
 from data_controller import cbow_vectors as cb_vecs
+from data_controller import simlex_vocab as simlex
+from data_controller import wordsim_vocab as wordsim
 
 
 def format_sets(t1, t2, a1, a2):
@@ -127,6 +129,14 @@ def string_dicts_to_numpy_array_dicts(t1, t2, a1, a2):
     return target1, target2, attribute1, attribute2, deleted
 
 
+def string_lex_to_numpy_array_dicts(data):
+    lex_dict = {}
+    for value in data:
+        val = numpy.array(data[value])
+        lex_dict[value] = val.astype(numpy.float)
+    return lex_dict
+
+
 def get_vectors_for_augments(space, lower, uploaded, aug1_list, aug2_list):
     found1, found2 = {}, {}
     not_found1, not_found2 = [], []
@@ -150,6 +160,29 @@ def get_vectors_for_augments(space, lower, uploaded, aug1_list, aug2_list):
     aug1, aug2, deleted = format_set_sizes(found1, found2)
 
     return aug1, aug2, not_found, deleted
+
+
+def get_lex_dict(space, uploaded, lex):
+    found = {}
+    if lex == "simlex":
+        if space == 'fasttext':
+            found, not_found = retrieve_vector_multiple(ft_vocab, ft_vecs, simlex)
+        if space == 'glove':
+            found, not_found = retrieve_vector_multiple(gv_vocab, gv_vecs, simlex)
+        if space == 'cbow':
+            found, not_found = retrieve_vector_multiple(cb_vocab, cb_vecs, simlex)
+        if uploaded == 'true':
+            found, not_found = retrieve_uploaded_vector_multiple(space, simlex)
+    if lex == "wordsim":
+        if space == 'fasttext':
+            found, not_found = retrieve_vector_multiple(ft_vocab, ft_vecs, wordsim)
+        if space == 'glove':
+            found, not_found = retrieve_vector_multiple(gv_vocab, gv_vecs, wordsim)
+        if space == 'cbow':
+            found, not_found = retrieve_vector_multiple(cb_vocab, cb_vecs, wordsim)
+        if uploaded == 'true':
+            found, not_found = retrieve_uploaded_vector_multiple(space, wordsim)
+    return found
 
 
 def return_vocab_vecs(space, uploaded):

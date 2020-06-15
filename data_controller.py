@@ -76,6 +76,19 @@ def load_simlex(path):
     return simlex
 
 
+def load_lex_by_start():
+    simlex_data = load_simlex(simlex_999)
+    wordsim_data = load_simlex(wordsim)
+    simlex_vocab, wordsim_vocab = [], []
+    for s in simlex_data:
+        simlex_vocab.append(s[0])
+        simlex_vocab.append(s[1])
+    for w in wordsim_data:
+        wordsim_vocab.append(w[0])
+        wordsim_vocab.append(w[1])
+    return simlex_vocab, wordsim_vocab
+
+
 def load_embeddings_by_start():
     fasttext_vocab, fasttext_vectors = load_binary_embeddings(fasttext_200k_vocab, fasttext_200k_vectors, inverse=False,
                                                               normalize=False)
@@ -87,5 +100,6 @@ def load_embeddings_by_start():
 
 
 fasttext_vocab, fasttext_vectors, glove_vocab, glove_vectors, cbow_vocab, cbow_vectors = load_embeddings_by_start()
+simlex_vocab, wordsim_vocab = load_lex_by_start()
 augmentations = load_augmentations(augmentations_postspec)
 print('Data_Handler started')
