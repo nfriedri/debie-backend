@@ -34,3 +34,5 @@ def debias_direction_linear(v_b, vecs):
     pis = get_pis(v_b, vecs_norm)
     logging.info("Debi-Engine: GBDD Debiasing finished")
     return vecs_norm - pis
+
+# def general_bias_direction_debiasing():

@@ -20,7 +20,7 @@ def retrieve_augmentations(number, content, bar):
 
     uploaded = 'false'
     lower = 'false'
-    iterations = 4
+    iterations = 3
     space = 'fasttext'
     if 'uploaded' in bar:
         uploaded = bar['uploaded']

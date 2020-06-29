@@ -31,9 +31,9 @@ def debiasing(methods, content, bar):
         lex = bar['lex']
     t1_list, t2_list, a1_list, a2_list, aug1_list, aug2_list = json_controller.json_to_debias_spec(content)
     if len(aug1_list) == 0:
-        aug1_list, computed = augmentation_retrieval.retrieve_multiple_augmentations(a1_list)
+        aug1_list, computed = augmentation_retrieval.retrieve_multiple_augmentations(t1_list)
     if len(aug2_list) == 0:
-        aug2_list, computed = augmentation_retrieval.retrieve_multiple_augmentations(a2_list)
+        aug2_list, computed = augmentation_retrieval.retrieve_multiple_augmentations(t2_list)
     if lower == 'true':
         t1_list = [x.lower() for x in t1_list]
         t2_list = [x.lower() for x in t2_list]
@@ -41,7 +41,8 @@ def debiasing(methods, content, bar):
         a2_list = [x.lower() for x in a2_list]
         aug1_list = [x.lower() for x in aug1_list]
         aug2_list = [x.lower() for x in aug2_list]
-
+    print(aug1_list)
+    print(aug2_list)
     equality_sets = []
     for i in range(len(aug1_list)):
         for j in range(len(aug2_list)):
