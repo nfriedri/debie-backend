@@ -52,18 +52,18 @@ def json_to_debias_spec(content):
         attributes1 = content['BiasSpecification']['A1'].split(' ')
         attributes2 = content['BiasSpecification']['A2'].split(' ')
         if 'Augmentations1' in content['BiasSpecification']:
-            augments1 = content['BiasSpecification']['Augmentations1']
+            augments1 = content['BiasSpecification']['Augmentations1'].split(' ')
         if 'Augmentations2' in content['BiasSpecification']:
-            augments2 = content['BiasSpecification']['Augmentations2']
+            augments2 = content['BiasSpecification']['Augmentations2'].split(' ')
     else:
         target1 = content['T1'].split(' ')
         target2 = content['T2'].split(' ')
         attributes1 = content['A1'].split(' ')
         attributes2 = content['A2'].split(' ')
         if 'Augmentations1' in content:
-            augments1 = content['Augmentations1']
+            augments1 = content['Augmentations1'].split(' ')
         if 'Augmentations2' in content:
-            augments2 = content['Augmentations2']
+            augments2 = content['Augmentations2'].split(' ')
     logging.info("JsonController: Found following bias spec: T1: " + str(target1) + "; T2: " + str(target2) + "; A1: " +
                  str(attributes1) + " ; A2: " + str(attributes2) + " ; Aug1: " + str(augments1) + " ; Aug2: " +
                  str(augments2))

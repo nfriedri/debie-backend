@@ -32,8 +32,10 @@ def debiasing(methods, content, bar):
     t1_list, t2_list, a1_list, a2_list, aug1_list, aug2_list = json_controller.json_to_debias_spec(content)
     if len(aug1_list) == 0:
         aug1_list, computed = augmentation_retrieval.retrieve_multiple_augmentations(t1_list)
+        print("here")
     if len(aug2_list) == 0:
         aug2_list, computed = augmentation_retrieval.retrieve_multiple_augmentations(t2_list)
+        print("here")
     if lower == 'true':
         t1_list = [x.lower() for x in t1_list]
         t2_list = [x.lower() for x in t2_list]
@@ -59,6 +61,7 @@ def debiasing(methods, content, bar):
 
     t1_deb, t2_deb, a1_deb, a2_deb, new_vecs= [], [], [], [], []
     # print("Debiasing-Engine: Specs loaded, starting computing")
+
     if methods == 'bam':
         t1_deb, t2_deb, a1_deb, a2_deb, new_vecs = debiasing_bam(equality_sets, vocab, vecs, t1_list, t2_list, a1_list,
                                                                  a2_list)
@@ -97,6 +100,7 @@ def debiasing(methods, content, bar):
                                                       t1_deb, t2_deb, a1_deb, a2_deb, not_found, deleted, lex_dict)
 
     # print("Debiasing-Engine: Finished")
+
     return response, 200
 
 
