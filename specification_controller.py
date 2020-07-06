@@ -102,8 +102,10 @@ def get_vectors_for_spec(space, lower, uploaded, t1, t2, a1, a2, aug1=None, aug2
     a1, a2, a_del = format_set_sizes(a1_found, a2_found)
     deleted_keys = t_del + a_del
     if aug1 is not None and aug2 is not None:
-        aug1, aug2, aug_del = format_set_sizes(aug1_found, aug2_found)
-        deleted_keys += aug_del
+        # aug1, aug2, aug_del = format_set_sizes(aug1_found, aug2_found)
+        # deleted_keys += aug_del
+        aug1 = aug1_found
+        aug2 = aug2_found
         logging.info("SpecController: Returning found vectors")
         logging.info("SpecController: NotFound: " + str(not_found) + " ; DeletedKeys: " + str(deleted_keys))
         return t1, t2, a1, a2, aug1, aug2, not_found, deleted_keys

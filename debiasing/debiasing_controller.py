@@ -1,4 +1,7 @@
 import logging
+
+import numpy as np
+
 import augmentation_retrieval
 import calculation
 import json_controller
@@ -8,7 +11,6 @@ from debiasing import bam, gbdd
 
 def debiasing(methods, content, bar):
     logging.info("Debiasing-Engine: Started")
-
     # bar params: lower, uploaded, pca, space
     if content is None:
         return 'BAD REQUEST - NO BIAS SPEC JSON FOUND', 400
@@ -21,6 +23,7 @@ def debiasing(methods, content, bar):
     lex = 'false'
     if 'space' in bar:
         space = bar['space']
+        print(space)
     if 'uploaded' in bar:
         uploaded = bar['uploaded']
     if 'lower' in bar:
@@ -32,10 +35,8 @@ def debiasing(methods, content, bar):
     t1_list, t2_list, a1_list, a2_list, aug1_list, aug2_list = json_controller.json_to_debias_spec(content)
     if len(aug1_list) == 0:
         aug1_list, computed = augmentation_retrieval.retrieve_multiple_augmentations(t1_list)
-        print("here")
     if len(aug2_list) == 0:
         aug2_list, computed = augmentation_retrieval.retrieve_multiple_augmentations(t2_list)
-        print("here")
     if lower == 'true':
         t1_list = [x.lower() for x in t1_list]
         t2_list = [x.lower() for x in t2_list]
@@ -43,12 +44,10 @@ def debiasing(methods, content, bar):
         a2_list = [x.lower() for x in a2_list]
         aug1_list = [x.lower() for x in aug1_list]
         aug2_list = [x.lower() for x in aug2_list]
-    print(aug1_list)
-    print(aug2_list)
     equality_sets = []
-    for i in range(len(aug1_list)):
-        for j in range(len(aug2_list)):
-            equality_sets.append([aug1_list[i], aug2_list[j]])
+    for t1 in aug1_list:
+        for t2 in aug2_list:
+            equality_sets.append((t1, t2))
 
     t1, t2, a1, a2, aug1, aug2, not_found, deleted = specification_controller. \
         get_vectors_for_spec(space, lower, uploaded, t1_list, t2_list, a1_list, a2_list, aug1_list, aug2_list)
@@ -59,9 +58,8 @@ def debiasing(methods, content, bar):
     else:
         vocab, vecs = calculation.create_vocab_and_vecs(t1, t2, a1, a2, aug1, aug2)
 
-    t1_deb, t2_deb, a1_deb, a2_deb, new_vecs= [], [], [], [], []
+    t1_deb, t2_deb, a1_deb, a2_deb, new_vecs = [], [], [], [], []
     # print("Debiasing-Engine: Specs loaded, starting computing")
-
     if methods == 'bam':
         t1_deb, t2_deb, a1_deb, a2_deb, new_vecs = debiasing_bam(equality_sets, vocab, vecs, t1_list, t2_list, a1_list,
                                                                  a2_list)
