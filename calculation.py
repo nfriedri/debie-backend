@@ -5,6 +5,8 @@ import random
 import copy
 from sklearn.decomposition import PCA
 
+from data_controller import simlex_vocab, wordsim_vocab
+
 
 # Creates deep-copies of one ore more dictionaries
 def create_duplicates(set1, set2=None, set3=None, set4=None):
@@ -164,16 +166,28 @@ def create_vocab_and_vecs(t1, t2=None, a1=None, a2=None, aug1=None, aug2=None, l
     return vocab, vecs
 
 
-def vocab_to_dicts(vocab, vecs, t1_list, t2_list, a1_list, a2_list):
-    t1, t2, a1, a2 = {}, {}, {}, {}
-    for word in t1_list:
-        t1[word] = vecs[vocab[word]]
-    for word in t2_list:
-        t2[word] = vecs[vocab[word]]
-    for word in a1_list:
-        a1[word] = vecs[vocab[word]]
-    for word in a2_list:
-        a2[word] = vecs[vocab[word]]
+def vocab_to_dict(vocab, vecs, lists):
+    res = {}
+    for word in lists:
+        if word in vocab:
+            res[word] = vecs[vocab[word]]
+    return res
+
+
+def vocabs_to_dicts(vocab, vecs, t1_list, t2_list, a1_list, a2_list, lex=None):
+    t1 = vocab_to_dict(vocab, vecs, t1_list)
+    t2 = vocab_to_dict(vocab, vecs, t2_list)
+    a1 = vocab_to_dict(vocab, vecs, a1_list)
+    a2 = vocab_to_dict(vocab, vecs, a2_list)
+    if lex is not None:
+        lex_dict = {}
+        if lex == 'simlex':
+            print('Vocab to dicts --- SIMLEX')
+            lex_dict = vocab_to_dict(vocab, vecs, simlex_vocab)
+        if lex == 'wordsim':
+            print('Vocab to dicts --- WORDSIM')
+            lex_dict = vocab_to_dict(vocab, vecs, wordsim_vocab)
+        return t1, t2, a1, a2, lex_dict
     return t1, t2, a1, a2
 
 

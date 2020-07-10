@@ -28,23 +28,8 @@ def json_augmentation_retrieval(augments, not_postspec):
     return response
 
 
-def json_to_bias_spec(content):
-    if 'BiasSpecification' in content:
-        target1 = content['BiasSpecification']['T1'].split(' ')
-        target2 = content['BiasSpecification']['T2'].split(' ')
-        attributes1 = content['BiasSpecification']['A1'].split(' ')
-        attributes2 = content['BiasSpecification']['A2'].split(' ')
-    else:
-        target1 = content['T1'].split(' ')
-        target2 = content['T2'].split(' ')
-        attributes1 = content['A1'].split(' ')
-        attributes2 = content['A2'].split(' ')
-    logging.info("JsonController: Found following bias spec: T1: " + str(target1) + "; T2: " + str(target2) + "; A1: " +
-                 str(attributes1) + " ; A2: " + str(attributes2))
-    return target1, target2, attributes1, attributes2
-
-
 def json_to_debias_spec(content):
+    print('Here: JSON to debias spec')
     target1, target2, attributes1, attributes2, augments1, augments2 = [], [], [], [], [], []
     if 'BiasSpecification' in content:
         target1 = content['BiasSpecification']['T1'].split(' ')
@@ -52,6 +37,7 @@ def json_to_debias_spec(content):
         attributes1 = content['BiasSpecification']['A1'].split(' ')
         attributes2 = content['BiasSpecification']['A2'].split(' ')
         if 'Augmentations1' in content['BiasSpecification']:
+            print('Augments 1 in content')
             augments1 = content['BiasSpecification']['Augmentations1'].split(' ')
         if 'Augmentations2' in content['BiasSpecification']:
             augments2 = content['BiasSpecification']['Augmentations2'].split(' ')
@@ -61,6 +47,7 @@ def json_to_debias_spec(content):
         attributes1 = content['A1'].split(' ')
         attributes2 = content['A2'].split(' ')
         if 'Augmentations1' in content:
+            print('Augments 1 in content')
             augments1 = content['Augmentations1'].split(' ')
         if 'Augmentations2' in content:
             augments2 = content['Augmentations2'].split(' ')
@@ -160,5 +147,6 @@ def json_with_vector_data(content):
 
 
 def json_lex_vector_data(content):
+    print('JSON_Controller -- JSON LEX VECTOR DATA')
     if 'LexDictionary' in content:
         return content['LexDictionary']

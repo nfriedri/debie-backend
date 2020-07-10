@@ -10,8 +10,6 @@ from data_controller import glove_vocab as gv_vocab
 from data_controller import glove_vectors as gv_vecs
 from data_controller import cbow_vocab as cb_vocab
 from data_controller import cbow_vectors as cb_vecs
-from upload_controller import uploaded_vocab as up_vocab
-from upload_controller import uploaded_vecs as up_vecs
 
 
 def retrieve_augmentations(number, content, bar):

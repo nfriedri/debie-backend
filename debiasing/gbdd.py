@@ -7,7 +7,6 @@ def get_bias_direction(equality_sets, vecs, vocab):
     logging.info("Debi-Engine: GBDD Debiasing started")
     dir_vecs = []
     vecs_norm = vecs / np.transpose([np.linalg.norm(vecs, 2, 1)])
-    print(vocab)
     for eq in equality_sets:
         if eq[0] in vocab and eq[1] in vocab:
             dir_vecs.append(vecs_norm[vocab[eq[0]]] - vecs_norm[vocab[eq[1]]])

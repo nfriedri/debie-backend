@@ -12,8 +12,8 @@ glove_200k_vectors = 'data/glove_200k.vec'
 cbow_200k_vocab = 'data/w2v_cbow_200k.vocab'
 cbow_200k_vectors = 'data/w2v_cbow_200k.vec'
 augmentations_postspec = 'data/augmentations_postspec.vocab'
-simlex_999 = 'data/simlex999/SimLex-999.txt'
-wordsim = 'data/wsim353/wsim.txt'
+simlex_999_path = 'data/simlex999/SimLex-999.txt'
+wordsim_path = 'data/wsim353/wsim_sim.txt'
 
 
 def load_vocab_binary(path, inverse=False):
@@ -72,13 +72,22 @@ def load_binary_uploads(vocab_filename, vecs_filename):
 
 def load_simlex(path):
     simlex_data = [line.strip() for line in list(codecs.open(path, "r", encoding='utf8', errors='replace').readlines())]
+    # print(simlex_data)
     simlex = [(line.split("\t")[0].lower(), line.split("\t")[1].lower(), float(line.split("\t")[3])) for line in simlex_data]
+    # print(path)
+    # print(simlex)
     return simlex
 
 
+def load_wordsim(path):
+    wordsim_data = [line.strip() for line in list(codecs.open(path, "r", encoding='utf8', errors='replace').readlines())]
+    wordsim = [(line.split("\t")[0].lower(), line.split("\t")[1].lower(), float(line.split("\t")[2])) for line in wordsim_data]
+    return wordsim
+
+
 def load_lex_by_start():
-    simlex_data = load_simlex(simlex_999)
-    wordsim_data = load_simlex(wordsim)
+    simlex_data = load_simlex(simlex_999_path)
+    wordsim_data = load_wordsim(wordsim_path)
     simlex_vocab, wordsim_vocab = [], []
     for s in simlex_data:
         simlex_vocab.append(s[0])
