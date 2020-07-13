@@ -36,7 +36,6 @@ def json_to_debias_spec(content):
         attributes1 = content['BiasSpecification']['A1'].split(' ')
         attributes2 = content['BiasSpecification']['A2'].split(' ')
         if 'Augmentations1' in content['BiasSpecification']:
-            print('Augments 1 in content')
             augments1 = content['BiasSpecification']['Augmentations1'].split(' ')
         if 'Augmentations2' in content['BiasSpecification']:
             augments2 = content['BiasSpecification']['Augmentations2'].split(' ')

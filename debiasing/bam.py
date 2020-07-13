@@ -12,9 +12,8 @@ def debias_proc(equality_sets, vocab, vecs):
     B = np.array(B)
 
     product = np.matmul(A.transpose(), B)
-    U, s, V = np.linalg.svd(product)
-    print(U.shape, V.shape)
-    proj_mat = np.matmul(U, V)  # V
+    u, sigma, v = np.linalg.svd(product)
+    proj_mat = v  # np.matmul(U, V)
     res = np.matmul(vecs, proj_mat)
     return (res + vecs) / 2, proj_mat
 

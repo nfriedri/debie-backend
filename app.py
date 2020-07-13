@@ -30,9 +30,9 @@ app.config['ALLOWED_EXTENSIONS'] = ALLOWED_EXTENSIONS
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
 
-# logging.basicConfig(filename="logfile.log", level=logging.INFO)
-# logging.info("APP: APP started at " + str(datetime.datetime.now()))
-# print("logging configured")
+logging.basicConfig(filename="logfile.log", level=logging.INFO)
+logging.info("APP: APP started at " + str(datetime.datetime.now()))
+print("logging configured")
 
 
 # API-Connection Test

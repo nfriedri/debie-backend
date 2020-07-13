@@ -27,7 +27,6 @@ def eval_svm(augmentations1, augmentations2, target1, target2, vocab, vecs):
         X_test = []
         y_test = []
         test = [(w, 0) for w in target1 if w in vocab] + [(w, 1) for w in target2 if w in vocab]
-        # print("SVM test words: " + str(len(test)))
         for p in test:
             w = p[0]
             l = p[1]

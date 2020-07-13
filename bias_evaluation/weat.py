@@ -13,7 +13,6 @@ def word_embedding_association_test(target1, target2, attribute1, attribute2, ac
     effect_size = effect_size_calculation(target_list, t1, t2, a1, a2)
     logging.info("Eval-Engine: WEAT effect-size: " + str(effect_size))
     # Calculate p_value
-    # print("WEAT: Started p-value calculation")
     s_b_e = differential_association(t1, t2, a1, a2)
     s_b_e_all = sum_up_diff_ass_all_permutations(target_list, a1, a2, accuracy)
     p_value = p_value_calculation(s_b_e, s_b_e_all)

@@ -3,7 +3,7 @@ import logging
 import numpy as np
 
 
-def get_bias_direction(equality_sets, vecs, vocab):
+def get_bias_direction(equality_sets, vocab, vecs):
     logging.info("Debi-Engine: GBDD Debiasing started")
     dir_vecs = []
     vecs_norm = vecs / np.transpose([np.linalg.norm(vecs, 2, 1)])

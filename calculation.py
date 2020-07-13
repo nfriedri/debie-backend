@@ -94,7 +94,7 @@ def check_set_content(vector_set1, vector_set2):
         for word in duplicates:
             vector_set1.remove(word)
             vector_set2.remove(word)
-            print(duplicates[word])
+            # print(duplicates[word])
     return vector_set1, vector_set2
 
 
@@ -182,10 +182,10 @@ def vocabs_to_dicts(vocab, vecs, t1_list, t2_list, a1_list, a2_list, lex=None):
     if lex is not None:
         lex_dict = {}
         if lex == 'simlex':
-            print('Vocab to dicts --- SIMLEX')
+            # print('Vocab to dicts --- SIMLEX')
             lex_dict = vocab_to_dict(vocab, vecs, simlex_vocab)
         if lex == 'wordsim':
-            print('Vocab to dicts --- WORDSIM')
+            # print('Vocab to dicts --- WORDSIM')
             lex_dict = vocab_to_dict(vocab, vecs, wordsim_vocab)
         return t1, t2, a1, a2, lex_dict
     return t1, t2, a1, a2

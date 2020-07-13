@@ -58,7 +58,7 @@ def debiasing(methods, content, bar):
         vocab, vecs = calculation.create_vocab_and_vecs(t1, t2, a1, a2, aug1, aug2)
 
     t1_deb, t2_deb, a1_deb, a2_deb, new_vecs = [], [], [], [], []
-    # print("Debiasing-Engine: Specs loaded, starting computing")
+    logging.info("Debiasing-Engine: Specs loaded, starting computing")
     if methods == 'bam':
         new_vecs, t1_deb, t2_deb, a1_deb, a2_deb = debiasing_bam(equality_sets, vocab, vecs, t1_list, t2_list, a1_list,
                                                                  a2_list)
@@ -102,7 +102,7 @@ def debiasing(methods, content, bar):
             response = json_controller.debiasing_json(space, lower, methods, pca, aug1_list, aug2_list, t1, t2, a1, a2,
                                                       t1_deb, t2_deb, a1_deb, a2_deb, not_found, deleted, lex_dict)
 
-    # print("Debiasing-Engine: Finished")
+    logging.info("Debiasing-Engine: Finished")
 
     return response, 200
 
@@ -114,7 +114,7 @@ def debiasing_bam(equality_sets, vocab, vecs, t1_list, t2_list, a1_list, a2_list
 
 
 def debiasing_gbdd(equality_sets, vocab, vecs, t1_list, t2_list, a1_list, a2_list):
-    v_b = gbdd.get_bias_direction(equality_sets, vecs, vocab)
+    v_b = gbdd.get_bias_direction(equality_sets, vocab, vecs)
     new_vecs = gbdd.debias_direction_linear(v_b, vecs)
     t1, t2, a1, a2 = calculation.vocabs_to_dicts(vocab, new_vecs, t1_list, t2_list, a1_list, a2_list)
     return new_vecs, t1, t2, a1, a2

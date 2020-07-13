@@ -83,31 +83,28 @@ def retrieve_single_augmentations(target, vocab=ft_vocab, vecs=ft_vecs):
 
 def retrieve_multiple_augmentations(target):
     augments = []
-    computed_augments = []
+    no_augments = []
     for word in target:
-        aug, computed = retrieve_single_augmentations(word)
+        aug, found = retrieve_single_augmentations(word)
         for w in aug:
             augments.append(w)
-        if computed:
-            computed_augments.append(word)
-    print(augments)
-    print(computed_augments)
-    return augments, computed_augments
+        if found:
+            no_augments.append(word)
+    return augments, no_augments
 
 
 def compute_augmentations(target, vocab, vecs, iterations=4):
-    # print('COMPUTED')
     augments = []
     cosinesim = {}
     if target not in vocab:
-        return [], False
+        return augments, True
     target_vec = np.array(vecs[vocab[target]])
     for word in vocab:
         vec = np.array(vecs[vocab[word]])
         if word != target:
             cosinesim[word] = calculation.cosine_similarity(target_vec, vec)
-    for i in range(iterations):
-        maximum = max(cosinesim, key=lambda k: cosinesim[k])
-        cosinesim.pop(maximum)
-        augments.append(maximum)
-    return augments, True
+            for i in range(iterations):
+                maximum = max(cosinesim, key=lambda k: cosinesim[k])
+                cosinesim.pop(maximum)
+                augments.append(maximum)
+    return augments, False

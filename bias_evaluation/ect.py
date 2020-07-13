@@ -38,9 +38,7 @@ def embedding_coherence_test(t1, t2, a1, a2):
 def target_set_mean_vector(target_list):
     # Create empty vector with dimension 300 for simpler vector addition
     vector_array = numpy.zeros(300)
-    # print("Zeros:" + str(len(vector_array)))
     for i in range(len(target_list)):
-        # print(len(target_list[i]))
         vector_array += target_list[i]
     result = (vector_array / len(target_list))
     return result
