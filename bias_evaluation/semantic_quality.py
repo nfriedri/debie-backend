@@ -1,20 +1,20 @@
 # Providing Simlex and Wordsim as implicit scores
 import codecs
-from data_controller import load_simlex, load_wordsim, simlex_999_path, wordsim_path
+from data_controller import simlex_data, wordsim_data
 from scipy.stats import stats
 import numpy as np
 
 
 def eval_simlex(vocab, vecs, sim_type):
-    simlex = None
+    lex_data = None
     if sim_type == 'SimLex':
-        simlex = load_simlex(simlex_999_path)
+        lex_data = simlex_data
     if sim_type == 'WordSim':
-        simlex = load_wordsim(wordsim_path)
+        lex_data = wordsim_data
     preds = []
     golds = []
     cnt = 0
-    for s in simlex:
+    for s in lex_data:
         if s[0] in vocab and s[1] in vocab:
             vec1 = vecs[vocab[s[0]]]
             vec2 = vecs[vocab[s[1]]]

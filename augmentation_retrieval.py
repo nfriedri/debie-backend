@@ -90,6 +90,8 @@ def retrieve_multiple_augmentations(target):
             augments.append(w)
         if computed:
             computed_augments.append(word)
+    print(augments)
+    print(computed_augments)
     return augments, computed_augments
 
 
@@ -98,7 +100,7 @@ def compute_augmentations(target, vocab, vecs, iterations=4):
     augments = []
     cosinesim = {}
     if target not in vocab:
-        return 'Not in vocab', False
+        return [], False
     target_vec = np.array(vecs[vocab[target]])
     for word in vocab:
         vec = np.array(vecs[vocab[word]])

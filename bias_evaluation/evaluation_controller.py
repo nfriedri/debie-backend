@@ -110,10 +110,8 @@ def evaluate_svm(space, lower, uploaded, t1, t2):
 def evaluate_simlex(space, uploaded, json, lex_dict):
     if json == 'true':
         vocab, vecs = calculation.create_vocab_and_vecs(lex_dict)
-        print('created lex vocab')
     else:
         vocab, vecs = specification_controller.return_vocab_vecs(space, uploaded)
-        print('created ususal vocab')
     pearson, spearman = semantic_quality.eval_simlex(vocab, vecs, 'SimLex')
     scores = {'SimLexPearson': pearson, 'SimLexSpearman': spearman}
     return scores

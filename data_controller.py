@@ -13,7 +13,7 @@ cbow_200k_vocab = 'data/w2v_cbow_200k.vocab'
 cbow_200k_vectors = 'data/w2v_cbow_200k.vec'
 augmentations_postspec = 'data/augmentations_postspec.vocab'
 simlex_999_path = 'data/simlex999/SimLex-999.txt'
-wordsim_path = 'data/wsim353/wsim_sim.txt'
+wordsim_path = 'data/wsim353/wsim.txt'
 
 
 def load_vocab_binary(path, inverse=False):
@@ -81,7 +81,7 @@ def load_simlex(path):
 
 def load_wordsim(path):
     wordsim_data = [line.strip() for line in list(codecs.open(path, "r", encoding='utf8', errors='replace').readlines())]
-    wordsim = [(line.split("\t")[0].lower(), line.split("\t")[1].lower(), float(line.split("\t")[2])) for line in wordsim_data]
+    wordsim = [(line.split("\t")[1].lower(), line.split("\t")[2].lower(), float(line.split("\t")[3])) for line in wordsim_data]
     return wordsim
 
 
@@ -95,7 +95,7 @@ def load_lex_by_start():
     for w in wordsim_data:
         wordsim_vocab.append(w[0])
         wordsim_vocab.append(w[1])
-    return simlex_vocab, wordsim_vocab
+    return simlex_vocab, simlex_data, wordsim_vocab, wordsim_data
 
 
 def load_embeddings_by_start():
@@ -109,6 +109,6 @@ def load_embeddings_by_start():
 
 
 fasttext_vocab, fasttext_vectors, glove_vocab, glove_vectors, cbow_vocab, cbow_vectors = load_embeddings_by_start()
-simlex_vocab, wordsim_vocab = load_lex_by_start()
+simlex_vocab, simlex_data, wordsim_vocab, wordsim_data = load_lex_by_start()
 augmentations = load_augmentations(augmentations_postspec)
 print('Data_Handler started')
