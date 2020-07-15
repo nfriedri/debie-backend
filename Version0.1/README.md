@@ -1,6 +1,6 @@
 # DEBIE Back-end
 
-DEBIE is a web application developed to demonstrate the by Luscher et al. (2019) in "A general framework for implicit and explicit debiasing of distributional word vector spaces" (accesible under: http://arxiv.org/abs/1909.06092) introduced bias evaluation methods and debiasing models.
+DEBIE is a web application developed to demonstrate the by Lauscher et al. (2019) in "A general framework for implicit and explicit debiasing of distributional word vector spaces" (accesible under: http://arxiv.org/abs/1909.06092) introduced bias evaluation methods and debiasing models.
 
 The application offers to evaluate bias specifications with the Embedding Coherence Test (ECT), the Bias Analogy Test (BAT), the Word Embeddings Association Test (WEAT) and by K-Means++ clustering.
 
