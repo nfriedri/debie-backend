@@ -10,12 +10,13 @@ import vector_retrieval
 from flask import Flask, request
 from flask import jsonify
 from flask_cors import CORS
+from flask_swagger_ui import get_swaggerui_blueprint
 from werkzeug.utils import secure_filename
 
 from bias_evaluation import evaluation_controller
 from debiasing import debiasing_controller
 
-''' RestAPI '''
+''' RestAPI Configuration'''
 # FLASK, CORS & Logging configuration
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'txt', 'vec', 'vocab', 'vectors'}
@@ -29,12 +30,19 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['ALLOWED_EXTENSIONS'] = ALLOWED_EXTENSIONS
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
+'''Swagger UI Configuration'''
+SWAGGER_URL = '/swagger'
+API_URL = '/static/swagger.json'
+SWAGGERUI_BLUEPRINT = get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'app_name': "DEBIE"})
+app.register_blueprint(SWAGGERUI_BLUEPRINT, url_prefix=SWAGGER_URL)
 
-# logging.basicConfig(filename="logfile.log", level=logging.INFO)
+'''Logging Configuration'''
+logging.basicConfig(filename="logfile.log", level=logging.INFO)
 logging.info("APP: APP started at " + str(datetime.datetime.now()))
 print("logging configured")
 
 
+'''API Endpoints'''
 # API-Connection Test
 @app.route('/REST/', methods=['GET'])
 def test():
