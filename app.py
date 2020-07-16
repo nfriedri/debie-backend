@@ -30,7 +30,7 @@ app.config['ALLOWED_EXTENSIONS'] = ALLOWED_EXTENSIONS
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
 
-logging.basicConfig(filename="logfile.log", level=logging.INFO)
+# logging.basicConfig(filename="logfile.log", level=logging.INFO)
 logging.info("APP: APP started at " + str(datetime.datetime.now()))
 print("logging configured")
 
@@ -224,7 +224,7 @@ def upload_embedding_space():
         file = request.files['vectorFile']
         if file.filename == '':
             resp = jsonify({'message': 'No file selected for uploading'})
-            resp.status_code = 400
+            resp.status_code = 402
             upload_controller.uploaded_binary = ''
             return resp
         if file and allowed_file(file.filename):
@@ -235,7 +235,7 @@ def upload_embedding_space():
             resp.status_code = 201
             return resp
         else:
-            resp = jsonify({'message': 'Allowed file types are txt, vec or vocab'})
+            resp = jsonify({'message': 'Allowed file types are txt, vec, vector or vocab'})
             resp.status_code = 400
             upload_controller.uploaded_binary = ''
             return resp
@@ -245,7 +245,7 @@ def upload_embedding_space():
         vecs = request.files['vecs']
         if vocab.filename and vecs.filename == '':
             resp = jsonify({'message': 'No files selected for uploading'})
-            resp.status_code = 400
+            resp.status_code = 402
             upload_controller.uploaded_binary = ''
             return resp
         if vocab.filename and allowed_file(vocab.filename) and vecs.filename and allowed_file(vecs.filename):
@@ -258,8 +258,8 @@ def upload_embedding_space():
             resp.status_code = 201
             return resp
         else:
-            resp = jsonify({'message': 'Allowed file types are txt, vec or vocab'})
-            resp.status_code = 400
+            resp = jsonify({'message': 'Allowed file types are txt, vec, vector or vocab'})
+            resp.status_code = 401
             upload_controller.uploaded_binary = ''
             return resp
 

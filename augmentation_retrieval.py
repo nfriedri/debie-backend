@@ -103,8 +103,8 @@ def compute_augmentations(target, vocab, vecs, iterations=4):
         vec = np.array(vecs[vocab[word]])
         if word != target:
             cosinesim[word] = calculation.cosine_similarity(target_vec, vec)
-            for i in range(iterations):
-                maximum = max(cosinesim, key=lambda k: cosinesim[k])
-                cosinesim.pop(maximum)
-                augments.append(maximum)
+    for i in range(iterations):
+        maximum = max(cosinesim, key=lambda k: cosinesim[k])
+        cosinesim.pop(maximum)
+        augments.append(maximum)
     return augments, False

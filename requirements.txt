@@ -1,0 +1,6 @@
+numpy == 1.18.5
+scipy == 1.4.1
+scikit-learn == 0.22.2.post1
+flask
+flask_CORS
+flask-swagger-ui

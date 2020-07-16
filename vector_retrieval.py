@@ -63,8 +63,9 @@ def retrieve_vector(number, content, bar):
     vectors = {}
     not_found = []
 
-    if 'space' and 'uploaded' not in bar:
-        return 'BAD REQUEST - NO SPACE SELECTED', 400
+    if 'space' not in bar:
+        if 'uploaded' not in bar:
+            return 'BAD REQUEST - NO SPACE SELECTED', 400
     space = 'fasttext'
     uploaded = 'false'
     lower = 'false'
@@ -77,7 +78,7 @@ def retrieve_vector(number, content, bar):
 
     if number == 'single':
         if 'word' not in bar:
-            return 'BAD REQUEST - NO WORD INPUT', 400
+            return 'BAD REQUEST - NO WORD INPUT', 401
         target = bar['word']
         if lower == 'true':
             target = target.lower()
