@@ -174,7 +174,7 @@ def vocab_to_dict(vocab, vecs, lists):
     return res
 
 
-def vocabs_to_dicts(vocab, vecs, t1_list, t2_list, a1_list, a2_list, lex=None):
+def vocabs_to_dicts(vocab, vecs, t1_list, t2_list, a1_list, a2_list, aug1_list=None, aug2_list=None, lex=None):
     t1 = vocab_to_dict(vocab, vecs, t1_list)
     t2 = vocab_to_dict(vocab, vecs, t2_list)
     a1 = vocab_to_dict(vocab, vecs, a1_list)
@@ -188,6 +188,10 @@ def vocabs_to_dicts(vocab, vecs, t1_list, t2_list, a1_list, a2_list, lex=None):
             # print('Vocab to dicts --- WORDSIM')
             lex_dict = vocab_to_dict(vocab, vecs, wordsim_vocab)
         return t1, t2, a1, a2, lex_dict
+    if aug1_list is not None and aug2_list is not None:
+        aug1 = vocab_to_dict(vocab, vecs, aug1_list)
+        aug2 = vocab_to_dict(vocab, vecs, aug2_list)
+        return t1, t2, a1, a2, aug1, aug2
     return t1, t2, a1, a2
 
 

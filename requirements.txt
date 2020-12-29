@@ -4,3 +4,4 @@ scikit-learn == 0.22.2.post1
 flask
 flask_CORS
 flask-swagger-ui
+gunicorn

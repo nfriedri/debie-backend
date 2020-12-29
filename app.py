@@ -37,9 +37,9 @@ SWAGGERUI_BLUEPRINT = get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'app
 app.register_blueprint(SWAGGERUI_BLUEPRINT, url_prefix=SWAGGER_URL)
 
 '''Logging Configuration'''
-logging.basicConfig(filename="logfile.log", level=logging.INFO)
-logging.info("APP: APP started at " + str(datetime.datetime.now()))
-print("logging configured")
+# logging.basicConfig(filename="logfile.log", level=logging.INFO)
+# logging.info("APP: APP started at " + str(datetime.datetime.now()))
+# print("logging configured")
 
 
 '''API Endpoints'''
@@ -201,23 +201,25 @@ def debiasing_bam():
 
 
 # Debiasing of bias specifications using GBDD and BAM, returning values
-@app.route('/REST/debiasing/full/gbddxbam', methods=['POST'])
+@app.route('/REST/debiasing/gbddxbam', methods=['POST'])
 def debiasing_gbdd_bam():
     logging.info("APP: " + str(datetime.datetime.now()) + " GBDDxBAM Debiasing started")
     content = request.get_json()
     bar = request.args.to_dict()
-    response, status_code = debiasing_controller.debiasing('gbddXbam', content, bar)
+    response, status_code = debiasing_controller.debiasing('gbddxbam', content, bar)
 
     return response, status_code
 
 
 # Debiasing of bias specifications using BAM and GBDD, returning values in full size
-@app.route('/REST/debiasing/full/bamxgbdd', methods=['POST'])
+@app.route('/REST/debiasing/bamxgbdd', methods=['POST'])
 def debiasing_bam_gbdd():
     logging.info("APP: " + str(datetime.datetime.now()) + " BAMxGBDD Debiasing started")
     content = request.get_json()
     bar = request.args.to_dict()
-    response, status_code = debiasing_controller.debiasing('bamXgbdd', content, bar)
+    # print(content)
+    # print(bar)
+    response, status_code = debiasing_controller.debiasing('bamxgbdd', content, bar)
 
     return response, status_code
 
