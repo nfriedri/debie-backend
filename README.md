@@ -16,5 +16,5 @@ Simply copy all the files which were too large to be uploaded here into the "dat
 
 An running instance of DEBIE is accessible under: http://debie.informatik.uni-mannheim.de
 
-DEBIE is also available as an desktop application with an GUI and as an CLI tool.
-These are available here: https://drive.google.com/drive/folders/1RDBFwOyPMPWBNL_GC5qplZ0NHDjfqOdc?usp=sharing
+DEBIE is also available as a desktop application with a GUI and as a CLI tool.
+These versions are available here: https://drive.google.com/drive/folders/1RDBFwOyPMPWBNL_GC5qplZ0NHDjfqOdc?usp=sharing
