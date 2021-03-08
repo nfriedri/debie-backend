@@ -11,4 +11,7 @@ For using other vector representations, the possibility is offered to upload emb
 
 The frontend is published here: https://github.com/nfriedri/debie-frontend
 
+To get the application running, word embedding spaces need to be included into the folder "data". These can be downloaded here: https://drive.google.com/drive/folders/1fY_dXkmlKF8jJbGpMLQNBwEPviDtcjB1?usp=sharing
+Simply copy all the files which were too large to be uploaded here into the "data" folder.
+
 An running instance of the application is accessible under: http://debie.informatik.uni-mannheim.de
