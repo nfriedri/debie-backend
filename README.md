@@ -18,3 +18,5 @@ An running instance of DEBIE is accessible under: http://debie.informatik.uni-ma
 
 DEBIE is also available as a desktop application with a GUI and as a CLI tool.
 These versions are available here: https://drive.google.com/drive/folders/1RDBFwOyPMPWBNL_GC5qplZ0NHDjfqOdc?usp=sharing
+
+DEBIE CLI-Tool Repository: https://github.com/nfriedri/debie-command-line
