@@ -1108,6 +1108,284 @@
         }
       }
     },
+    "/debiasing/full-space/bam": {
+      "post": {
+        "tags": [
+          "Debiasing",
+          "Full-Space"
+        ],
+        "summary": "Debiasing applying BAM and returning vomplete vector files",
+        "description": "Debiasing of the selceted embedding space by applying BAM (Bias-Alignment Model) under the usage of an explicit bias specification with augmentation term sets. This endpoint returns the complete used vector file of the embedding space.\n",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/octet-stream"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "contains the explicit bias specification, consisting out of the two target term sets T1 and T2 and the two attribute term sets A1 and A2. Optional, two augmentation term sets Augmentations1 and Augmentations2 of the target term sets can be added",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DebiasSpecification"
+            }
+          },
+          {
+            "in": "query",
+            "name": "space",
+            "description": "embedding space out of which the vector representation will be retrieved",
+            "required": true,
+            "default": "fasttext",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "uploaded",
+            "description": "contains the filename of the uploaded embedding space in case the data should be retrieved from an uploaded file. If no file is uploaded, either set the param to false or leave it out.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "lower",
+            "description": "lowercases all letters of the given input word",
+            "required": false,
+            "default": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success"
+          },
+          "400": {
+            "description": "failure"
+          }
+        }
+      }
+    },
+    "/debiasing/full-space/gbdd": {
+      "post": {
+        "tags": [
+          "Debiasing",
+          "Full-Space"
+        ],
+        "summary": "Debiasing applying GBDD and returning complete vector files",
+        "description": "Debiasing of the selceted embedding space by applying GBDD (Generalized Bias-Direction Debiasing) under the usage of an explicit bias specification with augmentation term sets. This endpoint returns the complete used vector file of the embedding space.\n",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/octet-stream"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "contains the explicit bias specification, consisting out of the two target term sets T1 and T2 and the two attribute term sets A1 and A2. Optional, two augmentation term sets Augmentations1 and Augmentations2 of the target term sets can be added",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DebiasSpecification"
+            }
+          },
+          {
+            "in": "query",
+            "name": "space",
+            "description": "embedding space out of which the vector representation will be retrieved",
+            "required": true,
+            "default": "fasttext",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "uploaded",
+            "description": "contains the filename of the uploaded embedding space in case the data should be retrieved from an uploaded file. If no file is uploaded, either set the param to false or leave it out.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "lower",
+            "description": "lowercases all letters of the given input word",
+            "required": false,
+            "default": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success"
+          },
+          "400": {
+            "description": "failure"
+          }
+        }
+      }
+    },
+    "/debiasing/full-space/bamxgbdd": {
+      "post": {
+        "tags": [
+          "Debiasing",
+          "Full-Space"
+        ],
+        "summary": "Debiasing applying BAM and afterwards GBDD, returning complete vector files",
+        "description": "Debiasing of the selceted embedding space by applying first BAM (Bias-Alignment Model) and afterwards  GBDD (Generalized Bias-Direction Debiasing) under the usage of an explicit bias specification with augmentation term sets. This endpoint returns the complete used vector file of the embedding space.\n",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/octet-stream"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "contains the explicit bias specification, consisting out of the two target term sets T1 and T2 and the two attribute term sets A1 and A2. Optional, two augmentation term sets Augmentations1 and Augmentations2 of the target term sets can be added",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DebiasSpecification"
+            }
+          },
+          {
+            "in": "query",
+            "name": "space",
+            "description": "embedding space out of which the vector representation will be retrieved",
+            "required": true,
+            "default": "fasttext",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "uploaded",
+            "description": "contains the filename of the uploaded embedding space in case the data should be retrieved from an uploaded file. If no file is uploaded, either set the param to false or leave it out.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "lower",
+            "description": "lowercases all letters of the given input word",
+            "required": false,
+            "default": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success"
+          },
+          "400": {
+            "description": "failure"
+          }
+        }
+      }
+    },
+    "/debiasing/full-space/gbddxbam": {
+      "post": {
+        "tags": [
+          "Debiasing",
+          "Full-Space"
+        ],
+        "summary": "Debiasing applying GBDD and afterwatds BAM, returning complete vector files",
+        "description": "Debiasing of the selceted embedding space by applying first GBDD (Generalized Bias-Direction Debiasing) and afterwards BAM (Bias-Alignment Model) under the usage of an explicit bias specification with augmentation term sets. This endpoint returns the complete used vector file of the embedding space.\n",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/octet-stream"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "contains the explicit bias specification, consisting out of the two target term sets T1 and T2 and the two attribute term sets A1 and A2. Optional, two augmentation term sets Augmentations1 and Augmentations2 of the target term sets can be added",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DebiasSpecification"
+            }
+          },
+          {
+            "in": "query",
+            "name": "space",
+            "description": "embedding space out of which the vector representation will be retrieved",
+            "required": true,
+            "default": "fasttext",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "uploaded",
+            "description": "contains the filename of the uploaded embedding space in case the data should be retrieved from an uploaded file. If no file is uploaded, either set the param to false or leave it out.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "lower",
+            "description": "lowercases all letters of the given input word",
+            "required": false,
+            "default": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success"
+          },
+          "400": {
+            "description": "failure"
+          }
+        }
+      }
+    },
+    "/debiasing/full-space/vocab": {
+      "get": {
+        "tags": [
+          "Debiasing",
+          "Full-Space"
+        ],
+        "summary": "Returns the vocab file to the selected embedding space",
+        "description": "Returns the vocabulary of the selected embedding space. The data is stored as a dictionary in a .vocab file. For example it can be read in by using json.loads() in python.\n",
+        "produces": [
+          "application/octet-stream"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "space",
+            "description": "embedding space whose vocabulary will be extracted.",
+            "required": true,
+            "default": "fasttext",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "uploaded",
+            "description": "contains the filename of the uploaded embedding space in case the data should be retrieved from an uploaded file. If no file is uploaded, either set the param to false or leave it out.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "lower",
+            "description": "lowercases all letters of the given input word",
+            "required": false,
+            "default": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success"
+          },
+          "400": {
+            "description": "failure"
+          }
+        }
+      }
+    },
     "/uploads/embedding-spaces": {
       "post": {
         "tags": [
@@ -2413,7 +2691,7 @@
       }
     }
   },
-  "host": "wifo5-29.informatik.uni-mannheim.de:8000",
+  "host": "debie.informatik.uni-mannheim.de:8000",
   "basePath": "/REST/",
   "schemes": [
     "http"

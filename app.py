@@ -1,13 +1,16 @@
 import datetime
+import json
 import logging
 import os
+
+import numpy as np
 
 import augmentation_retrieval
 import data_controller
 import upload_controller
 import vector_retrieval
 
-from flask import Flask, request
+from flask import Flask, request, send_from_directory, Response
 from flask import jsonify
 from flask_cors import CORS
 from flask_swagger_ui import get_swaggerui_blueprint
@@ -24,8 +27,8 @@ MAX_CONTENT_LENGTH = 500 * 1024 * 1024
 
 app = Flask(__name__)
 CORS(app)
-#cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
-app.secret_key = "secret key"
+# cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+# app.secret_key = "secret key"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['ALLOWED_EXTENSIONS'] = ALLOWED_EXTENSIONS
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
@@ -37,12 +40,14 @@ SWAGGERUI_BLUEPRINT = get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'app
 app.register_blueprint(SWAGGERUI_BLUEPRINT, url_prefix=SWAGGER_URL)
 
 '''Logging Configuration'''
-# logging.basicConfig(filename="logfile.log", level=logging.INFO)
-# logging.info("APP: APP started at " + str(datetime.datetime.now()))
-# print("logging configured")
+logging.basicConfig(filename="logfile.log", level=logging.INFO)
+logging.info("APP: APP started at " + str(datetime.datetime.now()))
+print("logging configured")
 
 
 '''API Endpoints'''
+
+
 # API-Connection Test
 @app.route('/REST/', methods=['GET'])
 def test():
@@ -222,6 +227,75 @@ def debiasing_bam_gbdd():
     response, status_code = debiasing_controller.debiasing('bamxgbdd', content, bar)
 
     return response, status_code
+
+
+# General Bias-Direction Debiasing of a bias specifiication returning complete vector file
+@app.route('/REST/debiasing/full-space/gbdd', methods=['POST'])
+def debiasing_gbdd_full():
+    logging.info("APP: " + str(datetime.datetime.now()) + " GBDD Debiasing full space started")
+    # print("APP: " + str(datetime.datetime.now()) + " GBDD Debiasing full space started")
+    content = request.get_json()
+    bar = request.args.to_dict()
+    new_vecs = debiasing_controller.debiasing_return_vecs('gbdd', content, bar)
+    binary_vecs = np.array(new_vecs, dtype=np.float32).tobytes()
+    return Response(binary_vecs,
+                    mimetype="application/octet-stream",
+                    headers={"Content-Disposition":
+                                 "attachment;filename=debiased_vectors.vecs"})
+
+
+# Bias Analogy Model debiasing of a bias specifiication returning complete vector file
+@app.route('/REST/debiasing/full-space/bam', methods=['POST'])
+def debiasing_bam_full():
+    logging.info("APP: " + str(datetime.datetime.now()) + " BAM Debiasing started")
+    content = request.get_json()
+    bar = request.args.to_dict()
+    new_vecs = debiasing_controller.debiasing_return_vecs('gbdd', content, bar)
+    binary_vecs = np.array(new_vecs, dtype=np.float32).tobytes()
+    return Response(binary_vecs,
+                    mimetype="application/octet-stream",
+                    headers={"Content-Disposition":
+                                 "attachment;filename=debiased_vectors.vecs"})
+
+
+# Debiasing of bias specifications using GBDD and BAM, returning complete vector file
+@app.route('/REST/debiasing/full-space/gbddxbam', methods=['POST'])
+def debiasing_gbdd_bam_full():
+    logging.info("APP: " + str(datetime.datetime.now()) + " GBDDxBAM Debiasing started")
+    content = request.get_json()
+    bar = request.args.to_dict()
+    new_vecs = debiasing_controller.debiasing_return_vecs('gbdd', content, bar)
+    binary_vecs = np.array(new_vecs, dtype=np.float32).tobytes()
+    return Response(binary_vecs,
+                    mimetype="application/octet-stream",
+                    headers={"Content-Disposition":
+                                 "attachment;filename=debiased_vectors.vecs"})
+
+
+# Debiasing of bias specifications using BAM and GBDD, returning complete vector file
+@app.route('/REST/debiasing/full-space/bamxgbdd', methods=['POST'])
+def debiasing_bam_gbdd_full():
+    logging.info("APP: " + str(datetime.datetime.now()) + " BAMxGBDD Debiasing started")
+    content = request.get_json()
+    bar = request.args.to_dict()
+    new_vecs = debiasing_controller.debiasing_return_vecs('gbdd', content, bar)
+    binary_vecs = np.array(new_vecs, dtype=np.float32).tobytes()
+    return Response(binary_vecs,
+                    mimetype="application/octet-stream",
+                    headers={"Content-Disposition":
+                                 "attachment;filename=debiased_vectors.vecs"})
+
+
+# Returns vocab file of currently used embedding file
+@app.route('/REST/debiasing/full-space/vocab', methods=['GET'])
+def debiasing_get_vocab():
+    bar = request.args.to_dict()
+    new_vocab = debiasing_controller.debiasing_return_vocab(bar)
+    vocab = json.dumps(new_vocab)
+    return Response(vocab,
+                    mimetype="application/octet-stream",
+                    headers={"Content-Disposition":
+                                 "attachment;filename=debiased_vocab.vocab"})
 
 
 # Upload of complete embedding spaces

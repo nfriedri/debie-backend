@@ -1,0 +1,2175 @@
+swagger: '2.0'
+info:
+  description: >
+    DEBiasing embeddings implicitly and explicitly - This is a tool providing
+    bias evaluation scores and metrices and debiasing models for implicit and
+    explicit bias specifications on embedding spaces. 
+
+    http://debie.informatik.uni-mannheim.de:8000/REST
+  version: 0.2.0
+  title: DEBIE
+  contact:
+    email: nfriedri@mail.uni-mannheim.de
+  license:
+    name: MIT License
+    url: 'https://github.com/nfriedri/debie-backend/blob/master/LICENSE'
+tags:
+  - name: Vector Retrieval
+    description: Retrieves vectors from the connected or uploaded embedding spaces
+  - name: Augmentation Retrieval
+    description: Retrieves up to 4 augmentations for a specified word or a list of words
+  - name: Bias Evaluation
+    description: >-
+      Bias evaluation scores measuring the amount of bias contained in a bias
+      specification
+  - name: Debiasing
+    description: Models removing bias from embedding spaces using bias specifications
+  - name: Uploads
+    description: Endpoints handling file upload and initialization process
+paths:
+  /vectors/single:
+    get:
+      tags:
+        - Vector Retrieval
+      summary: Retrieves the vector representation of a word
+      description: |
+        The system returns the vector representation of a input word
+        out of a specified embedding space.
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: word
+          description: input word for vector retrieval
+          required: true
+          type: string
+        - in: query
+          name: space
+          description: >-
+            embedding space out of which the vector representation will be
+            retrieved
+          required: true
+          default: fasttext
+          type: string
+        - in: query
+          name: uploaded
+          description: >-
+            contains the filename of the uploaded embedding space in case the
+            data should be retrieved from an uploaded file.
+          required: false
+          type: string
+        - in: query
+          name: lower
+          description: Lowercases all letters of the given input word
+          required: false
+          default: false
+          type: string
+      responses:
+        '200':
+          description: Succesfully found vector representation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/SingleVectorResult'
+        '400':
+          description: bad input parameter
+        '404':
+          description: NOT FOUND - input value not found in database
+  /vectors/multiple:
+    post:
+      tags:
+        - Vector Retrieval
+      summary: Retrieves the vector representations of a list of words
+      description: >
+        The system returns the vector representations of a list of words
+        separated by blank spaces out of a specified embedding space.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: List of words separated by blank spaces
+          required: true
+          schema:
+            $ref: '#/definitions/WordList'
+        - in: query
+          name: space
+          description: >-
+            embedding space out of which the vector representation will be
+            retrieved
+          required: true
+          default: fasttext
+          type: string
+        - in: query
+          name: uploaded
+          description: >-
+            contains the filename of the uploaded embedding space in case the
+            data should be retrieved from an uploaded file.
+          required: false
+          type: string
+        - in: query
+          name: lower
+          description: lowercases all letters of the given input word
+          required: false
+          default: false
+          type: string
+      responses:
+        '200':
+          description: Succesfully found vector representation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/MultipleVectorResult'
+        '400':
+          description: bad input parameter
+  /augmentations/single:
+    get:
+      tags:
+        - Augmentation Retrieval
+      summary: Retrieves augmentations for a given input word
+      description: >
+        The system returns a list of 4 augmentations for the input word out of a
+        postspecialized embedding space.
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: word
+          description: input word for vector retrieval
+          required: true
+          type: string
+        - in: query
+          name: space
+          description: >-
+            embedding space out of which the vector representation will be
+            retrieved
+          required: true
+          default: fasttext
+          type: string
+        - in: query
+          name: uploaded
+          description: >-
+            contains the filename of the uploaded embedding space in case the
+            data should be retrieved from an uploaded file.
+          required: false
+          type: string
+        - in: query
+          name: lower
+          description: Lowercases all letters of the given input word
+          required: false
+          default: false
+          type: string
+      responses:
+        '200':
+          description: Succesfully found augmentations
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/SingleAugmentationResult'
+        '400':
+          description: failure
+  /augmentations/multiple:
+    post:
+      tags:
+        - Augmentation Retrieval
+      summary: Retrieves the augmentations of a list of words
+      description: >
+        The system returns the computed postspecialized augmentations of a list
+        of words separated by blank spaces.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: List of words separated by blank spaces
+          required: true
+          schema:
+            $ref: '#/definitions/WordList'
+        - in: query
+          name: space
+          description: >-
+            embedding space out of which the vector representation will be
+            retrieved
+          required: true
+          default: fasttext
+          type: string
+        - in: query
+          name: uploaded
+          description: >-
+            contains the filename of the uploaded embedding space in case the
+            data should be retrieved from an uploaded file.
+          required: false
+          type: string
+        - in: query
+          name: lower
+          description: Lowercases all letters of the given input word
+          required: false
+          default: false
+          type: string
+      responses:
+        '200':
+          description: Succesfully found vector representation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/MultipleAugmentationResult'
+        '400':
+          description: bad input parameter
+  /bias-evaluation/all:
+    post:
+      tags:
+        - Bias Evaluation
+      summary: Computes the main bias evaluation scores
+      description: >
+        computes bias evaluation scores ECT, BAT, WEAT, K-Means++ and SVM on the
+        given bias specification.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            contains the explicit bias specification, consisting out of the two
+            target term sets T1 and T2 and the two attribute term sets A1 and
+            A2.
+          required: true
+          schema:
+            $ref: '#/definitions/BiasSpecification'
+        - in: query
+          name: space
+          description: >-
+            embedding space out of which the vector representation will be
+            retrieved
+          required: true
+          default: fasttext
+          type: string
+        - in: query
+          name: uploaded
+          description: >-
+            contains the filename of the uploaded embedding space in case the
+            data should be retrieved from an uploaded file. If no file is
+            uploaded, either set the param to false or leave it out.
+          required: false
+          type: string
+        - in: query
+          name: lower
+          description: Lowercases all letters of the given input word
+          required: false
+          default: false
+          type: string
+        - in: query
+          name: json
+          description: >-
+            set this parameter to true if the vector data should be retrieved
+            out of the request's body. Else set it to false or leave it out.
+          required: false
+          type: string
+      responses:
+        '200':
+          description: success
+          schema:
+            $ref: '#/definitions/BiasEvaluationALL'
+        '400':
+          description: failure
+  /bias-evaluation/ect:
+    post:
+      tags:
+        - Bias Evaluation
+      summary: Computes the ECT-score
+      description: >
+        computes the ECT-score (Embedding Coherence Test) with p-value on the
+        given bias specification.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            contains the explicit bias specification, consisting out of the two
+            target term sets T1 and T2 and the two attribute term sets A1 and
+            A2.
+          required: true
+          schema:
+            $ref: '#/definitions/BiasSpecification'
+        - in: query
+          name: space
+          description: >-
+            embedding space out of which the vector representation will be
+            retrieved
+          required: true
+          default: fasttext
+          type: string
+        - in: query
+          name: uploaded
+          description: >-
+            contains the filename of the uploaded embedding space in case the
+            data should be retrieved from an uploaded file. If no file is
+            uploaded, either set the param to false or leave it out.
+          required: false
+          type: string
+        - in: query
+          name: lower
+          description: Lowercases all letters of the given input word
+          required: false
+          default: false
+          type: string
+        - in: query
+          name: json
+          description: >-
+            set this parameter to true if the vector data should be retrieved
+            out of the request's body. Else set it to false or leave it out.
+          required: false
+          type: string
+      responses:
+        '200':
+          description: success
+          schema:
+            $ref: '#/definitions/BiasEvaluationECT'
+        '400':
+          description: failure
+  /bias-evaluation/bat:
+    post:
+      tags:
+        - Bias Evaluation
+      summary: Computes the BAT-score
+      description: >
+        computes the BAT-score (Bias Analogy Test) on the given bias
+        specification.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            contains the explicit bias specification, consisting out of the two
+            target term sets T1 and T2 and the two attribute term sets A1 and
+            A2.
+          required: true
+          schema:
+            $ref: '#/definitions/BiasSpecification'
+        - in: query
+          name: space
+          description: >-
+            embedding space out of which the vector representation will be
+            retrieved
+          required: true
+          default: fasttext
+          type: string
+        - in: query
+          name: uploaded
+          description: >-
+            contains the filename of the uploaded embedding space in case the
+            data should be retrieved from an uploaded file. If no file is
+            uploaded, either set the param to false or leave it out.
+          required: false
+          type: string
+        - in: query
+          name: lower
+          description: Lowercases all letters of the given input word
+          required: false
+          default: false
+          type: string
+        - in: query
+          name: json
+          description: >-
+            set this parameter to true if the vector data should be retrieved
+            out of the request's body. Else set it to false or leave it out.
+          required: false
+          type: string
+      responses:
+        '200':
+          description: success
+          schema:
+            $ref: '#/definitions/BiasEvaluationBAT'
+        '400':
+          description: failure
+  /bias-evaluation/weat:
+    post:
+      tags:
+        - Bias Evaluation
+      summary: Computes the WEAT-score
+      description: >
+        computes the WEAT (Word Embedding Association Test) effect size with
+        p-value on the given bias specification.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            contains the explicit bias specification, consisting out of the two
+            target term sets T1 and T2 and the two attribute term sets A1 and
+            A2.
+          required: true
+          schema:
+            $ref: '#/definitions/BiasSpecification'
+        - in: query
+          name: space
+          description: >-
+            embedding space out of which the vector representation will be
+            retrieved
+          required: true
+          default: fasttext
+          type: string
+        - in: query
+          name: uploaded
+          description: >-
+            contains the filename of the uploaded embedding space in case the
+            data should be retrieved from an uploaded file. If no file is
+            uploaded, either set the param to false or leave it out.
+          required: false
+          type: string
+        - in: query
+          name: lower
+          description: Lowercases all letters of the given input word
+          required: false
+          default: false
+          type: string
+        - in: query
+          name: json
+          description: >-
+            set this parameter to true if the vector data should be retrieved
+            out of the request's body. Else set it to false or leave it out.
+          required: false
+          type: string
+      responses:
+        '200':
+          description: success
+          schema:
+            $ref: '#/definitions/BiasEvaluationWEAT'
+        '400':
+          description: failure
+  /bias-evaluation/kmeans:
+    post:
+      tags:
+        - Bias Evaluation
+      summary: Computes the K-Means++ score
+      description: |
+        computes the K-Means++ score on the given bias specification.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            contains the explicit bias specification, consisting out of the two
+            target term sets T1 and T2 and the two attribute term sets A1 and
+            A2.
+          required: true
+          schema:
+            $ref: '#/definitions/BiasSpecification'
+        - in: query
+          name: space
+          description: >-
+            embedding space out of which the vector representation will be
+            retrieved
+          required: true
+          default: fasttext
+          type: string
+        - in: query
+          name: uploaded
+          description: >-
+            contains the filename of the uploaded embedding space in case the
+            data should be retrieved from an uploaded file. If no file is
+            uploaded, either set the param to false or leave it out.
+          required: false
+          type: string
+        - in: query
+          name: lower
+          description: Lowercases all letters of the given input word
+          required: false
+          default: false
+          type: string
+        - in: query
+          name: json
+          description: >-
+            set this parameter to true if the vector data should be retrieved
+            out of the request's body. Else set it to false or leave it out.
+          required: false
+          type: string
+      responses:
+        '200':
+          description: success
+          schema:
+            $ref: '#/definitions/BiasEvaluationKMEANS'
+        '400':
+          description: failure
+  /bias-evaluation/svm:
+    post:
+      tags:
+        - Bias Evaluation
+      summary: Computes the SVM-score
+      description: >
+        computes the SVM-score (Support Vector Machine) on the given bias
+        specification.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            contains the explicit bias specification, consisting out of the two
+            target term sets T1 and T2 and the two attribute term sets A1 and
+            A2.
+          required: true
+          schema:
+            $ref: '#/definitions/BiasSpecification'
+        - in: query
+          name: space
+          description: >-
+            embedding space out of which the vector representation will be
+            retrieved
+          required: true
+          default: fasttext
+          type: string
+        - in: query
+          name: uploaded
+          description: >-
+            contains the filename of the uploaded embedding space in case the
+            data should be retrieved from an uploaded file. If no file is
+            uploaded, either set the param to false or leave it out.
+          required: false
+          type: string
+        - in: query
+          name: lower
+          description: Lowercases all letters of the given input word
+          required: false
+          default: false
+          type: string
+        - in: query
+          name: json
+          description: >-
+            set this parameter to true if the vector data should be retrieved
+            out of the request's body. Else set it to false or leave it out.
+          required: false
+          type: string
+      responses:
+        '200':
+          description: success
+          schema:
+            $ref: '#/definitions/BiasEvaluationSVM'
+        '400':
+          description: failure
+  /bias-evaluation/simlex:
+    post:
+      tags:
+        - Bias Evaluation
+      summary: Computes the SimLex-999 score
+      description: >
+        computes the semantic quality measure SimLex-999 on the selected
+        embedding space.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            contains the explicit bias specification, consisting out of the two
+            target term sets T1 and T2 and the two attribute term sets A1 and
+            A2.
+          required: true
+          schema:
+            $ref: '#/definitions/BiasSpecification'
+        - in: query
+          name: space
+          description: >-
+            embedding space out of which the vector representation will be
+            retrieved
+          required: true
+          default: fasttext
+          type: string
+        - in: query
+          name: uploaded
+          description: >-
+            contains the filename of the uploaded embedding space in case the
+            data should be retrieved from an uploaded file. If no file is
+            uploaded, either set the param to false or leave it out.
+          required: false
+          type: string
+        - in: query
+          name: lower
+          description: Lowercases all letters of the given input word
+          required: false
+          default: false
+          type: string
+        - in: query
+          name: json
+          description: >-
+            set this parameter to true if the vector data should be retrieved
+            out of the request's body. Else set it to false or leave it out.
+          required: false
+          type: string
+      responses:
+        '200':
+          description: success
+          schema:
+            $ref: '#/definitions/BiasEvaluationSimLex'
+        '400':
+          description: failure
+  /bias-evaluation/wordsim:
+    post:
+      tags:
+        - Bias Evaluation
+      summary: Computes the WordSim-353 score
+      description: >
+        computes the semantic quality measure WordSim-353 on the selected
+        embedding space.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            contains the explicit bias specification, consisting out of the two
+            target term sets T1 and T2 and the two attribute term sets A1 and
+            A2.
+          required: true
+          schema:
+            $ref: '#/definitions/BiasSpecification'
+        - in: query
+          name: space
+          description: >-
+            embedding space out of which the vector representation will be
+            retrieved
+          required: true
+          default: fasttext
+          type: string
+        - in: query
+          name: uploaded
+          description: >-
+            contains the filename of the uploaded embedding space in case the
+            data should be retrieved from an uploaded file. If no file is
+            uploaded, either set the param to false or leave it out.
+          required: false
+          type: string
+        - in: query
+          name: lower
+          description: Lowercases all letters of the given input word
+          required: false
+          default: false
+          type: string
+        - in: query
+          name: json
+          description: >-
+            set this parameter to true if the vector data should be retrieved
+            out of the request's body. Else set it to false or leave it out.
+          required: false
+          type: string
+      responses:
+        '200':
+          description: success
+          schema:
+            $ref: '#/definitions/BiasEvaluationWordSim'
+        '400':
+          description: failure
+  /debiasing/bam:
+    post:
+      tags:
+        - Debiasing
+      summary: Debiasing applying BAM
+      description: >
+        Debiasing of the selceted embedding space by applying BAM
+        (Bias-Alignment Model) under the usage of an explicit bias specification
+        with augmentation term sets.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            contains the explicit bias specification, consisting out of the two
+            target term sets T1 and T2 and the two attribute term sets A1 and
+            A2. Optional, two augmentation term sets Augmentations1 and
+            Augmentations2 of the target term sets can be added
+          required: true
+          schema:
+            $ref: '#/definitions/DebiasSpecification'
+        - in: query
+          name: space
+          description: >-
+            embedding space out of which the vector representation will be
+            retrieved
+          required: true
+          default: fasttext
+          type: string
+        - in: query
+          name: uploaded
+          description: >-
+            contains the filename of the uploaded embedding space in case the
+            data should be retrieved from an uploaded file. If no file is
+            uploaded, either set the param to false or leave it out.
+          required: false
+          type: string
+        - in: query
+          name: lower
+          description: lowercases all letters of the given input word
+          required: false
+          default: false
+          type: string
+        - in: query
+          name: pca
+          description: >-
+            set this parameter to true if the vectors should additionally be
+            compressed to a dimension of 2 by PCA (Proncipal Component
+            Analysis). Else set it to false.
+          required: false
+          type: string
+        - in: query
+          name: lex
+          description: >-
+            set this parameter to true if after debiasing a semantic quality
+            test will be performed on the outcomes. In this case, the required
+            terms with vector representations will be added to the retrieved
+            data.
+          type: string
+      responses:
+        '200':
+          description: success
+          schema:
+            $ref: '#/definitions/DebiasingPCALEX'
+        '400':
+          description: failure
+  /debiasing/gbdd:
+    post:
+      tags:
+        - Debiasing
+      summary: Debiasing applying GBDD
+      description: >
+        Debiasing of the selceted embedding space by applying GBDD (Generalized
+        Bias-Direction Debiasing) under the usage of an explicit bias
+        specification with augmentation term sets.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            contains the explicit bias specification, consisting out of the two
+            target term sets T1 and T2 and the two attribute term sets A1 and
+            A2. Optional, two augmentation term sets Augmentations1 and
+            Augmentations2 of the target term sets can be added
+          required: true
+          schema:
+            $ref: '#/definitions/DebiasSpecification'
+        - in: query
+          name: space
+          description: >-
+            embedding space out of which the vector representation will be
+            retrieved
+          required: true
+          default: fasttext
+          type: string
+        - in: query
+          name: uploaded
+          description: >-
+            contains the filename of the uploaded embedding space in case the
+            data should be retrieved from an uploaded file. If no file is
+            uploaded, either set the param to false or leave it out.
+          required: false
+          type: string
+        - in: query
+          name: lower
+          description: lowercases all letters of the given input word
+          required: false
+          default: false
+          type: string
+        - in: query
+          name: pca
+          description: >-
+            set this parameter to true if the vectors should additionally be
+            compressed to a dimension of 2 by PCA (Proncipal Component
+            Analysis). Else set it to false.
+          required: false
+          type: string
+        - in: query
+          name: lex
+          description: >-
+            set this parameter to true if after debiasing a semantic quality
+            test will be performed on the outcomes. In this case, the required
+            terms with vector representations will be added to the retrieved
+            data.
+          type: string
+      responses:
+        '200':
+          description: success
+          schema:
+            $ref: '#/definitions/DebiasingPCALEX'
+        '400':
+          description: failure
+  /debiasing/bamxgbdd:
+    post:
+      tags:
+        - Debiasing
+      summary: Debiasing applying BAM and afterwards GBDD
+      description: >
+        Debiasing of the selceted embedding space by applying first BAM
+        (Bias-Alignment Model) and afterwards  GBDD (Generalized Bias-Direction
+        Debiasing) under the usage of an explicit bias specification with
+        augmentation term sets.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            contains the explicit bias specification, consisting out of the two
+            target term sets T1 and T2 and the two attribute term sets A1 and
+            A2. Optional, two augmentation term sets Augmentations1 and
+            Augmentations2 of the target term sets can be added
+          required: true
+          schema:
+            $ref: '#/definitions/DebiasSpecification'
+        - in: query
+          name: space
+          description: >-
+            embedding space out of which the vector representation will be
+            retrieved
+          required: true
+          default: fasttext
+          type: string
+        - in: query
+          name: uploaded
+          description: >-
+            contains the filename of the uploaded embedding space in case the
+            data should be retrieved from an uploaded file. If no file is
+            uploaded, either set the param to false or leave it out.
+          required: false
+          type: string
+        - in: query
+          name: lower
+          description: lowercases all letters of the given input word
+          required: false
+          default: false
+          type: string
+        - in: query
+          name: pca
+          description: >-
+            set this parameter to true if the vectors should additionally be
+            compressed to a dimension of 2 by PCA (Proncipal Component
+            Analysis). Else set it to false.
+          required: false
+          type: string
+        - in: query
+          name: lex
+          description: >-
+            set this parameter to true if after debiasing a semantic quality
+            test will be performed on the outcomes. In this case, the required
+            terms with vector representations will be added to the retrieved
+            data.
+          type: string
+      responses:
+        '200':
+          description: success
+          schema:
+            $ref: '#/definitions/DebiasingPCALEX'
+        '400':
+          description: failure
+  /debiasing/gbddxbam:
+    post:
+      tags:
+        - Debiasing
+      summary: Debiasing applying GBDD and afterwatds BAM
+      description: >
+        Debiasing of the selceted embedding space by applying first GBDD
+        (Generalized Bias-Direction Debiasing) and afterwards BAM
+        (Bias-Alignment Model) under the usage of an explicit bias specification
+        with augmentation term sets.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            contains the explicit bias specification, consisting out of the two
+            target term sets T1 and T2 and the two attribute term sets A1 and
+            A2. Optional, two augmentation term sets Augmentations1 and
+            Augmentations2 of the target term sets can be added
+          required: true
+          schema:
+            $ref: '#/definitions/DebiasSpecification'
+        - in: query
+          name: space
+          description: >-
+            embedding space out of which the vector representation will be
+            retrieved
+          required: true
+          default: fasttext
+          type: string
+        - in: query
+          name: uploaded
+          description: >-
+            contains the filename of the uploaded embedding space in case the
+            data should be retrieved from an uploaded file. If no file is
+            uploaded, either set the param to false or leave it out.
+          required: false
+          type: string
+        - in: query
+          name: lower
+          description: lowercases all letters of the given input word
+          required: false
+          default: false
+          type: string
+        - in: query
+          name: pca
+          description: >-
+            set this parameter to true if the vectors should additionally be
+            compressed to a dimension of 2 by PCA (Proncipal Component
+            Analysis). Else set it to false.
+          required: false
+          type: string
+        - in: query
+          name: lex
+          description: >-
+            set this parameter to true if after debiasing a semantic quality
+            test will be performed on the outcomes. In this case, the required
+            terms with vector representations will be added to the retrieved
+            data.
+          type: string
+      responses:
+        '200':
+          description: success
+          schema:
+            $ref: '#/definitions/DebiasingPCALEX'
+        '400':
+          description: failure
+     
+  /debiasing/full-space/bam:
+    post:
+      tags:
+        - Debiasing
+        - Full-Space
+      summary: Debiasing applying BAM and returning vomplete vector files
+      description: >
+        Debiasing of the selceted embedding space by applying BAM
+        (Bias-Alignment Model) under the usage of an explicit bias specification
+        with augmentation term sets. This endpoint returns the complete used vector file of the embedding space.
+      consumes:
+        - application/json
+      produces:
+        - application/octet-stream
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            contains the explicit bias specification, consisting out of the two
+            target term sets T1 and T2 and the two attribute term sets A1 and
+            A2. Optional, two augmentation term sets Augmentations1 and
+            Augmentations2 of the target term sets can be added
+          required: true
+          schema:
+            $ref: '#/definitions/DebiasSpecification'
+        - in: query
+          name: space
+          description: >-
+            embedding space out of which the vector representation will be
+            retrieved
+          required: true
+          default: fasttext
+          type: string
+        - in: query
+          name: uploaded
+          description: >-
+            contains the filename of the uploaded embedding space in case the
+            data should be retrieved from an uploaded file. If no file is
+            uploaded, either set the param to false or leave it out.
+          required: false
+          type: string
+        - in: query
+          name: lower
+          description: lowercases all letters of the given input word
+          required: false
+          default: false
+          type: string
+      responses:
+        '200':
+          description: success
+        '400':
+          description: failure
+  /debiasing/full-space/gbdd:
+    post:
+      tags:
+        - Debiasing
+        - Full-Space
+      summary: Debiasing applying GBDD and returning complete vector files
+      description: >
+        Debiasing of the selceted embedding space by applying GBDD (Generalized
+        Bias-Direction Debiasing) under the usage of an explicit bias
+        specification with augmentation term sets. This endpoint returns the complete used vector file of the embedding space.
+      consumes:
+        - application/json
+      produces:
+        - application/octet-stream
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            contains the explicit bias specification, consisting out of the two
+            target term sets T1 and T2 and the two attribute term sets A1 and
+            A2. Optional, two augmentation term sets Augmentations1 and
+            Augmentations2 of the target term sets can be added
+          required: true
+          schema:
+            $ref: '#/definitions/DebiasSpecification'
+        - in: query
+          name: space
+          description: >-
+            embedding space out of which the vector representation will be
+            retrieved
+          required: true
+          default: fasttext
+          type: string
+        - in: query
+          name: uploaded
+          description: >-
+            contains the filename of the uploaded embedding space in case the
+            data should be retrieved from an uploaded file. If no file is
+            uploaded, either set the param to false or leave it out.
+          required: false
+          type: string
+        - in: query
+          name: lower
+          description: lowercases all letters of the given input word
+          required: false
+          default: false
+          type: string
+      responses:
+        '200':
+          description: success
+        '400':
+          description: failure
+  /debiasing/full-space/bamxgbdd:
+    post:
+      tags:
+        - Debiasing
+        - Full-Space
+      summary: Debiasing applying BAM and afterwards GBDD, returning complete vector files
+      description: >
+        Debiasing of the selceted embedding space by applying first BAM
+        (Bias-Alignment Model) and afterwards  GBDD (Generalized Bias-Direction
+        Debiasing) under the usage of an explicit bias specification with
+        augmentation term sets. This endpoint returns the complete used vector file of the embedding space.
+      consumes:
+        - application/json
+      produces:
+        - application/octet-stream
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            contains the explicit bias specification, consisting out of the two
+            target term sets T1 and T2 and the two attribute term sets A1 and
+            A2. Optional, two augmentation term sets Augmentations1 and
+            Augmentations2 of the target term sets can be added
+          required: true
+          schema:
+            $ref: '#/definitions/DebiasSpecification'
+        - in: query
+          name: space
+          description: >-
+            embedding space out of which the vector representation will be
+            retrieved
+          required: true
+          default: fasttext
+          type: string
+        - in: query
+          name: uploaded
+          description: >-
+            contains the filename of the uploaded embedding space in case the
+            data should be retrieved from an uploaded file. If no file is
+            uploaded, either set the param to false or leave it out.
+          required: false
+          type: string
+        - in: query
+          name: lower
+          description: lowercases all letters of the given input word
+          required: false
+          default: false
+          type: string
+      responses:
+        '200':
+          description: success
+        '400':
+          description: failure
+  /debiasing/full-space/gbddxbam:
+    post:
+      tags:
+        - Debiasing
+        - Full-Space
+      summary: Debiasing applying GBDD and afterwatds BAM, returning complete vector files
+      description: >
+        Debiasing of the selceted embedding space by applying first GBDD
+        (Generalized Bias-Direction Debiasing) and afterwards BAM
+        (Bias-Alignment Model) under the usage of an explicit bias specification
+        with augmentation term sets. This endpoint returns the complete used vector file of the embedding space.
+      consumes:
+        - application/json
+      produces:
+        - application/octet-stream
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            contains the explicit bias specification, consisting out of the two
+            target term sets T1 and T2 and the two attribute term sets A1 and
+            A2. Optional, two augmentation term sets Augmentations1 and
+            Augmentations2 of the target term sets can be added
+          required: true
+          schema:
+            $ref: '#/definitions/DebiasSpecification'
+        - in: query
+          name: space
+          description: >-
+            embedding space out of which the vector representation will be
+            retrieved
+          required: true
+          default: fasttext
+          type: string
+        - in: query
+          name: uploaded
+          description: >-
+            contains the filename of the uploaded embedding space in case the
+            data should be retrieved from an uploaded file. If no file is
+            uploaded, either set the param to false or leave it out.
+          required: false
+          type: string
+        - in: query
+          name: lower
+          description: lowercases all letters of the given input word
+          required: false
+          default: false
+          type: string
+      responses:
+        '200':
+          description: success
+        '400':
+          description: failure   
+  /debiasing/full-space/vocab:
+    get:
+      tags:
+        - Debiasing
+        - Full-Space
+      summary: Returns the vocab file to the selected embedding space
+      description: >
+        Returns the vocabulary of the selected embedding space. The data is stored as a dictionary in a .vocab file. For example it can be read in by using json.loads() in python.
+      produces:
+        - application/octet-stream
+      parameters:
+        - in: query
+          name: space
+          description: >-
+            embedding space whose vocabulary will be extracted.
+          required: true
+          default: fasttext
+          type: string
+        - in: query
+          name: uploaded
+          description: >-
+            contains the filename of the uploaded embedding space in case the
+            data should be retrieved from an uploaded file. If no file is
+            uploaded, either set the param to false or leave it out.
+          required: false
+          type: string
+        - in: query
+          name: lower
+          description: lowercases all letters of the given input word
+          required: false
+          default: false
+          type: string
+      responses:
+        '200':
+          description: success
+        '400':
+          description: failure 
+          
+          
+
+  /uploads/embedding-spaces:
+    post:
+      tags:
+        - Uploads
+      summary: upload emdedding spaces to the system here
+      description: >
+        upload embedding spaces which are not already contained by the system
+        here. Either as single files containing one word followed by its vector
+        representation separated by white spaces or as a by pickle created
+        python-object separated in a .vocab file containing the vocab as a list
+        and a .vec or .vector file containing the dictionary of vocabulary to
+        the index of the vocab.
+
+        By calling this method, the files are only uploaded. The initialize
+        method has to be called afterwards to use the uploaded files.
+      consumes:
+        - form-data/file
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            properties:
+              vectorFile:
+                type: string
+              vocab:
+                type: string
+              vecs:
+                type: string
+      responses:
+        '201':
+          description: Files successfully uploaded
+        '400':
+          description: No file(s) part of the request
+        '401':
+          description: 'Allowed file types are txt, vec, vector or vocab'
+        '402':
+          description: No file selected for uploading
+  /uploads/initialize:
+    get:
+      tags:
+        - Uploads
+      summary: initializes the uploaded embedding space
+      description: >
+        initializes the uploaded embedding space. Requires the name of the
+        uploaded files for an successful initialization.
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: vocab
+          description: >-
+            for separated vocab and vec files, the system needs the files names
+            for an successful initialization
+          required: false
+          type: string
+        - in: query
+          name: vecs
+          description: >-
+            for separated vocab and vec files, the system needs the files names
+            for an successful initialization
+          required: false
+          type: string
+      responses:
+        '200':
+          description: INITIALIZED VECTOR FILE SUCCESSFULLY
+        '404':
+          description: NO UPLOADED FILE(S) FOUND
+  /uploads/delete:
+    delete:
+      tags:
+        - Uploads
+      summary: Deletes the specified files of uploaded embedding spaces
+      description: >
+        Deletes the specified files of uploaded embedding spaces out of the
+        system. 
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: file
+          description: >-
+            If the uploaded embedding space consists out of one file, enter it's
+            name here.
+          type: string
+        - in: query
+          name: vocab
+          description: >-
+            If the uploaded embedding space consists out of two files, enter
+            here the vocab file's name
+          type: string
+        - in: query
+          name: vecs
+          description: >-
+            If the uploaded embedding space consists out of two files, enter
+            here the vector file's name
+          type: string
+      responses:
+        '200':
+          description: REMOVED FILE SUCCESFULLY
+        '404':
+          description: FILE NOT FOUND
+definitions:
+  WordList:
+    type: object
+    required:
+      - Words
+    properties:
+      Words:
+        type: string
+        format: utf-8
+        example: car truck plane ship boat
+  BiasSpecification:
+    type: object
+    properties:
+      T1:
+        type: string
+        example: >-
+          science technology physics chemistry Einstein NASA experiment
+          astronomy
+      T2:
+        type: string
+        example: poetry art Shakespeare dance literature novel symphony drama
+      A1:
+        type: string
+        example: brother father uncle grandfather son he his him
+      A2:
+        type: string
+        example: sister mother aunt grandmother daughter she hers her
+    required:
+      - T1
+      - T2
+      - A1
+      - A2
+  DebiasSpecification:
+    type: object
+    properties:
+      T1:
+        type: string
+        example: >-
+          science technology physics chemistry Einstein NASA experiment
+          astronomy
+      T2:
+        type: string
+        example: poetry art Shakespeare dance literature novel symphony drama
+      A1:
+        type: string
+        example: brother father uncle grandfather son he his him
+      A2:
+        type: string
+        example: sister mother aunt grandmother daughter she hers her
+      Augmentations1:
+        type: string
+        example: physicists test electrochemistry automation engineering ...
+      Augmentations2:
+        type: string
+        example: dramaturgy monograph untried dances poesy ...
+    required:
+      - T1
+      - T2
+      - A1
+      - A2
+  SingleVectorResult:
+    type: object
+    required:
+      - Vector
+      - NotFound
+    properties:
+      Vector:
+        type: array
+        items:
+          type: object
+          properties:
+            word1:
+              type: number
+              example: 0.12345 0.4568 0.123456 0.122 ...
+      NotFound:
+        type: string
+        example: '[]'
+  MultipleVectorResult:
+    type: object
+    required:
+      - Vector
+      - NotFound
+    properties:
+      Vector:
+        type: array
+        items:
+          type: object
+          properties:
+            word1:
+              type: number
+              example: 0.12345 0.4568 0.123456 0.122 ...
+            word2:
+              type: number
+              example: 0.12345 0.4568 0.123456 0.122 ...
+            word3:
+              type: number
+              example: 0.12345 0.4568 0.123456 0.122 ...
+      NotFound:
+        type: string
+        example: '[''word4'', ''word5'']'
+  SingleAugmentationResult:
+    type: object
+    required:
+      - Augmentations
+      - NotPostspecialized
+    properties:
+      Augmentations:
+        type: object
+        properties:
+          word1:
+            type: array
+            items:
+              type: string
+              example: word2 word3 word4
+      NotPostspecialized:
+        type: string
+        example: '[]'
+  MultipleAugmentationResult:
+    type: object
+    required:
+      - Augmentations
+      - NotPostspecialized
+    properties:
+      Augmentations:
+        type: object
+        properties:
+          word1:
+            type: array
+            items:
+              type: string
+              example: word1-2 word1-3 word1-4
+          word2:
+            type: array
+            items:
+              type: string
+              example: word2-2 word2-3 word2-4
+      NotPostspecialized:
+        type: string
+        example: '[]'
+  BiasEvaluationALL:
+    type: object
+    required:
+      - Scores
+    properties:
+      Scores:
+        type: object
+        properties:
+          ECT_Score:
+            type: number
+            example: 0.7352941176470589
+          ECT_P_Value:
+            type: number
+            example: 0.0011716155350991778
+          BAT_Score:
+            type: number
+            example: 0.4095982142857143
+          WEAT_Effect_Size:
+            type: number
+            example: 1.303649939451679
+          WEAT_P_Value:
+            type: number
+            example: 0
+          K_Means:
+            type: number
+            example: 1
+          SVM:
+            type: number
+            example: 1
+      Space:
+        type: string
+        example: fasttext
+      Lower:
+        type: string
+        example: true
+      BiasSpecification:
+        type: object
+        properties:
+          T1:
+            type: string
+            example: >-
+              science technology physics chemistry Einstein NASA experiment
+              astronomy
+          T2:
+            type: string
+            example: poetry art Shakespeare dance literature novel symphony drama
+          A1:
+            type: string
+            example: brother father uncle grandfather son he his him
+          A2:
+            type: string
+            example: sister mother aunt grandmother daughter she hers her
+          NotFound:
+            type: string
+            example: []
+          Deleted:
+            type: string
+            example: []
+  BiasEvaluationECT:
+    type: object
+    required:
+      - Scores
+    properties:
+      Scores:
+        type: object
+        properties:
+          ECT_Score:
+            type: number
+            example: 0.7352941176470589
+          ECT_P_Value:
+            type: number
+            example: 0.0011716155350991778
+      Space:
+        type: string
+        example: fasttext
+      Lower:
+        type: string
+        example: true
+      BiasSpecification:
+        type: object
+        properties:
+          T1:
+            type: string
+            example: >-
+              science technology physics chemistry Einstein NASA experiment
+              astronomy
+          T2:
+            type: string
+            example: poetry art Shakespeare dance literature novel symphony drama
+          A1:
+            type: string
+            example: brother father uncle grandfather son he his him
+          A2:
+            type: string
+            example: sister mother aunt grandmother daughter she hers her
+          NotFound:
+            type: string
+            example: []
+          Deleted:
+            type: string
+            example: []
+  BiasEvaluationBAT:
+    type: object
+    required:
+      - Scores
+    properties:
+      Scores:
+        type: object
+        properties:
+          BAT_Score:
+            type: number
+            example: 0.4095982142857143
+      Space:
+        type: string
+        example: fasttext
+      Lower:
+        type: string
+        example: true
+      BiasSpecification:
+        type: object
+        properties:
+          T1:
+            type: string
+            example: >-
+              science technology physics chemistry Einstein NASA experiment
+              astronomy
+          T2:
+            type: string
+            example: poetry art Shakespeare dance literature novel symphony drama
+          A1:
+            type: string
+            example: brother father uncle grandfather son he his him
+          A2:
+            type: string
+            example: sister mother aunt grandmother daughter she hers her
+          NotFound:
+            type: string
+            example: []
+          Deleted:
+            type: string
+            example: []
+  BiasEvaluationWEAT:
+    type: object
+    required:
+      - Scores
+    properties:
+      Scores:
+        type: object
+        properties:
+          WEAT_Effect_Size:
+            type: number
+            example: 1.303649939451679
+          WEAT_P_Value:
+            type: number
+            example: 0
+      Space:
+        type: string
+        example: fasttext
+      Lower:
+        type: string
+        example: true
+      BiasSpecification:
+        type: object
+        properties:
+          T1:
+            type: string
+            example: >-
+              science technology physics chemistry Einstein NASA experiment
+              astronomy
+          T2:
+            type: string
+            example: poetry art Shakespeare dance literature novel symphony drama
+          A1:
+            type: string
+            example: brother father uncle grandfather son he his him
+          A2:
+            type: string
+            example: sister mother aunt grandmother daughter she hers her
+          NotFound:
+            type: string
+            example: []
+          Deleted:
+            type: string
+            example: []
+  BiasEvaluationKMEANS:
+    type: object
+    required:
+      - Scores
+    properties:
+      Scores:
+        type: object
+        properties:
+          K_Means:
+            type: number
+            example: 1
+      Space:
+        type: string
+        example: fasttext
+      Lower:
+        type: string
+        example: true
+      BiasSpecification:
+        type: object
+        properties:
+          T1:
+            type: string
+            example: >-
+              science technology physics chemistry Einstein NASA experiment
+              astronomy
+          T2:
+            type: string
+            example: poetry art Shakespeare dance literature novel symphony drama
+          A1:
+            type: string
+            example: brother father uncle grandfather son he his him
+          A2:
+            type: string
+            example: sister mother aunt grandmother daughter she hers her
+          NotFound:
+            type: string
+            example: []
+          Deleted:
+            type: string
+            example: []
+  BiasEvaluationSVM:
+    type: object
+    required:
+      - Scores
+    properties:
+      Scores:
+        type: object
+        properties:
+          SVM:
+            type: number
+            example: 1
+      Space:
+        type: string
+        example: fasttext
+      Lower:
+        type: string
+        example: true
+      BiasSpecification:
+        type: object
+        properties:
+          T1:
+            type: string
+            example: >-
+              science technology physics chemistry Einstein NASA experiment
+              astronomy
+          T2:
+            type: string
+            example: poetry art Shakespeare dance literature novel symphony drama
+          A1:
+            type: string
+            example: brother father uncle grandfather son he his him
+          A2:
+            type: string
+            example: sister mother aunt grandmother daughter she hers her
+          NotFound:
+            type: string
+            example: []
+          Deleted:
+            type: string
+            example: []
+  BiasEvaluationSimLex:
+    type: object
+    required:
+      - Scores
+    properties:
+      Scores:
+        type: object
+        properties:
+          SimLexPearson:
+            type: number
+            example: 0.3869173678628652
+          SimLexSpearman:
+            type: number
+            example: 0.3822891920029773
+      Space:
+        type: string
+        example: fasttext
+      Lower:
+        type: string
+        example: true
+      BiasSpecification:
+        type: object
+        properties:
+          T1:
+            type: string
+            example: >-
+              science technology physics chemistry Einstein NASA experiment
+              astronomy
+          T2:
+            type: string
+            example: poetry art Shakespeare dance literature novel symphony drama
+          A1:
+            type: string
+            example: brother father uncle grandfather son he his him
+          A2:
+            type: string
+            example: sister mother aunt grandmother daughter she hers her
+          NotFound:
+            type: string
+            example: []
+          Deleted:
+            type: string
+            example: []
+  BiasEvaluationWordSim:
+    type: object
+    required:
+      - Scores
+    properties:
+      Scores:
+        type: object
+        properties:
+          WordSimPearson:
+            type: number
+            example: 0.6964852375531371
+          WordSimSpearman:
+            type: number
+            example: 0.7369036730536086
+      Space:
+        type: string
+        example: fasttext
+      Lower:
+        type: string
+        example: true
+      BiasSpecification:
+        type: object
+        properties:
+          T1:
+            type: string
+            example: >-
+              science technology physics chemistry Einstein NASA experiment
+              astronomy
+          T2:
+            type: string
+            example: poetry art Shakespeare dance literature novel symphony drama
+          A1:
+            type: string
+            example: brother father uncle grandfather son he his him
+          A2:
+            type: string
+            example: sister mother aunt grandmother daughter she hers her
+          NotFound:
+            type: string
+            example: []
+          Deleted:
+            type: string
+            example: []
+  DebiasingPCALEX:
+    type: object
+    required:
+      - Space
+      - Model
+      - Lower
+      - PCA
+      - UsedAugmentations
+      - BiasedSpace
+      - DebiasedSpace
+    properties:
+      Space:
+        type: string
+        example: fasttext
+      Model:
+        type: string
+        example: GBDD
+      Lower:
+        type: string
+        example: true
+      PCA:
+        type: string
+        example: true
+      UsedAugmentations:
+        type: object
+        properties:
+          Augmentations1:
+            type: array
+            items:
+              type: string
+            example:
+              - learning
+              - erudition
+              - education
+              - lore
+              - ...
+          Augmentations2:
+            type: array
+            items:
+              type: string
+            example:
+              - poem
+              - poesy
+              - poems
+              - verse
+              - ...
+      BiasedSpace:
+        type: object
+        properties:
+          T1:
+            type: object
+            properties:
+              word1:
+                type: number
+                example: '0.1090, -0.0867, 0.10627, 0.44887, ...'
+              word2:
+                type: number
+                example: '0.1090, -0.0867, 0.10627, 0.44887, ...'
+              word3:
+                type: number
+                example: '0.1090, -0.0867, 0.10627, 0.44887, ...'
+          T2:
+            type: object
+            properties:
+              word1:
+                type: number
+                example: '0.1090, -0.0867, 0.10627, 0.44887, ...'
+              word2:
+                type: number
+                example: '0.1090, -0.0867, 0.10627, 0.44887, ...'
+              word3:
+                type: number
+                example: '0.1090, -0.0867, 0.10627, 0.44887, ...'
+          A1:
+            type: object
+            properties:
+              word1:
+                type: number
+                example: '0.1090, -0.0867, 0.10627, 0.44887, ...'
+              word2:
+                type: number
+                example: '0.1090, -0.0867, 0.10627, 0.44887, ...'
+              word3:
+                type: number
+                example: '0.1090, -0.0867, 0.10627, 0.44887, ...'
+          A2:
+            type: object
+            properties:
+              word1:
+                type: number
+                example: '0.1090, -0.0867, 0.10627, 0.44887, ...'
+              word2:
+                type: number
+                example: '0.1090, -0.0867, 0.10627, 0.44887, ...'
+              word3:
+                type: number
+                example: '0.1090, -0.0867, 0.10627, 0.44887, ...'
+          Augmentations1:
+            type: object
+            properties:
+              word1:
+                type: number
+                example: '0.1090, -0.0867'
+              word2:
+                type: number
+                example: '0.1090, -0.0867'
+              word3:
+                type: number
+                example: '0.1090, -0.0867'
+          Augmentations2:
+            type: object
+            properties:
+              word1:
+                type: number
+                example: '0.1090, -0.0867'
+              word2:
+                type: number
+                example: '0.1090, -0.0867'
+              word3:
+                type: number
+                example: '0.1090, -0.0867'
+      DebiasedSpace:
+        type: object
+        properties:
+          T1:
+            type: object
+            properties:
+              word1:
+                type: number
+                example: '0.1090, -0.0867, 0.10627, 0.44887, ...'
+              word2:
+                type: number
+                example: '0.1090, -0.0867, 0.10627, 0.44887, ...'
+              word3:
+                type: number
+                example: '0.1090, -0.0867, 0.10627, 0.44887, ...'
+          T2:
+            type: object
+            properties:
+              word1:
+                type: number
+                example: '0.1090, -0.0867, 0.10627, 0.44887, ...'
+              word2:
+                type: number
+                example: '0.1090, -0.0867, 0.10627, 0.44887, ...'
+              word3:
+                type: number
+                example: '0.1090, -0.0867, 0.10627, 0.44887, ...'
+          A1:
+            type: object
+            properties:
+              word1:
+                type: number
+                example: '0.1090, -0.0867, 0.10627, 0.44887, ...'
+              word2:
+                type: number
+                example: '0.1090, -0.0867, 0.10627, 0.44887, ...'
+              word3:
+                type: number
+                example: '0.1090, -0.0867, 0.10627, 0.44887, ...'
+          A2:
+            type: object
+            properties:
+              word1:
+                type: number
+                example: '0.1090, -0.0867, 0.10627, 0.44887, ...'
+              word2:
+                type: number
+                example: '0.1090, -0.0867, 0.10627, 0.44887, ...'
+              word3:
+                type: number
+                example: '0.1090, -0.0867, 0.10627, 0.44887, ...'
+          Augmentations1:
+            type: object
+            properties:
+              word1:
+                type: number
+                example: '0.1090, -0.0867'
+              word2:
+                type: number
+                example: '0.1090, -0.0867'
+              word3:
+                type: number
+                example: '0.1090, -0.0867'
+          Augmentations2:
+            type: object
+            properties:
+              word1:
+                type: number
+                example: '0.1090, -0.0867'
+              word2:
+                type: number
+                example: '0.1090, -0.0867'
+              word3:
+                type: number
+                example: '0.1090, -0.0867'
+      BiasedSpacePCA:
+        type: object
+        properties:
+          T1:
+            type: object
+            properties:
+              word1:
+                type: number
+                example: '0.1090, -0.0867'
+              word2:
+                type: number
+                example: '0.1090, -0.0867'
+              word3:
+                type: number
+                example: '0.1090, -0.0867'
+          T2:
+            type: object
+            properties:
+              word1:
+                type: number
+                example: '0.1090, -0.0867'
+              word2:
+                type: number
+                example: '0.1090, -0.0867'
+              word3:
+                type: number
+                example: '0.1090, -0.0867'
+          A1:
+            type: object
+            properties:
+              word1:
+                type: number
+                example: '0.1090, -0.0867'
+              word2:
+                type: number
+                example: '0.1090, -0.0867'
+              word3:
+                type: number
+                example: '0.1090, -0.0867'
+          A2:
+            type: object
+            properties:
+              word1:
+                type: number
+                example: '0.1090, -0.0867'
+              word2:
+                type: number
+                example: '0.1090, -0.0867'
+              word3:
+                type: number
+                example: '0.1090, -0.0867'
+          Augmentations1:
+            type: object
+            properties:
+              word1:
+                type: number
+                example: '0.1090, -0.0867'
+              word2:
+                type: number
+                example: '0.1090, -0.0867'
+              word3:
+                type: number
+                example: '0.1090, -0.0867'
+          Augmentations2:
+            type: object
+            properties:
+              word1:
+                type: number
+                example: '0.1090, -0.0867'
+              word2:
+                type: number
+                example: '0.1090, -0.0867'
+              word3:
+                type: number
+                example: '0.1090, -0.0867'
+      DebiasedSpacePCA:
+        type: object
+        properties:
+          T1:
+            type: object
+            properties:
+              word1:
+                type: number
+                example: '0.1090, -0.0867'
+              word2:
+                type: number
+                example: '0.1090, -0.0867'
+              word3:
+                type: number
+                example: '0.1090, -0.0867'
+          T2:
+            type: object
+            properties:
+              word1:
+                type: number
+                example: '0.1090, -0.0867'
+              word2:
+                type: number
+                example: '0.1090, -0.0867'
+              word3:
+                type: number
+                example: '0.1090, -0.0867'
+          A1:
+            type: object
+            properties:
+              word1:
+                type: number
+                example: '0.1090, -0.0867'
+              word2:
+                type: number
+                example: '0.1090, -0.0867'
+              word3:
+                type: number
+                example: '0.1090, -0.0867'
+          A2:
+            type: object
+            properties:
+              word1:
+                type: number
+                example: '0.1090, -0.0867'
+              word2:
+                type: number
+                example: '0.1090, -0.0867'
+              word3:
+                type: number
+                example: '0.1090, -0.0867'
+          Augmentations1:
+            type: object
+            properties:
+              word1:
+                type: number
+                example: '0.1090, -0.0867'
+              word2:
+                type: number
+                example: '0.1090, -0.0867'
+              word3:
+                type: number
+                example: '0.1090, -0.0867'
+          Augmentations2:
+            type: object
+            properties:
+              word1:
+                type: number
+                example: '0.1090, -0.0867'
+              word2:
+                type: number
+                example: '0.1090, -0.0867'
+              word3:
+                type: number
+                example: '0.1090, -0.0867'
+      NotFound:
+        type: string
+        example: []
+      Deleted:
+        type: string
+        example: []
+      LexDictionary:
+        type: object
+        properties:
+          word1:
+            type: number
+            example: '0.1090, -0.0867, 0.10627, 0.44887, ...'
+          word2:
+            type: number
+            example: '0.1090, -0.0867, 0.10627, 0.44887, ...'
+          word3:
+            type: number
+            example: '0.1090, -0.0867, 0.10627, 0.44887, ...'
+host: 'wifo5-29.informatik.uni-mannheim.de:8000'
+basePath: /REST/
+schemes:
+  - http

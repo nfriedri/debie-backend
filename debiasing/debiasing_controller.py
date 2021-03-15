@@ -138,3 +138,93 @@ def debiasing_gbdd_bam(equality_sets, vocab, vecs, t1_list, t2_list, a1_list, a2
     new_vecs, proj_matrix = bam.debias_proc(equality_sets, vocab, new_vecs)
     t1, t2, a1, a2, aug1, aug2 = calculation.vocabs_to_dicts(vocab, new_vecs, t1_list, t2_list, a1_list, a2_list, aug1_list, aug2_list)
     return new_vecs, t1, t2, a1, a2, aug1, aug2
+
+
+""" Definitions for returning full debiased embedding spaces """
+
+
+def debiasing_return_vecs(methods, content, bar):
+    # bar params: lower, uploaded, pca, space
+    if content is None:
+        return 'BAD REQUEST - NO BIAS SPEC JSON FOUND', 400
+    if 'space' not in bar and 'uploaded' not in bar:
+        return 'BAD REQUEST - NO SPACE SELECTED', 400
+    space = 'fasttext'
+    uploaded = 'false'
+    lower = 'false'
+
+    if 'space' in bar:
+        space = bar['space']
+    if 'uploaded' in bar:
+        uploaded = bar['uploaded']
+    if 'lower' in bar:
+        lower = bar['lower']
+    if 'fileType' in bar:
+        file_type = bar['fileType']
+
+    vocab, vecs = specification_controller.return_vocab_vecs(space, uploaded)
+
+    t1_list, t2_list, a1_list, a2_list, aug1_list, aug2_list = json_controller.json_to_debias_spec(content)
+    if len(aug1_list) == 0:
+        aug1_list, computed = augmentation_retrieval.retrieve_multiple_augmentations(t1_list)
+    if len(aug2_list) == 0:
+        aug2_list, computed = augmentation_retrieval.retrieve_multiple_augmentations(t2_list)
+    if lower == 'true':
+        aug1_list = [x.lower() for x in aug1_list]
+        aug2_list = [x.lower() for x in aug2_list]
+    equality_sets = []
+    for t1 in aug1_list:
+        for t2 in aug2_list:
+            equality_sets.append((t1, t2))
+    new_vecs = []
+    logging.info("Debiasing-Engine: Specs loaded, starting computing")
+    print(methods)
+    if methods == 'bam':
+        new_vecs = debiasing_bam_full(equality_sets, vocab, vecs)
+    if methods == 'gbdd':
+        new_vecs = debiasing_gbdd_full(equality_sets, vocab, vecs)
+    if methods == 'bamxgbdd':
+        new_vecs = debiasing_bam_gbdd_full(equality_sets, vocab, vecs)
+    if methods == 'gbddxbam':
+        new_vecs = debiasing_gbdd_bam_full(equality_sets, vocab, vecs)
+    logging.info("Debiasing-Engine: Finished")
+
+    return new_vecs
+
+
+def debiasing_return_vocab(bar):
+    if 'space' not in bar and 'uploaded' not in bar:
+        return 'BAD REQUEST - NO SPACE SELECTED', 400
+    space = 'fasttext'
+    uploaded = 'false'
+    if 'space' in bar:
+        space = bar['space']
+    if 'uploaded' in bar:
+        uploaded = bar['uploaded']
+    vocab, vecs = specification_controller.return_vocab_vecs(space, uploaded)
+    return vocab
+
+
+def debiasing_bam_full(equality_sets, vocab, vecs):
+    new_vecs, proj_mat = bam.debias_proc(equality_sets, vocab, vecs)
+    return new_vecs
+
+
+def debiasing_gbdd_full(equality_sets, vocab, vecs):
+    v_b = gbdd.get_bias_direction(equality_sets, vocab, vecs)
+    new_vecs = gbdd.debias_direction_linear(v_b, vecs)
+    return new_vecs
+
+
+def debiasing_bam_gbdd_full(equality_sets, vocab, vecs):
+    new_vecs, proj_matrix = bam.debias_proc(equality_sets, vocab, vecs)
+    v_b = gbdd.get_bias_direction(equality_sets, vocab, new_vecs)
+    new_vecs = gbdd.debias_direction_linear(v_b, new_vecs)
+    return new_vecs
+
+
+def debiasing_gbdd_bam_full(equality_sets, vocab, vecs):
+    v_b = gbdd.get_bias_direction(equality_sets, vocab, vecs)
+    new_vecs = gbdd.debias_direction_linear(v_b, vecs)
+    new_vecs, proj_matrix = bam.debias_proc(equality_sets, vocab, new_vecs)
+    return new_vecs

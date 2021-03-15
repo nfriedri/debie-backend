@@ -46,7 +46,6 @@ def json_to_debias_spec(content):
         attributes2 = content['A2'].split(' ')
         if 'Augmentations1' in content:
             augments1 = content['Augmentations1'].split(' ')
-            print('IS USED')
         if 'Augmentations2' in content:
             augments2 = content['Augmentations2'].split(' ')
     logging.info("JsonController: Found following bias spec: T1: " + str(target1) + "; T2: " + str(target2) + "; A1: " +
